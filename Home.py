@@ -32,8 +32,8 @@ h_l_col, h_r_col = st.columns([1, 1])
 left_col, right_col = st.columns([1, 1])
 
 with h_r_col:
-    st.write("**STATUS:** Online - The loading time of stats, is hardly "
-             "depending on friend.tech network traffic, which gets pretty high. Trying to substitute most of the stats "
+    st.write("**STATUS:** Online - Base Scan has some issues at the moment. Some Values wont be calculated "
+             "At the moment im trying to substitute most of the stats "
              "from Base-Scan, to decrease timeouts and increase loading speed.")
     button2 = h_r_col.button("Home")
 
