@@ -296,8 +296,9 @@ def get_personal_activity(target):
 
 @st.cache_data(show_spinner=False)
 def account_stats(wallet: str):
-    url = f"""https://api.basescan.org/api?module=account&action=txlist&address={wallet}
-    &startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}"""
+    url = (f"https://api.basescan.org/api?module=account&action=txlist&address={wallet}"
+           f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
+    print(url)
     response = requests.get(url)
     response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
     data = json.loads(response.text)
@@ -316,8 +317,8 @@ def account_stats(wallet: str):
     sells = 0
     date = None
 
-    tx_url = f"""https://api.basescan.org/api?module=account&action=txlistinternal&address={wallet}
-    &startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}"""
+    tx_url = (f"https://api.basescan.org/api?module=account&action=txlistinternal&address={wallet}"
+              f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
     response = requests.get(tx_url)
     response.raise_for_status()
 
@@ -333,8 +334,8 @@ def account_stats(wallet: str):
 
             if tx['value'] == "0":
                 creation_block = int(tx["blockNumber"])
-                block_url = f"""https://api.basescan.org/api?module=block&action=getblockcountdown&blockno=
-                {creation_block}&apikey={st.secrets['basescan_api_key']}"""
+                block_url = (f"https://api.basescan.org/api?module=block&action=getblockcountdown&blockno="
+                             f"{creation_block}&apikey={st.secrets['basescan_api_key']}")
 
                 response = requests.get(block_url)
                 response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
