@@ -1,2 +1,1 @@
-**STATUS:** Online - I added a Base Scan Mode, which I will further develop to give also a complete user scan.
-You can search the wallets, and you'll find the connect Twitter account. Base Scan is ways slower, since it's fetching more data!
+**STATUS:** Online - Base Scan currently not accurate for sells, have to solve this problem first
