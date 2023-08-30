@@ -133,7 +133,7 @@ def load_ft_stats(address):
 
         with st.spinner("Fetching Base-Scan..."):
             created_at, profit, volume, buys, sells = bs.account_stats(address)
-            if profit is not None and portfolio_value is not None and fees is not None:
+            if profit is not None and portfolio_value is not None and fees_collected is not None:
                 total = round((profit + portfolio_value + fees), 3)
             else:
                 total = "N/A"

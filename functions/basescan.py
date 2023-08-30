@@ -115,31 +115,32 @@ def get_trending(wallet: str):
 
             if matching_tx:
                 # Convert the value to integer
-                value = int(matching_tx['value']) * 10 ** -18
+                value = int(matching_tx['value']) * 20 * 10 ** -18
 
                 # Search for existing dictionary with the 'to' address in results list
                 found = False
                 for result in results:
-                    if result['to'] == matching_tx['to']:
+                    if result['Subject'] == matching_tx['to']:
                         if tx['functionName'].startswith('buyShares'):
-                            result['value'] += value
+                            result['Value'] += value
                         elif tx['functionName'].startswith('sellShares'):
-                            result['value'] -= value
+                            result['Value'] -= value
                         found = True
                         break
 
                     # If not found, append a new dictionary to results
                 if not found:
+
                     new_dict = {
-                        'to': matching_tx['to'],
-                        'value': (value if tx['functionName'].startswith('buyShares') else -value)
+                        'Subject': matching_tx['to'],
+                        'Value': (value if tx['functionName'].startswith('buyShares') else -value)
                     }
                     results.append(new_dict)
 
-    winners = [res for res in results if res['value'] > 0.01 and 'e' not in str(res['value'])]
-    losers = [res for res in results if res['value'] < -0.01 and 'e' not in str(res['value'])]
-    winners.sort(key=lambda x: x['value'], reverse=True)
-    losers.sort(key=lambda x: x['value'])
+    winners = [res for res in results if res['Value'] > 0.01 and 'e' not in str(res['Value'])]
+    losers = [res for res in results if res['Value'] < -0.01 and 'e' not in str(res['Value'])]
+    winners.sort(key=lambda x: x['Value'], reverse=True)
+    losers.sort(key=lambda x: x['Value'])
 
     return winners, losers
 
