@@ -111,7 +111,8 @@ def get_trending(wallet: str):
         if (tx['functionName'].startswith('buyShares') or tx['functionName'].startswith('sellShares')
                 and tx['isError'] != "1"):
             # Here, you search for the corresponding transaction in conf_int_txs
-            matching_tx = next((item for item in conf_int_txs if item['hash'] == tx['hash']), None)
+            matching_tx = next((item for item in conf_int_txs if item['hash'] == tx['hash']
+                                and tx['from'] != item['to']), None)
 
             if matching_tx:
                 # Convert the value to integer

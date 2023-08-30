@@ -1,1 +1,1 @@
-**STATUS:** Online - Base Scan currently not accurate for sells, have to solve this problem first
+**STATUS:** Online - Everything should work fine now!
