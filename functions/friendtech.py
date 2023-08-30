@@ -4,12 +4,12 @@ from datetime import datetime
 from web3 import Web3
 
 
-def timestamp_to_string(unix_timestamp):
+def timestamp_to_date(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
     return dt.strftime('%d/%m/%Y')
 
 
-def _timestamp_to_string(unix_timestamp):
+def timestamp_to_datetime(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
     return dt.strftime('%d/%m/%Y %H:%M')
 
@@ -163,8 +163,8 @@ def get_share_price(address, target):
         share_price = []
         for item in data["events"]:
             if item["subject"]['username'].lower() == target.lower():
-                _time = timestamp_to_string(int(item['createdAt'] / 1000))
-                raw_time = _timestamp_to_string(int(item['createdAt'] / 1000))
+                _time = timestamp_to_date(int(item['createdAt'] / 1000))
+                raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
                 share_price.append({
                     'time': _time,
                     'raw_time': raw_time,

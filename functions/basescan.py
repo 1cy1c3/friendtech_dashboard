@@ -55,7 +55,7 @@ def account_stats(wallet: str):
                 if data_block['status'] != '1':
                     print('Anfrage 2 fehlgeschlagen')
                 else:
-                    timestamp = ft._timestamp_to_string(int(data_block["result"]["timeStamp"]))
+                    timestamp = ft.timestamp_to_datetime(int(data_block["result"]["timeStamp"]))
                     date = str(timestamp + " (UTC)")
 
         elif (tx['functionName'].startswith('sellShares') and tx['hash'] in
