@@ -250,10 +250,10 @@ def addr_to_user(address, convert):
 
     try:
         data = response.json()
-        if convert and data["twitterUsername"]:
+        if convert and "twitterUsername" in data:
             return data["twitterUsername"]
 
-        elif convert and not data["twitterUsername"]:
+        elif convert and "twitterUsername" not in data:
             return None
 
         else:
