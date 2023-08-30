@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
 import functions.friendtech as ft
+import functions.basescan as bs
 import streamlit as st
 import pandas as pd
 
@@ -131,7 +132,7 @@ def load_ft_stats(address):
         st.write(f"**Collected Fees:** {fees}")
 
         with st.spinner("Fetching Base-Scan..."):
-            created_at, profit, volume, buys, sells = ft.account_stats(address)
+            created_at, profit, volume, buys, sells = bs.account_stats(address)
             if profit is not None and portfolio_value is not None and fees is not None:
                 total = round((profit + portfolio_value + fees), 3)
             else:
@@ -139,7 +140,7 @@ def load_ft_stats(address):
             if created_at is None:
                 created_at = "N/A"
 
-        st.write(f"**Trading Profit:** {profit}")
+        st.write(f"**Unrealized Profit:** {profit}")
         st.write(f"**Trading Volume:** {volume}")
         st.write(f"**Total Profit: {total}**")
         st.write(f"**Created: {created_at}**")

@@ -2,16 +2,15 @@ import requests
 import streamlit as st
 from datetime import datetime
 from web3 import Web3
-import json
 
 
 def timestamp_to_string(unix_timestamp):
-    dt = datetime.utcfromtimestamp(int(unix_timestamp / 1000))
+    dt = datetime.utcfromtimestamp(int(unix_timestamp))
     return dt.strftime('%d/%m/%Y')
 
 
 def _timestamp_to_string(unix_timestamp):
-    dt = datetime.utcfromtimestamp(int(unix_timestamp / 1000))
+    dt = datetime.utcfromtimestamp(int(unix_timestamp))
     return dt.strftime('%d/%m/%Y %H:%M')
 
 
@@ -164,10 +163,10 @@ def get_share_price(address, target):
         share_price = []
         for item in data["events"]:
             if item["subject"]['username'].lower() == target.lower():
-                time = timestamp_to_string(int(item['createdAt']))
-                raw_time = _timestamp_to_string(int(item['createdAt']))
+                _time = timestamp_to_string(int(item['createdAt'] / 1000))
+                raw_time = _timestamp_to_string(int(item['createdAt'] / 1000))
                 share_price.append({
-                    'time': time,
+                    'time': _time,
                     'raw_time': raw_time,
                     'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
@@ -292,75 +291,3 @@ def get_personal_activity(target):
     except requests.exceptions.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
         return None
-
-
-@st.cache_data(show_spinner=False)
-def account_stats(wallet: str):
-    url = (f"https://api.basescan.org/api?module=account&action=txlist&address={wallet}"
-           f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
-    print(url)
-    response = requests.get(url)
-    response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
-    data = json.loads(response.text)
-
-    if data['status'] != '1':
-        print('Anfrage fehlgeschlagen')
-        return None, None, None, None, None
-
-    transactions = data['result']
-
-    # Initial profit/loss value
-    profit = 0
-    volume = 0
-    total_gas_fees = 0
-    buys = 0
-    sells = 0
-    date = None
-
-    tx_url = (f"https://api.basescan.org/api?module=account&action=txlistinternal&address={wallet}"
-              f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
-    response = requests.get(tx_url)
-    response.raise_for_status()
-
-    data_tx = response.json()
-
-    # Iterate over each transaction in the data
-    for tx in transactions:
-        # If the transaction is a buyShares transaction, subtract the value from profit
-        if tx['functionName'].startswith('buyShares') and tx['isError'] != "1":
-            profit -= int(tx['value']) / (10 ** 18)
-            volume += int(tx['value']) / (10 ** 18)
-            buys += 1
-
-            if tx['value'] == "0":
-                creation_block = int(tx["blockNumber"])
-                block_url = (f"https://api.basescan.org/api?module=block&action=getblockcountdown&blockno="
-                             f"{creation_block}&apikey={st.secrets['basescan_api_key']}")
-
-                response = requests.get(block_url)
-                response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
-                data_block = json.loads(response.text)
-
-                if data_block['status'] != '1':
-                    print('Anfrage fehlgeschlagen')
-                else:
-                    timestamp = timestamp_to_string(int(data_block["result"]["timeStamp"]))
-                    date = str(timestamp[:-3] + " (UTC)")
-
-        elif (tx['functionName'].startswith('sellShares') and tx['hash'] in
-              [item["hash"] for item in data_tx["result"]] and tx['isError'] != "1"):
-
-            matched_values = [item["value"] for item in data_tx["result"] if item["hash"] == tx["hash"]]
-            tx_value = matched_values[0] if matched_values else None
-            profit += int(tx_value) / (10 ** 18)
-            volume += int(tx['value']) / (10 ** 18)
-            sells += 1
-
-        # Calculate gas fee for the transaction
-        gas_fee = int(tx['gasUsed']) / (10 ** 9)
-        total_gas_fees += gas_fee
-
-    # Convert profit from wei to ether (assuming Ethereum transactions, 1 ether = 10^18 wei)
-    volume = round(volume, 3)
-    profit_in_ether = round((profit - total_gas_fees), 3)
-    return date, profit_in_ether, volume, buys, sells
