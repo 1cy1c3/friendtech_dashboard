@@ -87,7 +87,7 @@ if not bs_mode:
                 st.write("User not found")
         ss["submit"] = False
 else:
-    winners, losers = bs.account_stats(st.secrets['friendtech_contract'])
+    winners, losers = bs.get_trending(st.secrets['friendtech_contract'])
     with left_col:
         st.markdown("# Trending Gaining 15 min")
         gui.load_ft_df(winners, hide=False)
