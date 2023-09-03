@@ -4,9 +4,20 @@ import functions.friendtech as ft
 import json
 import time
 
+ss = st.session_state
+
 
 @st.cache_data(show_spinner=False)
 def account_stats(wallet: str):
+    # Initial profit/loss value
+    profit = 0
+    volume = 0
+    total_gas_fees = 0
+    buys = 0
+    sells = 0
+    date = None
+    share_price = []
+
     url = (f"https://api.basescan.org/api?module=account&action=txlist&address={wallet}"
            f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
 
@@ -19,15 +30,6 @@ def account_stats(wallet: str):
         return None, None, None, None, None
 
     txs = data['result']
-
-    # Initial profit/loss value
-    profit = 0
-    volume = 0
-    total_gas_fees = 0
-    buys = 0
-    sells = 0
-    date = None
-
     tx_url = (f"https://api.basescan.org/api?module=account&action=txlistinternal&address={wallet}"
               f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
 
@@ -74,7 +76,22 @@ def account_stats(wallet: str):
     # Convert profit from wei to ether (assuming Ethereum transactions, 1 ether = 10^18 wei)
     volume = round(volume, 3)
     profit_in_ether = round((profit - total_gas_fees), 3)
-    return date, profit_in_ether, volume, buys, sells
+
+    if ss.get('base_mode'):
+        for tx_int in txs_int:
+            if tx_int not in txs or txs.count(tx_int['hash']) == 2:
+                if txs.count(tx_int) == 2:
+                    value = (sum([item['value'] for item in txs_int if txs.count(tx_int['hash']) == 2])
+                             * (100 / 95) // (10 ** 18))
+                else:
+                    value = int(tx_int['value']) * 20 // (10 ** 18)
+                share_price.append({
+                    'price': value,
+                    'time': ft.timestamp_to_date(tx_int['timeStamp']),
+                    'raw_time': ft.timestamp_to_datetime(tx_int['timeStamp'])
+                })
+
+    return date, profit_in_ether, volume, buys, sells, share_price
 
 
 def get_trending(wallet: str):
@@ -131,7 +148,6 @@ def get_trending(wallet: str):
 
                     # If not found, append a new dictionary to results
                 if not found:
-
                     new_dict = {
                         'Subject': matching_tx['to'],
                         'Value': (value if tx['functionName'].startswith('buyShares') else -value)

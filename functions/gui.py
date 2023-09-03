@@ -132,7 +132,7 @@ def load_ft_stats(address):
         st.write(f"**Collected Fees:** {fees}")
 
         with st.spinner("Fetching Base-Scan..."):
-            created_at, profit, volume, buys, sells = bs.account_stats(address)
+            created_at, profit, volume, buys, sells, share_price = bs.account_stats(address)
             if profit is not None and portfolio_value is not None and fees_collected is not None:
                 total = round((profit + portfolio_value + fees), 3)
             else:
@@ -147,6 +147,8 @@ def load_ft_stats(address):
 
     with right_col:
         st.write(f"**Buys:Sells:** {buys} : {sells}")
+
+    return share_price
 
 
 def load_ft_top50():
