@@ -57,14 +57,13 @@ if not button and not ss['base_mode']:
     st.markdown("# Global Activity")
     gui.load_ft_df(ft.get_global_activity(), hide=True)
 
-
 if button and ss.get("submit"):
     if len(target) == 42 and target.startswith("0x"):
         target_address = target.lower()
         target = ft.addr_to_user(target_address, convert=True)
     else:
         target_address = ft.user_to_addr(target)
-    if target_address:  # and not ss['base_mode']:
+    if target_address and not ss['base_mode']:
         share_price = ft.get_share_price(target_address, target)
         activity = ft.get_personal_activity(target_address)
         key_activity, key_volume = ft.get_token_activity(target_address)
@@ -88,12 +87,15 @@ if button and ss.get("submit"):
             st.markdown(f"# {target}")
             st.write(f"**Wallet:** {target_address}")
 
-        with st.spinner("Loading Stats"):
-            share_price = gui.load_ft_stats(target_address)
-            gui.load_ft_graph(share_price)
+            with st.spinner("Loading Stats"):
+                share_price = gui.load_ft_stats(target_address)
 
         with right_col:
             st.markdown("# Activity")
+
+        st.markdown("# Key Activity")
+        gui.load_ft_graph(share_price)
+
     else:
         with right_col:
             st.write("User not found")

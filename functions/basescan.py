@@ -82,11 +82,12 @@ def account_stats(wallet: str):
             if tx_int not in txs or txs.count(tx_int['hash']) == 2:
                 if txs.count(tx_int) == 2:
                     value = (sum([item['value'] for item in txs_int if txs.count(tx_int['hash']) == 2])
-                             * (100 / 95) // (10 ** 18))
+                             * (100 / 95))
                 else:
-                    value = int(tx_int['value']) * 20 // (10 ** 18)
+                    value = int(tx_int['value']) * 20
+
                 share_price.append({
-                    'price': value,
+                    'price': round(value / (10 ** 18), 3),
                     'time': ft.timestamp_to_date(tx_int['timeStamp']),
                     'raw_time': ft.timestamp_to_datetime(tx_int['timeStamp'])
                 })
