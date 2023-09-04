@@ -63,7 +63,7 @@ if button and ss.get("submit"):
         target = ft.addr_to_user(target_address, convert=True)
     else:
         target_address = ft.user_to_addr(target)
-    if target_address and not ss['base_mode']:
+    if target_address:  # and not ss['base_mode']:
         share_price = ft.get_share_price(target_address, target)
         activity = ft.get_personal_activity(target_address)
         key_activity, key_volume = ft.get_token_activity(target_address)
