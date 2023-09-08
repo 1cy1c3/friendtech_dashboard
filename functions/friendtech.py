@@ -177,7 +177,14 @@ def get_share_price(address, target):
 
 def get_token_activity(target):
     url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity'
-    response = requests.get(url)
+    headers = {
+        'Authorization': st.secrets["auth_token"],
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Referer': 'https://www.friend.tech/'
+    }
+
+    response = requests.get(url, headers=headers)
     token_activity = []
     total_eth = 0  # initialize a counter to store the sum of ethAmounts
 
@@ -191,12 +198,13 @@ def get_token_activity(target):
 
             eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
             total_eth += eth_value  # increment the counter with each loop iteration
-
+            time_delta = time_ago(int(item["createdAt"]))
             token_activity.append({
                 'Trader': item['twitterUsername'],
                 'Activity': activity,
                 'Keys': item['shareAmount'],
-                'Eth': eth_value
+                'Eth': eth_value,
+                'Timedelta': time_delta
             })
 
         return token_activity, round(total_eth, 3)
