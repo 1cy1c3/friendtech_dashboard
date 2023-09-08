@@ -287,12 +287,13 @@ def get_personal_activity(target):
                 activity = "buy"
             else:
                 activity = "sell"
-
+            time_delta = time_ago(int(item["createdAt"]))
             account_activity.append({
                 'Subject': item['twitterUsername'],
                 'Activity': activity,
                 'Keys': item['shareAmount'],
-                'Eth': round((int(item['ethAmount']) * 10 ** -18), 3)
+                'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                'Timedelta': time_delta
             })
         return account_activity
     except requests.exceptions.JSONDecodeError as e:
