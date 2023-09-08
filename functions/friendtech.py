@@ -125,7 +125,6 @@ def get_portfolio_value(address):
         return None, None
 
 
-@st.cache_data(show_spinner=False)
 def get_top_50():
     url = f'https://prod-api.kosetto.com/lists/top-by-price'
     response = requests.get(url)
