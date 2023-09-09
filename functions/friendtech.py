@@ -154,34 +154,6 @@ def get_top_50():
         return None
 
 
-def get_share_price(address, target):
-    last_value = 0
-    url = f'https://prod-api.kosetto.com/holdings-activity/{address}'
-    response = requests.get(url)
-    try:
-        data = response.json()
-        share_price = []
-        for item in data["events"]:
-            if item["subject"]['username'].lower() == target.lower():
-                _time = timestamp_to_date(int(item['createdAt'] / 1000))
-                raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
-
-                if last_value != 0 and int(item['ethAmount']) > 2 * last_value:
-                    div = int(int(item['ethAmount']) / last_value)
-                    item['ethAmount'] = int(int(item['ethAmount']) / div)
-
-                share_price.append({
-                    'time': _time,
-                    'raw_time': raw_time,
-                    'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                })
-                last_value = int(item['ethAmount'])
-        return share_price
-    except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
-        return None
-
-
 def get_token_activity(target):
     url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity'
     headers = {
@@ -193,6 +165,8 @@ def get_token_activity(target):
 
     response = requests.get(url, headers=headers)
     token_activity = []
+    chart_data = []
+    last_value = 0
     total_eth = 0  # initialize a counter to store the sum of ethAmounts
 
     try:
@@ -205,7 +179,13 @@ def get_token_activity(target):
 
             eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
             total_eth += eth_value  # increment the counter with each loop iteration
+            _time = timestamp_to_date(int(item['createdAt'] / 1000))
+            raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
             time_delta = time_ago(int(item["createdAt"]))
+
+            if int(item['shareAmount']) > 1:
+                item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
             token_activity.append({
                 'Trader': item['twitterUsername'],
                 'Activity': activity,
@@ -213,8 +193,13 @@ def get_token_activity(target):
                 'Eth': eth_value,
                 'Timedelta': time_delta
             })
+            chart_data.append({
+                    'time': _time,
+                    'raw_time': raw_time,
+                    'price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                })
 
-        return token_activity, round(total_eth, 3)
+        return token_activity, round(total_eth, 3), chart_data
     except requests.exceptions.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
         return None, None

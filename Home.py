@@ -64,9 +64,8 @@ if button and ss.get("submit"):
     else:
         target_address = ft.user_to_addr(target)
     if target_address:  # and not ss['base_mode']:
-        share_price = ft.get_share_price(target_address, target)
         activity = ft.get_personal_activity(target_address)
-        key_activity, key_volume = ft.get_token_activity(target_address)
+        key_activity, key_volume, share_price = ft.get_token_activity(target_address)
 
         with right_col:
             st.markdown("# Activity")
@@ -81,6 +80,9 @@ if button and ss.get("submit"):
             st.write(f"**Wallet:** {target_address}")
             with st.spinner("Loading Stats"):
                 stats = gui.load_ft_stats(target_address)
+
+#
+# BASE SCAN
 
     elif target_address and ss['base_mode'] and not locked:
         with left_col:

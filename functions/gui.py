@@ -60,7 +60,7 @@ def load_ft_graph(data):
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
         if raw:
-            st.write(data[0]["time"][:-6])
+            st.write(f'{data[0]["time"][:-6]} UTC')
         st.line_chart(df.set_index('time')['price'], use_container_width=True)
     else:
         st.write("No Data found")
