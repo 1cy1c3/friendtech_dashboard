@@ -166,7 +166,7 @@ def get_token_activity(target):
     response = requests.get(url, headers=headers)
     token_activity = []
     chart_data = []
-    last_value = 0
+
     total_eth = 0  # initialize a counter to store the sum of ethAmounts
 
     try:
