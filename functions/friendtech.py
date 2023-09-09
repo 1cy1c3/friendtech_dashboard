@@ -155,6 +155,7 @@ def get_top_50():
 
 
 def get_share_price(address, target):
+    last_value = 0
     url = f'https://prod-api.kosetto.com/holdings-activity/{address}'
     response = requests.get(url)
     try:
@@ -164,11 +165,17 @@ def get_share_price(address, target):
             if item["subject"]['username'].lower() == target.lower():
                 _time = timestamp_to_date(int(item['createdAt'] / 1000))
                 raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
+
+                if last_value != 0 and int(item['ethAmount']) > 2 * last_value:
+                    div = int(int(item['ethAmount']) / last_value)
+                    item['ethAmount'] = int(int(item['ethAmount']) / div)
+
                 share_price.append({
                     'time': _time,
                     'raw_time': raw_time,
                     'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
+                last_value = int(item['ethAmount'])
         return share_price
     except requests.exceptions.JSONDecodeError as e:
         print(f"JSON Decode Error: {e}")
