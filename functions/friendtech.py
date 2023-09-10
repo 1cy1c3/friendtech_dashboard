@@ -193,7 +193,6 @@ def get_token_activity(target):
                     'raw_time': raw_time,
                     'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
-
         return token_activity, round(total_eth, 3), chart_data
     except requests.exceptions.JSONDecodeError as e:
         return None, None

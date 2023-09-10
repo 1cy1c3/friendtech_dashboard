@@ -20,8 +20,15 @@ def load_ft_graph(data):
         # Create a dictionary to store average values per date
         date_to_values = {}
 
+        if len(data) == count:
+            for item in data:
+                item['time'] = item['raw_time']
+            raw = True
         for trans in data:
-            date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+            if raw:
+                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+            else:
+                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
 
             if date in date_to_values:
                 date_to_values[date].append(float(trans["price"]))
