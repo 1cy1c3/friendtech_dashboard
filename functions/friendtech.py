@@ -64,7 +64,6 @@ def get_global_activity():
                 })
         return filtered_data
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None
 
 
@@ -94,11 +93,9 @@ def get_trending():
             })
         return filtered_data
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None
 
 
-@st.cache_data(show_spinner=False)
 def get_portfolio_value(address):
     url = f'https://prod-api.kosetto.com/wallet-info/{address}'
     response = requests.get(url)
@@ -121,7 +118,6 @@ def get_portfolio_value(address):
         else:
             return None, None
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None, None
 
 
@@ -150,7 +146,6 @@ def get_top_50():
             top50.append(user)
         return top50
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None
 
 
@@ -201,7 +196,6 @@ def get_token_activity(target):
 
         return token_activity, round(total_eth, 3), chart_data
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None, None
 
 
@@ -212,7 +206,6 @@ def get_user_points(address):
         data = response.json()
         return data["totalPoints"], data["tier"]
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None, None
 
 
@@ -239,7 +232,6 @@ def user_to_addr(user):
         else:
             return None
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None
 
 
@@ -253,7 +245,7 @@ def addr_to_user(address, convert):
             return data["twitterUsername"]
 
         elif convert and "twitterUsername" not in data:
-            return None
+            return "N/A"
 
         else:
             if "." in data["displayPrice"]:
@@ -262,10 +254,9 @@ def addr_to_user(address, convert):
             return (data["holderCount"], data["holdingCount"],
                     data["shareSupply"], round((int(data["displayPrice"]) * 10 ** -18), 3))
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         if convert:
-            return None
-        return None, None, None, None
+            return "N/A"
+        return "N/A", "N/A", "N/A", "N/A"
 
 
 def get_personal_activity(target):
@@ -289,5 +280,4 @@ def get_personal_activity(target):
             })
         return account_activity
     except requests.exceptions.JSONDecodeError as e:
-        print(f"JSON Decode Error: {e}")
         return None

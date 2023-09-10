@@ -16,18 +16,12 @@ def load_ft_graph(data):
     if len(data) > 1:
         # Sort the transactions by date
         data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
-        count = sum(1 for item in data if item['time'] == data[0]['time'])
+        count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
         # Create a dictionary to store average values per date
         date_to_values = {}
-        if len(data) == count:
-            for item in data:
-                item['time'] = item['raw_time']
-            raw = True
+
         for trans in data:
-            if raw:
-                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
-            else:
-                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+            date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
 
             if date in date_to_values:
                 date_to_values[date].append(float(trans["price"]))
@@ -59,59 +53,33 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
-        if raw:
-            st.write(f'{data[0]["time"][:-6]} UTC')
         st.line_chart(df.set_index('time')['price'], use_container_width=True)
     else:
         st.write("No Data found")
 
 
-def load_button(name):
-    if name == "ref_buttons":
-        with open("style/ref_buttons.css", "r") as f:
-            ref_buttons_css = f.read()
-        st.markdown(ref_buttons_css, unsafe_allow_html=True)
-
-
+@st.cache_data(show_spinner=False, ttl="1h")
 def load_ft_stats(address):
     left_col, right_col = st.columns([1, 1])
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, keys, price = ft.addr_to_user(address, convert=False)
 
-    if holder is not None and keys is not None:
+    if holder != "N/A" and keys != "N/A":
         unique_holder = min(100, (100 * holder) / keys)
     else:
         unique_holder = 0
-    if price is not None and keys is not None:
+    if price != "N/A" and keys != "N/A":
         market_cap = keys * price
     else:
         market_cap = 0
 
     with right_col:
-        if holdings is None:
-            st.write(f"**Holdings:** N/A")
-        else:
-            st.write(f"**Holdings:** {holdings}")
-        if holder is None:
-            st.write(f"**Holder:** N/A")
-        else:
-            st.write(f"**Holder:** {holder}")
-        if keys is None:
-            st.write(f"**Keys:** N/A")
-        else:
-            st.write(f"**Keys:** {keys}")
-        if unique_holder == 0:
-            st.write(f"**Unique Holder:** N/A")
-        else:
-            st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
-        if price is None:
-            st.write(f"**Key Price:** N/A")
-        else:
-            st.write(f"**Key Price:** {price}")
-        if market_cap == 0:
-            st.write(f"**Market Cap:** N/A")
-        else:
-            st.write(f"**Market Cap:** {round(market_cap, 3)}")
+        st.write(f"**Holdings:** {holdings}")
+        st.write(f"**Holder:** {holder}")
+        st.write(f"**Keys:** {keys}")
+        st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
+        st.write(f"**Key Price:** {price}")
+        st.write(f"**Market Cap:** {round(market_cap, 3)}")
 
     with left_col:
         with st.spinner("Fetching friend.tech rank..."):
@@ -133,12 +101,10 @@ def load_ft_stats(address):
 
         with st.spinner("Fetching Base-Scan..."):
             created_at, profit, volume, buys, sells, share_price = bs.account_stats(address)
-            if profit is not None and portfolio_value is not None and fees_collected is not None:
+            if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                 total = round((profit + portfolio_value + fees), 3)
             else:
                 total = "N/A"
-            if created_at is None:
-                created_at = "N/A"
 
         st.write(f"**Unrealized Profit:** {profit}")
         st.write(f"**Trading Volume:** {volume}")
@@ -149,13 +115,6 @@ def load_ft_stats(address):
         st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     return share_price
-
-
-def load_ft_top50():
-    event_data = ft.get_top_50()
-    df = pd.DataFrame(event_data)
-    df.index += 1
-    st.dataframe(df, use_container_width=True)
 
 
 def load_ft_df(data, hide):
@@ -170,19 +129,22 @@ def load_ft_df(data, hide):
 def load_sidebar_ft():
     with open("text/sidebar_ft.txt") as file:
         sidebar_txt = file.read()
-    with st.sidebar:
-        st.write(sidebar_txt, unsafe_allow_html=True)
+    st.write(sidebar_txt, unsafe_allow_html=True)
+
+    with open("style/ref_buttons.css", "r") as f:
+        ref_buttons_css = f.read()
+    st.markdown(ref_buttons_css, unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner=False)
-def load_header():
-    with open("style/header.css") as f:
-        header_css = f.read()
-    st.markdown(header_css, unsafe_allow_html=True)
+def load_css_cache(element):
+    with open(f"style/{element}.css") as f:
+        element_css = f.read()
+    st.markdown(element_css, unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner=False)
-def load_footer():
-    with open("style/footer.css") as f:
-        footer_css = f.read()
-    st.markdown(footer_css, unsafe_allow_html=True)
+def load_status():
+    with open("text/status.txt") as f:
+        status_txt = f.read()
+    st.write(status_txt, unsafe_allow_html=True)

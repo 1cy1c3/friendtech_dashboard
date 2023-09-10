@@ -7,7 +7,6 @@ import time
 ss = st.session_state
 
 
-@st.cache_data(show_spinner=False)
 def account_stats(wallet: str):
     # Initial profit/loss value
     profit = 0
@@ -24,10 +23,8 @@ def account_stats(wallet: str):
     response = requests.get(url)
     response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
     data = json.loads(response.text)
-
     if data['status'] != '1':
-        print('Anfrage 1 fehlgeschlagen')
-        return None, None, None, None, None
+        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
     txs = data['result']
     tx_url = (f"https://api.basescan.org/api?module=account&action=txlistinternal&address={wallet}"
@@ -54,9 +51,7 @@ def account_stats(wallet: str):
                 response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
                 data_block = json.loads(response.text)
 
-                if data_block['status'] != '1':
-                    print('Anfrage 2 fehlgeschlagen')
-                else:
+                if data_block['status'] == '1':
                     timestamp = ft.timestamp_to_datetime(int(data_block["result"]["timeStamp"]))
                     date = str(timestamp + " (UTC)")
 
@@ -107,7 +102,6 @@ def get_trending(wallet: str):
     data = json.loads(response.text)
 
     if data['status'] != '1':
-        print('Anfrage 1 fehlgeschlagen')
         return None, None, None, None, None
 
     txs = data['result']
@@ -171,19 +165,5 @@ def get_block_by_timestamp(timestamp):
     data = json.loads(response.text)
 
     if data['status'] != '1':
-        print('Anfrage 3 fehlgeschlagen')
         return "0"
     return data['result']
-
-
-def extract_value(hex_string):
-    # Remove the '0x' prefix if it exists
-    hex_string = hex_string[2:] if hex_string.startswith('0x') else hex_string
-
-    # Find the position of the last zero
-    last_zero_position = max(loc for loc, val in enumerate(hex_string) if val == '0')
-
-    # Slice the string from the last zero's position to the end
-    result = hex_string[last_zero_position + 1:]
-
-    return result
