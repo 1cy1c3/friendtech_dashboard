@@ -91,7 +91,7 @@ def load_ft_stats(address):
         st.write(f"**{tier}:** {points} Points")
         with st.spinner("Fetching friend.tech wallet info..."):
             portfolio_value, fees_collected = ft.get_portfolio_value(address)
-        if fees_collected:
+        if fees_collected != "N/A":
             fees = fees_collected / 2
         else:
             fees = "N/A"
