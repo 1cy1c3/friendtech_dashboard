@@ -42,7 +42,7 @@ def account_stats(wallet: str):
             volume += int(tx['value']) / (10 ** 18)
             buys += 1
 
-            if tx['value'] == "0":
+            if tx['value'] == "0":  # Filter for first share buy
                 creation_block = str(tx["blockNumber"])
                 block_url = (f"https://api.basescan.org/api?module=block&action=getblockreward&blockno="
                              f"{creation_block}&apikey={st.secrets['basescan_api_key']}")
@@ -55,9 +55,11 @@ def account_stats(wallet: str):
                     timestamp = ft.timestamp_to_datetime(int(data_block["result"]["timeStamp"]))
                     date = str(timestamp + " (UTC)")
 
+        # If the transaction is a sellShares transaction, add the value from profit
         elif (tx['functionName'].startswith('sellShares') and tx['hash'] in
               [item["hash"] for item in txs_int] and tx['isError'] != "1"):
 
+            # search for matching tx hashes
             matched_values = [item["value"] for item in txs_int if item["hash"] == tx["hash"]]
             tx_value = matched_values[0] if matched_values else None
             profit += int(tx_value) / (10 ** 18)
@@ -71,21 +73,6 @@ def account_stats(wallet: str):
     # Convert profit from wei to ether (assuming Ethereum transactions, 1 ether = 10^18 wei)
     volume = round(volume, 3)
     profit_in_ether = round((profit - total_gas_fees), 3)
-
-    if ss.get('base_mode'):
-        for tx_int in txs_int:
-            if tx_int not in txs or txs.count(tx_int['hash']) == 2:
-                if txs.count(tx_int) == 2:
-                    value = (sum([item['value'] for item in txs_int if txs.count(tx_int['hash']) == 2])
-                             * (100 / 95))
-                else:
-                    value = int(tx_int['value']) * 20
-
-                share_price.append({
-                    'price': round(value / (10 ** 18), 3),
-                    'time': ft.timestamp_to_date(tx_int['timeStamp']),
-                    'raw_time': ft.timestamp_to_datetime(tx_int['timeStamp'])
-                })
 
     return date, profit_in_ether, volume, buys, sells, share_price
 
@@ -114,7 +101,9 @@ def get_trending(wallet: str):
     data_int = response.json()
     txs_int = data_int['result']
 
+    # Create set of hashes to reduce the data
     tx_hashes = set(item['hash'] for item in txs)
+    # Checking for txs, where the receiver isn't friend.tech
     conf_int_txs = [item for item in txs_int if item['hash'] in tx_hashes
                     and item['to'] != st.secrets['friendtech_wallet'].lower()]
     results = []
@@ -149,9 +138,9 @@ def get_trending(wallet: str):
                     }
                     results.append(new_dict)
 
-    winners = [res for res in results if res['Value'] > 0.01 and 'e' not in str(res['Value'])]
-    losers = [res for res in results if res['Value'] < -0.01 and 'e' not in str(res['Value'])]
-    winners.sort(key=lambda x: x['Value'], reverse=True)
+    winners = [res for res in results if res['Value'] > 0.01 and 'e' not in str(res['Value'])]  # Filter for Winning
+    losers = [res for res in results if res['Value'] < -0.01 and 'e' not in str(res['Value'])]  # Filter for Losing
+    winners.sort(key=lambda x: x['Value'], reverse=True)  # Sorting
     losers.sort(key=lambda x: x['Value'])
 
     return winners, losers
@@ -165,5 +154,5 @@ def get_block_by_timestamp(timestamp):
     data = json.loads(response.text)
 
     if data['status'] != '1':
-        return "0"
+        return "0"  # To avoid crash at failed request
     return data['result']
