@@ -205,7 +205,7 @@ def get_user_points(address):
         data = response.json()
         return data["totalPoints"], data["tier"]
     except requests.exceptions.JSONDecodeError as e:
-        return None, None
+        return "N/A", "N/A"
 
 
 def user_to_addr(user):

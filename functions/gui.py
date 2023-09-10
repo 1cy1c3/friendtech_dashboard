@@ -60,6 +60,8 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
+        if raw:
+            st.write(data[0]["time"][:-6])
         st.line_chart(df.set_index('time')['price'], use_container_width=True)
     else:
         st.write("No Data found")
@@ -90,24 +92,21 @@ def load_ft_stats(address):
 
     with left_col:
         with st.spinner("Fetching friend.tech rank..."):
-            try:
-                points, tier = ft.get_user_points(address)
-            except RuntimeError:
-                points, tier = "N/A", "N/A"
+            points, tier = ft.get_user_points(address)
 
         st.write(f"**{tier}:** {points} Points")
         with st.spinner("Fetching friend.tech wallet info..."):
             portfolio_value, fees_collected = ft.get_portfolio_value(address)
-        if fees_collected != "N/A":
-            fees = fees_collected / 2
-        else:
+        if fees_collected == "N/A":
             fees = "N/A"
+        else:
+            fees = fees_collected / 2
 
         st.write(f"**Portfolio Value:** {portfolio_value}")
         st.write(f"**Collected Fees:** {fees}")
 
         with st.spinner("Fetching Base-Scan..."):
-            created_at, profit, volume, buys, sells, share_price = bs.account_stats(address)
+            created_at, profit, volume, buys, sells = bs.account_stats(address)
             if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                 total = round((profit + portfolio_value + fees), 3)
             else:
@@ -120,8 +119,6 @@ def load_ft_stats(address):
 
     with right_col:
         st.write(f"**Buys:Sells:** {buys} : {sells}")
-
-    return share_price
 
 
 def load_ft_df(data, hide):

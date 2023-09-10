@@ -77,7 +77,6 @@ if button and ss.get("submit"):
     if target_address and target_address != "N/A":
         activity = ft.get_personal_activity(target_address)
         key_activity, key_volume, share_price = ft.get_token_activity(target_address)
-
         with right_col:
             st.markdown("# Activity")
             gui.load_ft_df(activity, hide=True)
@@ -90,7 +89,7 @@ if button and ss.get("submit"):
             st.markdown(f"# {target}")
             st.write(f"**Wallet:** {target_address}")
             with st.spinner("Loading Stats"):
-                stats = gui.load_ft_stats(target_address)
+                gui.load_ft_stats(target_address)
 
     else:
         with right_col:

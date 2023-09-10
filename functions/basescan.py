@@ -15,7 +15,6 @@ def account_stats(wallet: str):
     buys = 0
     sells = 0
     date = None
-    share_price = []
 
     url = (f"https://api.basescan.org/api?module=account&action=txlist&address={wallet}"
            f"&startblock=0&endblock=99999999&apikey={st.secrets['basescan_api_key']}")
@@ -74,7 +73,7 @@ def account_stats(wallet: str):
     volume = round(volume, 3)
     profit_in_ether = round((profit - total_gas_fees), 3)
 
-    return date, profit_in_ether, volume, buys, sells, share_price
+    return date, profit_in_ether, volume, buys, sells
 
 
 def get_trending(wallet: str):
