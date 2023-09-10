@@ -116,9 +116,9 @@ def get_portfolio_value(address):
             return round((int(data["portfolioValue"]) * 10 ** -18), 3), round((int(data["feesCollected"]) * 10 ** -19),
                                                                               3)
         else:
-            return None, None
+            return "N/A", "N/A"
     except requests.exceptions.JSONDecodeError as e:
-        return None, None
+        return "N/A", "N/A"
 
 
 def get_top_50():
