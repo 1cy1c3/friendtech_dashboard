@@ -6,7 +6,6 @@ import pandas as pd
 
 import datetime
 
-
 ss = st.session_state
 
 
@@ -133,7 +132,8 @@ def load_ft_stats(address, target):
             st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     with right_col:
-        load_ft_df(activity, hide=True)
+        if activity != "N/A":
+            load_ft_df(activity, hide=True)
 
 
 def load_ft_df(data, hide):
@@ -144,6 +144,8 @@ def load_ft_df(data, hide):
             st.dataframe(df, use_container_width=True, hide_index=False)
         else:
             st.dataframe(df, use_container_width=True, hide_index=True)
+    else:
+        pass
 
 
 def load_sidebar_ft():
