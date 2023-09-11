@@ -1,7 +1,6 @@
 from datetime import timedelta, datetime
 
 import functions.friendtech as ft
-import functions.basescan as bs
 import streamlit as st
 import pandas as pd
 
@@ -68,7 +67,7 @@ def load_ft_graph(data):
 
 
 @st.cache_data(show_spinner=False, ttl="1h")
-def load_ft_stats(address):
+def load_ft_stats(address, created_at, profit, volume, buys, sells):
     left_col, right_col = st.columns([1, 1])
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, keys, price = ft.addr_to_user(address, convert=False)
@@ -105,12 +104,10 @@ def load_ft_stats(address):
         st.write(f"**Portfolio Value:** {portfolio_value}")
         st.write(f"**Collected Fees:** {fees}")
 
-        with st.spinner("Fetching Base-Scan..."):
-            created_at, profit, volume, buys, sells = bs.account_stats(address)
-            if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
-                total = round((profit + portfolio_value + fees), 3)
-            else:
-                total = "N/A"
+        if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+            total = round((profit + portfolio_value + fees), 3)
+        else:
+            total = "N/A"
 
         st.write(f"**Unrealized Profit:** {profit}")
         st.write(f"**Trading Volume:** {volume}")

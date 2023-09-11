@@ -7,6 +7,7 @@ import time
 ss = st.session_state
 
 
+# Substituted by ft now
 def account_stats(wallet: str):
     # Initial profit/loss value
     profit = 0

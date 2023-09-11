@@ -314,16 +314,33 @@ def addr_to_user(address, convert):
 
 
 def get_personal_activity(target):
+    profit = 0
+    volume = 0
+    buys = 0
+    sells = 0
+    date = None
+
     url = f'https://prod-api.kosetto.com/users/{target}/trade-activity'
     response = requests.get(url)
     account_activity = []
+
     try:
         data = response.json()
         for item in data["users"]:
             if item["isBuy"]:
                 activity = "buy"
+                profit -= int(item['ethAmount']) / (10 ** 18)
+                volume += int(item['ethAmount']) / (10 ** 18)
+                buys += 1
+
+                if item['ethAmount'] == "0":
+                    date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
             else:
                 activity = "sell"
+                profit += int(item['ethAmount']) / (10 ** 18)
+                volume += int(item['ethAmount']) / (10 ** 18)
+                sells += 1
+
             time_delta = time_ago(int(item["createdAt"]))
             account_activity.append({
                 'Subject': item['twitterUsername'],
@@ -332,6 +349,55 @@ def get_personal_activity(target):
                 'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
                 'Timedelta': time_delta
             })
-        return account_activity
+
+        volume = round(volume, 3)
+        profit_in_ether = round(profit, 3)
+
     except requests.exceptions.JSONDecodeError as e:
-        return None
+        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+
+    # Search for next page start and make more requests until the full history is loaded
+    if data['nextPageStart'] != "0":
+        next_page = data['nextPageStart']
+        while next_page != "0":
+            url = f'https://prod-api.kosetto.com/users/{target}/trade-activity?pageStart={next_page}'
+            response = requests.get(url)
+
+            try:
+                data = response.json()
+                for item in data["users"]:
+                    if item["isBuy"]:
+                        activity = "buy"
+                        profit -= int(item['ethAmount']) / (10 ** 18)
+                        volume += int(item['ethAmount']) / (10 ** 18)
+                        buys += 1
+
+                        if item['ethAmount'] == "0":
+                            date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                    else:
+                        activity = "sell"
+                        profit += int(item['ethAmount']) / (10 ** 18)
+                        volume += int(item['ethAmount']) / (10 ** 18)
+                        sells += 1
+
+                    time_delta = time_ago(int(item["createdAt"]))
+                    account_activity.append({
+                        'Subject': item['twitterUsername'],
+                        'Activity': activity,
+                        'Keys': item['shareAmount'],
+                        'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                        'Timedelta': time_delta
+                    })
+
+                if data['nextPageStart'] is None:
+                    next_page = "0"
+                else:
+                    next_page = data['nextPageStart']
+                volume = round(volume, 3)
+                profit_in_ether = round(profit, 3)
+
+            except requests.exceptions.JSONDecodeError as e:
+                return account_activity, date, profit_in_ether, volume, buys, sells
+        return account_activity, date, profit_in_ether, volume, buys, sells
+    else:
+        return account_activity, date, profit_in_ether, volume, buys, sells

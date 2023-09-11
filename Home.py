@@ -78,10 +78,19 @@ if button and ss.get("submit"):
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":
-        activity = ft.get_personal_activity(target_address)
-        key_activity, key_volume, share_price = ft.get_token_activity(target_address)
+        # Preload structure
         with right_col:
             st.markdown("# Activity")
+
+        with left_col:
+            st.markdown(f"# {target}")
+            st.write(f"**Wallet:** {target_address}")
+
+        with st.spinner("Fetching friend.tech API"):
+            activity, date, profit_in_ether, volume, buys, sells = ft.get_personal_activity(target_address)
+            key_activity, key_volume, share_price = ft.get_token_activity(target_address)
+
+        with right_col:
             gui.load_ft_df(activity, hide=True)
 
         st.markdown("# Key Activity")
@@ -89,14 +98,12 @@ if button and ss.get("submit"):
         gui.load_ft_df(key_activity, hide=True)
 
         with left_col:
-            st.markdown(f"# {target}")
-            st.write(f"**Wallet:** {target_address}")
             with st.spinner("Loading Stats"):
-                gui.load_ft_stats(target_address)
+                gui.load_ft_stats(target_address, date, profit_in_ether, volume, buys, sells)
 
     else:
         with right_col:
-            st.write("User not found")
+            st.write("# USER NOT FOUND")
 
     ss["submit"] = False  # reset submit
 
