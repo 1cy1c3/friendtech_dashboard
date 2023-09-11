@@ -66,56 +66,76 @@ def load_ft_graph(data):
         st.write("No Data found")
 
 
+# UNDER COLUMN TO DISPLAY DATA WHILE GENERATING
 @st.cache_data(show_spinner=False, ttl="1h")
-def load_ft_stats(address, created_at, profit, volume, buys, sells):
+def load_ft_stats(address, target):
     left_col, right_col = st.columns([1, 1])
+    with left_col:
+        st.markdown(f"# {target}")
+        st.write(f"**Wallet:** {address}")
+
+    with right_col:
+        st.markdown("# Activity")
+    with st.spinner("Fetching key activity..."):
+        key_activity, key_volume, share_price = ft.get_token_activity(address)
+
+    st.markdown("# Key Activity")
+    load_ft_graph(share_price)
+    load_ft_df(key_activity, hide=True)
+
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, keys, price = ft.addr_to_user(address, convert=False)
 
-    if holder != "N/A" and keys != "N/A":
-        unique_holder = min(100, (100 * holder) / keys)
-    else:
-        unique_holder = 0
-    if price != "N/A" and keys != "N/A":
-        market_cap = keys * price
-    else:
-        market_cap = 0
-
-    with right_col:
-        st.write(f"**Holdings:** {holdings}")
-        st.write(f"**Holder:** {holder}")
-        st.write(f"**Keys:** {keys}")
-        st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
-        st.write(f"**Key Price:** {price}")
-        st.write(f"**Market Cap:** {round(market_cap, 3)}")
-
     with left_col:
-        with st.spinner("Fetching friend.tech rank..."):
-            points, tier = ft.get_user_points(address)
-
-        st.write(f"**{tier}:** {points} Points")
-        with st.spinner("Fetching friend.tech wallet info..."):
-            portfolio_value, fees_collected = ft.get_portfolio_value(address)
-        if fees_collected == "N/A":
-            fees = "N/A"
+        lc_2, rc_2 = st.columns([1, 1])
+        if holder != "N/A" and keys != "N/A":
+            unique_holder = min(100, (100 * holder) / keys)
         else:
-            fees = fees_collected / 2
+            unique_holder = 0
 
-        st.write(f"**Portfolio Value:** {portfolio_value}")
-        st.write(f"**Collected Fees:** {fees}")
-
-        if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
-            total = round((profit + portfolio_value + fees), 3)
+        if price != "N/A" and keys != "N/A":
+            market_cap = keys * price
         else:
-            total = "N/A"
+            market_cap = 0
 
-        st.write(f"**Unrealized Profit:** {profit}")
-        st.write(f"**Trading Volume:** {volume}")
-        st.write(f"**Total Profit: {total}**")
-        st.write(f"**Created: {created_at}**")
+        with rc_2:
+            st.write(f"**Holdings:** {holdings}")
+            st.write(f"**Holder:** {holder}")
+            st.write(f"**Keys:** {keys}")
+            st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
+            st.write(f"**Key Price:** {price}")
+            st.write(f"**Market Cap:** {round(market_cap, 3)}")
+
+        with lc_2:
+            with st.spinner("Fetching friend.tech rank..."):
+                points, tier = ft.get_user_points(address)
+
+            st.write(f"**{tier}:** {points} Points")
+            with st.spinner("Fetching friend.tech wallet info..."):
+                portfolio_value, fees_collected = ft.get_portfolio_value(address)
+            if fees_collected == "N/A":
+                fees = "N/A"
+            else:
+                fees = fees_collected / 2
+
+            st.write(f"**Portfolio Value:** {portfolio_value}")
+            st.write(f"**Collected Fees:** {fees}")
+            with st.spinner("Fetching friend.tech user activity..."):
+                activity, created_at, profit, volume, buys, sells = ft.get_personal_activity(address)
+            if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+                total = round((profit + portfolio_value + fees), 3)
+            else:
+                total = "N/A"
+            st.write(f"**Unrealized Profit:** {profit}")
+            st.write(f"**Trading Volume:** {volume}")
+            st.write(f"**Total Profit: {total}**")
+            st.write(f"**Created: {created_at}**")
+
+        with rc_2:
+            st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     with right_col:
-        st.write(f"**Buys:Sells:** {buys} : {sells}")
+        load_ft_df(activity, hide=True)
 
 
 def load_ft_df(data, hide):

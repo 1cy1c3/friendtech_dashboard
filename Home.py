@@ -56,18 +56,6 @@ with h_l_col.form(key="search", clear_on_submit=True):
     target = st.text_input(label="Look up a Twitter-Handle or friend.tech wallet")
     button = st.form_submit_button("Search User", on_click=submit())
 
-# Friendtech General Data
-if not button and not ss['base_mode']:
-    with left_col:
-        st.markdown("# Top 50")
-        gui.load_ft_df(ft.get_top_50(), hide=False)
-    with right_col:
-        st.markdown("# Trending")
-        gui.load_ft_df(ft.get_trending(), hide=False)
-    st.markdown("")  # Spacer for columns
-    st.markdown("# Global Activity")
-    gui.load_ft_df(ft.get_global_activity(), hide=True)
-
 # Search User
 if button and ss.get("submit"):
     if len(target) == 42 and target.startswith("0x"):
@@ -78,28 +66,7 @@ if button and ss.get("submit"):
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":
-        # Preload structure
-        with right_col:
-            st.markdown("# Activity")
-
-        with left_col:
-            st.markdown(f"# {target}")
-            st.write(f"**Wallet:** {target_address}")
-
-        with st.spinner("Fetching friend.tech API"):
-            activity, date, profit_in_ether, volume, buys, sells = ft.get_personal_activity(target_address)
-            key_activity, key_volume, share_price = ft.get_token_activity(target_address)
-
-        with right_col:
-            gui.load_ft_df(activity, hide=True)
-
-        st.markdown("# Key Activity")
-        gui.load_ft_graph(share_price)
-        gui.load_ft_df(key_activity, hide=True)
-
-        with left_col:
-            with st.spinner("Loading Stats"):
-                gui.load_ft_stats(target_address, date, profit_in_ether, volume, buys, sells)
+        gui.load_ft_stats(target_address, target)
 
     else:
         with right_col:
@@ -107,6 +74,17 @@ if button and ss.get("submit"):
 
     ss["submit"] = False  # reset submit
 
+# Friendtech General Data
+elif not button and not ss['base_mode']:
+    with left_col:
+        st.markdown("# Top 50")
+        gui.load_ft_df(ft.get_top_50(), hide=False)
+    with right_col:
+        st.markdown("# Trending")
+        gui.load_ft_df(ft.get_trending(), hide=False)
+    st.markdown("")  # Spacer for columns
+    st.markdown("# Global Activity")
+    gui.load_ft_df(ft.get_global_activity(), hide=True)
 
 # Display Base Scan data
 elif ss['base_mode'] and not button:
