@@ -1,2 +1,2 @@
 **STATUS:** Online - Substituted all data with friendtech data instead of using basescan.org.
-Loading times for big accounts can be up to 1 minute, please be patient it's a lot of data.
+Loading times for big accounts can be up to 15s, please be patient it's a lot of data.
