@@ -137,12 +137,13 @@ def load_ft_stats(address, target):
 
 
 def load_ft_df(data, hide):
-    df = pd.DataFrame(data)
-    df.index += 1
-    if not hide:
-        st.dataframe(df, use_container_width=True, hide_index=False)
-    else:
-        st.dataframe(df, use_container_width=True, hide_index=True)
+    if data:
+        df = pd.DataFrame(data)
+        df.index += 1
+        if not hide:
+            st.dataframe(df, use_container_width=True, hide_index=False)
+        else:
+            st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 def load_sidebar_ft():
