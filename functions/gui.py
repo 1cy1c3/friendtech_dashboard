@@ -66,8 +66,6 @@ def load_ft_graph(data):
         st.write("No Data found")
 
 
-# UNDER COLUMN TO DISPLAY DATA WHILE GENERATING
-@st.cache_data(show_spinner=False, ttl="1h")
 def load_ft_stats(address, target):
     left_col, right_col = st.columns([1, 1])
     with left_col:
