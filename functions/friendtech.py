@@ -3,6 +3,8 @@ import streamlit as st
 from datetime import datetime
 from web3 import Web3
 
+ss = st.session_state
+
 
 def timestamp_to_date(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
@@ -189,13 +191,66 @@ def get_token_activity(target):
                 'Timedelta': time_delta
             })
             chart_data.append({
-                    'time': _time,
-                    'raw_time': raw_time,
-                    'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                })
-        return token_activity, round(total_eth, 3), chart_data
+                'time': _time,
+                'raw_time': raw_time,
+                'price': round((int(item['ethAmount']) * 10 ** -18), 3)
+            })
     except requests.exceptions.JSONDecodeError as e:
-        return None, None
+        return None, None, None
+
+    # Search for next page start and make more requests untill the full history is loaded
+    if data['nextPageStart'] != "0" and ss['full_data'] is True:
+        next_page = data['nextPageStart']
+        while next_page != "0":
+            url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity?pageStart={next_page}'
+            headers = {
+                'Authorization': st.secrets["auth_token"],
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Referer': 'https://www.friend.tech/'
+            }
+            response = requests.get(url, headers=headers)
+
+            try:
+                data = response.json()
+                for item in data["users"]:
+                    if item["isBuy"]:
+                        activity = "buy"
+                    else:
+                        activity = "sell"
+
+                    eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
+                    total_eth += eth_value  # increment the counter with each loop iteration
+                    _time = timestamp_to_date(int(item['createdAt'] / 1000))
+                    raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
+                    time_delta = time_ago(int(item["createdAt"]))
+
+                    if int(item['shareAmount']) > 1:
+                        item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
+                    token_activity.append({
+                        'Trader': item['twitterUsername'],
+                        'Activity': activity,
+                        'Keys': item['shareAmount'],
+                        'Eth': eth_value,
+                        'Timedelta': time_delta
+                    })
+                    chart_data.append({
+                        'time': _time,
+                        'raw_time': raw_time,
+                        'price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                    })
+
+                if data['nextPageStart'] is None:
+                    next_page = "0"
+                else:
+                    next_page = data['nextPageStart']
+
+            except requests.exceptions.JSONDecodeError as e:
+                return token_activity, round(total_eth, 3), chart_data
+        return token_activity, round(total_eth, 3), chart_data
+    else:
+        return token_activity, round(total_eth, 3), chart_data
 
 
 def get_user_points(address):

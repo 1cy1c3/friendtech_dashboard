@@ -147,7 +147,7 @@ def load_css_cache(element):
     st.markdown(element_css, unsafe_allow_html=True)
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl="1d")
 def load_status():
     with open("text/status.txt") as f:
         status_txt = f.read()
