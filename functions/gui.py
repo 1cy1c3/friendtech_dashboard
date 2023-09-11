@@ -12,7 +12,7 @@ ss = st.session_state
 
 def load_ft_graph(data):
     raw = False
-    if len(data) > 1:
+    if data and len(data) > 1:
         # Sort the transactions by date
         data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
         count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates

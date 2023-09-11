@@ -75,7 +75,7 @@ if button and ss.get("submit"):
     ss["submit"] = False  # reset submit
 
 # Friendtech General Data
-elif not button and not ss['base_mode']:
+if not button and not ss['base_mode']:
     with left_col:
         st.markdown("# Top 50")
         gui.load_ft_df(ft.get_top_50(), hide=False)
