@@ -36,7 +36,6 @@ st.header("friend.tech Dashboard")
 
 
 __login__obj = __login__(auth_token="courier_auth_token",
-                         nav_sidebar=False,
                          company_name="Shims",
                          width=200, height=250,
                          logout_button_name='Logout', hide_menu_bool=False,
@@ -50,8 +49,6 @@ with st.sidebar:
     gui.load_sidebar_ft()
 
 if LOGGED_IN is True:
-
-    st.markdown(f"Welcome {name}")
 
     # Columns for responsive Page layout and page structure
     h_l_col, h_r_col = st.columns([1, 1])  # Columns header
