@@ -65,20 +65,27 @@ def load_ft_graph(data):
         st.write("No Data found")
 
 
-def load_ft_stats(address, target):
+def load_ft_stats(address, target, dashboard=False):
     left_col, right_col = st.columns([1, 1])
     with left_col:
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
 
-    with right_col:
-        st.markdown("# Activity")
+    if not dashboard:
+        with right_col:
+            st.markdown("# Activity")
     with st.spinner("Fetching key activity..."):
         key_activity, key_volume, share_price = ft.get_token_activity(address)
 
-    st.markdown("# Key Activity")
-    load_ft_graph(share_price)
-    load_ft_df(key_activity, hide=True)
+    if not dashboard:
+        st.markdown("# Key Activity")
+        load_ft_graph(share_price)
+        load_ft_df(key_activity, hide=True)
+    elif dashboard:
+        with right_col:
+            st.markdown("# Key Activity")
+            load_ft_graph(share_price)
+        load_ft_df(key_activity, hide=True)
 
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, keys, price = ft.addr_to_user(address, convert=False)
@@ -117,23 +124,27 @@ def load_ft_stats(address, target):
 
             st.write(f"**Portfolio Value:** {portfolio_value}")
             st.write(f"**Collected Fees:** {fees}")
-            with st.spinner("Fetching friend.tech user activity..."):
-                activity, created_at, profit, volume, buys, sells = ft.get_personal_activity(address)
-            if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
-                total = round((profit + portfolio_value + fees), 3)
-            else:
-                total = "N/A"
-            st.write(f"**Unrealized Profit:** {profit}")
-            st.write(f"**Trading Volume:** {volume}")
-            st.write(f"**Total Profit: {total}**")
-            st.write(f"**Created: {created_at}**")
 
-        with rc_2:
-            st.write(f"**Buys:Sells:** {buys} : {sells}")
+            if not dashboard:
+                with st.spinner("Fetching friend.tech user activity..."):
+                    activity, created_at, profit, volume, buys, sells = ft.get_personal_activity(address)
+                if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+                    total = round((profit + portfolio_value + fees), 3)
+                else:
+                    total = "N/A"
+                st.write(f"**Unrealized Profit:** {profit}")
+                st.write(f"**Trading Volume:** {volume}")
+                st.write(f"**Total Profit: {total}**")
+                st.write(f"**Created: {created_at}**")
 
-    with right_col:
-        if activity != "N/A":
-            load_ft_df(activity, hide=True)
+        if not dashboard:
+            with rc_2:
+                st.write(f"**Buys:Sells:** {buys} : {sells}")
+
+    if not dashboard:
+        with right_col:
+            if activity != "N/A":
+                load_ft_df(activity, hide=True)
 
 
 def load_ft_df(data, hide):

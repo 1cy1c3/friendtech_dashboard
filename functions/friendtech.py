@@ -6,6 +6,22 @@ from web3 import Web3
 ss = st.session_state
 
 
+def add_watchlist(address, username):
+    with open(f'watchlist/{username}.txt', 'r') as f:
+        content = f.read()
+        lines = content.splitlines()
+
+    if address in lines:
+        updated_lines = [line for line in lines if line != address]
+        print("Element exists, removing it.")
+    else:
+        updated_lines = lines + [address]
+        print("Element does not exist, adding it.")
+
+    with open(f'watchlist/{username}.txt', 'w') as file:
+        file.writelines('\n'.join(updated_lines))
+
+
 def timestamp_to_date(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
     return dt.strftime('%d/%m/%Y')
@@ -392,7 +408,7 @@ def get_personal_activity(target):
                 if data['nextPageStart'] is None:
                     next_page = "0"
                 else:
-                    next_page = data['nextPageStart']
+                    next_page = str(data['nextPageStart'])
                 volume = round(volume, 3)
                 profit_in_ether = round(profit, 3)
 
@@ -401,3 +417,101 @@ def get_personal_activity(target):
         return account_activity, date, profit_in_ether, volume, buys, sells
     else:
         return account_activity, date, profit_in_ether, volume, buys, sells
+
+
+def get_watchlist_activity(target_list):
+    watchlist_buy = []
+    watchlist_sell = []
+
+    for target in target_list:
+        url = f'https://prod-api.kosetto.com/users/{target[0]}/trade-activity'
+        response = requests.get(url)
+        try:
+            data = response.json()
+            for item in data["users"]:
+                if item["isBuy"]:
+                    activity = "buy"
+                    time_delta = time_ago(int(item["createdAt"]))
+                    if "days ago" not in time_delta:
+                        watchlist_buy.append({
+                            'Timedelta': time_delta,
+                            'Trader': target[1],
+                            'Subject': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                            'BuyerWallet': target[0]
+                        })
+                    else:
+                        continue
+
+                else:
+                    activity = "sell"
+                    time_delta = time_ago(int(item["createdAt"]))
+                    if "days ago" not in time_delta:
+                        watchlist_sell.append({
+                            'Timedelta': time_delta,
+                            'Trader': target[1],
+                            'Subject': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                            'BuyerWallet': target[0]
+                        })
+                    else:
+                        continue
+
+        except requests.exceptions.JSONDecodeError:
+            continue
+
+        # Search for next page start and make more requests until the full history is loaded
+        if data['nextPageStart'] != "0":
+            next_page = data['nextPageStart']
+            if "days ago" not in watchlist_buy and "days ago" not in watchlist_sell:
+                next_page = "0"
+            while next_page != "0":
+                url = f'https://prod-api.kosetto.com/users/{target[0]}/trade-activity?pageStart={next_page}'
+                response = requests.get(url)
+                try:
+                    data = response.json()
+                    for item in data["users"]:
+                        if item["isBuy"]:
+                            activity = "buy"
+                            time_delta = time_ago(int(item["createdAt"]))
+                            if "days ago" not in time_delta:
+                                watchlist_buy.append({
+                                    'BuyerWallet': target[0],
+                                    'BuyerName': target[1],
+                                    'Subject': item['twitterUsername'],
+                                    'Keys': item['shareAmount'],
+                                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                                    'Timedelta': time_delta
+                                })
+                            else:
+                                continue
+
+                        else:
+                            activity = "sell"
+                            time_delta = time_ago(int(item["createdAt"]))
+                            if "days ago" not in time_delta:
+                                watchlist_sell.append({
+                                    'BuyerWallet': target[0],
+                                    'BuyerName': target[1],
+                                    'Subject': item['twitterUsername'],
+                                    'Keys': item['shareAmount'],
+                                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                                    'Timedelta': time_delta
+                                })
+                            else:
+                                continue
+
+                    if data['nextPageStart'] is None:
+                        next_page = "0"
+                    else:
+                        next_page = str(data['nextPageStart'])
+
+                except requests.exceptions.JSONDecodeError:
+                    continue
+        else:
+            return watchlist_buy, watchlist_sell
+    return watchlist_buy, watchlist_sell
