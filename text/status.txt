@@ -1,2 +1,2 @@
-**STATUS:** FRIENDTECH IS OFFLINE - Substituted all data with friendtech data instead of using basescan.org.
+**STATUS:** ONLINE - Substituted all data with friendtech data instead of using basescan.org.
 Loading times for big accounts can be up to 15s, please be patient it's a lot of data.
