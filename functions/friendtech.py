@@ -98,10 +98,10 @@ def get_trending():
         data = response.json()
         filtered_data = []
         for item in data["users"]:
-            if "." in item["displayPrice"]:
+            if "displayPrice" in item and "." in item["displayPrice"]:
                 temp_p = item["displayPrice"].split(".")
                 item["displayPrice"] = temp_p[0]
-            if "." in item["volume"]:
+            if "volume" in item and "." in item["volume"]:
                 temp_p = item["volume"].split(".")
                 item["volume"] = temp_p[0]
             filtered_data.append({
