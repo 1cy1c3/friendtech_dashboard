@@ -1,1 +1,7 @@
+/shelf/
+/workspace.xml
 /_secret_auth_.json
+.streamlit/
+.idea/
+watchlist/
+/start.bat
