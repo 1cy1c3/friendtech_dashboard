@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
@@ -83,13 +82,7 @@ if LOGGED_IN is True:
                 target = ft.addr_to_user(target_address[0].lower(), convert=True)
                 target_name_list.append((target_address[0].lower(), target))
 
-            watchlist_buy, watchlist_sell = ft.get_watchlist_activity(target_name_list)
+            watchlist= ft.get_watchlist_activity(target_name_list)
 
-            with left_col:
-                st.markdown("# Last Buys [24h]")
-                gui.load_ft_df(watchlist_buy, hide=True)
-            with right_col:
-                st.markdown("# Last Sells [24h]")
-                gui.load_ft_df(watchlist_sell, hide=True)
-
-
+            st.markdown("# Activity [24h]")
+            st.dataframe(gui.filter_dataframe(watchlist), use_container_width=True, hide_index=True)
