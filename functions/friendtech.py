@@ -1,25 +1,66 @@
 import requests
+import mysql.connector
 import streamlit as st
 from datetime import datetime
 from web3 import Web3
 
 ss = st.session_state
+sc = st.secrets
 
 
-def add_watchlist(address, username):
-    with open(f'watchlist/{username}.txt', 'r') as f:
-        content = f.read()
-        lines = content.splitlines()
+def get_watchlist(name):
+    conn = mysql.connector.connect(
+        host=sc["db_host"],
+        user=sc["db_user"],
+        password=sc["db_pw"],
+        database=sc["db_name"],
+        autocommit=True
+    )
+    cursor = conn.cursor()
 
-    if address in lines:
-        updated_lines = [line for line in lines if line != address]
-        print("Element exists, removing it.")
+    create_table_query = f"""
+        SELECT wallet FROM watchlist WHERE user = %s
+        """
+
+    cursor.execute(create_table_query, (name,))
+    watchlist = cursor.fetchall()
+    return watchlist
+
+
+def add_remove_wl(wallet, name):
+    values = (name, wallet)
+    conn = mysql.connector.connect(
+        host=sc["db_host"],
+        user=sc["db_user"],
+        password=sc["db_pw"],
+        database=sc["db_name"],
+        autocommit=True
+    )
+    cursor = conn.cursor()
+
+    create_table_query = f"""
+        SELECT wallet FROM watchlist WHERE user = %s
+        """
+
+    cursor.execute(create_table_query, (name,))
+    watchlist = [item[0] for item in cursor.fetchall()]
+
+    if wallet not in watchlist:
+        # SQL-Befehl zum Erstellen einer Tabelle
+        create_table_query = f"""
+        INSERT INTO watchlist (user, wallet) VALUES (%s, %s)
+        """
+
     else:
-        updated_lines = lines + [address]
-        print("Element does not exist, adding it.")
+        create_table_query = f"""
+            DELETE FROM watchlist WHERE user = %s AND wallet = %s
+            """
 
-    with open(f'watchlist/{username}.txt', 'w') as file:
-        file.writelines('\n'.join(updated_lines))
+    cursor.execute(create_table_query, values)
+    conn.commit()
+
+    cursor.close()
+    conn.close()
 
 
 def timestamp_to_date(unix_timestamp):
@@ -55,7 +96,7 @@ def time_ago(timestamp_ms):
 def get_global_activity():
     url = f'https://prod-api.kosetto.com/global-activity'
     headers = {
-        'Authorization': st.secrets["auth_token"],
+        'Authorization': sc["auth_token"],
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Referer': 'https://www.friend.tech/'
@@ -88,7 +129,7 @@ def get_global_activity():
 def get_trending():
     url = f'https://prod-api.kosetto.com/lists/trending'
     headers = {
-        'Authorization': st.secrets["auth_token"],
+        'Authorization': sc["auth_token"],
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Referer': 'https://www.friend.tech/'
@@ -170,7 +211,7 @@ def get_top_50():
 def get_token_activity(target):
     url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity'
     headers = {
-        'Authorization': st.secrets["auth_token"],
+        'Authorization': sc["auth_token"],
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Referer': 'https://www.friend.tech/'
@@ -220,7 +261,7 @@ def get_token_activity(target):
         while next_page != "0":
             url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity?pageStart={next_page}'
             headers = {
-                'Authorization': st.secrets["auth_token"],
+                'Authorization': sc["auth_token"],
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Referer': 'https://www.friend.tech/'
@@ -283,7 +324,7 @@ def user_to_addr(user):
     url = 'https://prod-api.kosetto.com/search/users?'
 
     headers = {
-        'Authorization': st.secrets["auth_token"],
+        'Authorization': sc["auth_token"],
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Referer': 'https://www.friend.tech/'

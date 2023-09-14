@@ -55,13 +55,9 @@ if LOGGED_IN is True:
             target = st.text_input(label="Look up a Twitter-Handle or friend.tech wallet")
             button = st.form_submit_button("Search User", on_click=submit())
 
-    if not os.path.exists(f'watchlist/{username}.txt'):
-        with open(f'watchlist/{username}.txt', 'w') as file:
-            pass
-    with open(f'watchlist/{username}.txt', 'r') as f:
-        target_list = f.read().splitlines()
-
     target_name_list = []
+    target_list = ft.get_watchlist(username)
+
     left_col, right_col = st.columns([1, 1])  # Columns Search
 
     if button and ss.get("submit"):
@@ -73,7 +69,7 @@ if LOGGED_IN is True:
 
         # runs only if wallet address gets returned
         if target_address and target_address != "N/A":
-            add_remove = st.button("**+ / -** Watchlist", on_click=ft.add_watchlist(target_address, username))
+            add_remove = st.button("**+ / -** Watchlist", on_click=ft.add_remove_wl(target_address, username))
             gui.load_ft_stats(target_address, target, dashboard=True)
 
         else:
@@ -82,17 +78,18 @@ if LOGGED_IN is True:
         ss["submit"] = False
 
     elif not button:
-        for target_address in target_list:
-            target = ft.addr_to_user(target_address.lower(), convert=True)
-            target_name_list.append((target_address.lower(), target))
+        if target_list:
+            for target_address in target_list:
+                target = ft.addr_to_user(target_address[0].lower(), convert=True)
+                target_name_list.append((target_address[0].lower(), target))
 
-        watchlist_buy, watchlist_sell = ft.get_watchlist_activity(target_name_list)
+            watchlist_buy, watchlist_sell = ft.get_watchlist_activity(target_name_list)
 
-        with left_col:
-            st.markdown("# Last Buys [24h]")
-            gui.load_ft_df(watchlist_buy, hide=True)
-        with right_col:
-            st.markdown("# Last Sells [24h]")
-            gui.load_ft_df(watchlist_sell, hide=True)
+            with left_col:
+                st.markdown("# Last Buys [24h]")
+                gui.load_ft_df(watchlist_buy, hide=True)
+            with right_col:
+                st.markdown("# Last Sells [24h]")
+                gui.load_ft_df(watchlist_sell, hide=True)
 
 
