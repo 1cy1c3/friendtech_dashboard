@@ -359,7 +359,7 @@ def addr_to_user(address, convert):
             return "N/A"
 
         else:
-            if "." in data["displayPrice"]:
+            if "displayPrice" in data and "." in data["displayPrice"]:
                 temp_p = data["displayPrice"].split(".")
                 data["displayPrice"] = temp_p[0]
             return (data["holderCount"], data["holdingCount"],

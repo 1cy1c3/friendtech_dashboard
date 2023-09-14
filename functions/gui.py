@@ -132,7 +132,7 @@ def load_ft_stats(address, target, dashboard=False):
                     total = round((profit + portfolio_value + fees), 3)
                 else:
                     total = "N/A"
-                st.write(f"**Unrealized Profit:** {profit}")
+                st.write(f"**Profit/Loss:** {profit}")
                 st.write(f"**Trading Volume:** {volume}")
                 st.write(f"**Total Profit: {total}**")
                 st.write(f"**Created: {created_at}**")
