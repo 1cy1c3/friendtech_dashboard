@@ -46,7 +46,6 @@ def add_remove_wl(wallet, name):
     watchlist = [item[0] for item in cursor.fetchall()]
 
     if wallet not in watchlist:
-        # SQL-Befehl zum Erstellen einer Tabelle
         create_table_query = f"""
         INSERT INTO watchlist (user, wallet) VALUES (%s, %s)
         """
