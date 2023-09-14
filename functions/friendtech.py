@@ -363,9 +363,12 @@ def addr_to_user(address, convert):
             if "displayPrice" in data and "." in data["displayPrice"]:
                 temp_p = data["displayPrice"].split(".")
                 data["displayPrice"] = temp_p[0]
-            return (data["holderCount"], data["holdingCount"],
-                    data["shareSupply"], round((int(data["displayPrice"]) * 10 ** -18), 3))
-    except requests.exceptions.JSONDecodeError as e:
+            if "holderCount" in data and "holdingCount" in data and "shareSupply" in data and "displayPrice" in data:
+                return (data["holderCount"], data["holdingCount"],
+                        data["shareSupply"], round((int(data["displayPrice"]) * 10 ** -18), 3))
+            else:
+                return "N/A", "N/A", "N/A", "N/A"
+    except requests.exceptions.JSONDecodeError:
         if convert:
             return "N/A"
         return "N/A", "N/A", "N/A", "N/A"
