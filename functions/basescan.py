@@ -7,7 +7,7 @@ import time
 ss = st.session_state
 
 
-@st.cache_resource(show_spinner="Fetching Base Scan")
+@st.cache_resource(show_spinner="Fetching Base Scan", ttl="15m")
 def balance(wallet: str):
     url = (f"https://api.basescan.org/api?module=account&action=balance&address="
            f"{wallet}&apikey={st.secrets['basescan_api_key']}")
