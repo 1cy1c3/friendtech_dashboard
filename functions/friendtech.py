@@ -139,20 +139,23 @@ def get_trending():
     try:
         data = response.json()
         filtered_data = []
-        for item in data["users"]:
-            if "displayPrice" in item and "." in item["displayPrice"]:
-                temp_p = item["displayPrice"].split(".")
-                item["displayPrice"] = temp_p[0]
-            if "volume" in item and "." in item["volume"]:
-                temp_p = item["volume"].split(".")
-                item["volume"] = temp_p[0]
-            filtered_data.append({
-                'Subject': item['twitterUsername'],
-                'Volume': round((int(item['volume']) * 10 ** -18), 3),
-                'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
-            })
-        return filtered_data
-    except requests.exceptions.JSONDecodeError as e:
+        if "users" in data:
+            for item in data["users"]:
+                if "displayPrice" in item and "." in item["displayPrice"]:
+                    temp_p = item["displayPrice"].split(".")
+                    item["displayPrice"] = temp_p[0]
+                if "volume" in item and "." in item["volume"]:
+                    temp_p = item["volume"].split(".")
+                    item["volume"] = temp_p[0]
+                filtered_data.append({
+                    'Subject': item['twitterUsername'],
+                    'Volume': round((int(item['volume']) * 10 ** -18), 3),
+                    'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
+                })
+            return filtered_data
+        else:
+            return None
+    except requests.exceptions.JSONDecodeError:
         return None
 
 
@@ -177,7 +180,7 @@ def get_portfolio_value(address):
                                                                               3)
         else:
             return "N/A", "N/A"
-    except requests.exceptions.JSONDecodeError as e:
+    except requests.exceptions.JSONDecodeError:
         return "N/A", "N/A"
 
 
@@ -187,25 +190,27 @@ def get_top_50():
     try:
         data = response.json()
         top50 = []
+        if "users" in data:
+            for rank in data["users"]:
+                name = rank["twitterUsername"]
+                if "." in rank["displayPrice"]:
+                    temp_p = rank["displayPrice"].split(".")
+                    rank["displayPrice"] = temp_p[0]
+                price = round((int(rank["displayPrice"]) * 10 ** -18), 3)
+                holder = rank["holderCount"]
+                supply = rank["shareSupply"]
 
-        for rank in data["users"]:
-            name = rank["twitterUsername"]
-            if "." in rank["displayPrice"]:
-                temp_p = rank["displayPrice"].split(".")
-                rank["displayPrice"] = temp_p[0]
-            price = round((int(rank["displayPrice"]) * 10 ** -18), 3)
-            holder = rank["holderCount"]
-            supply = rank["shareSupply"]
-
-            user = {
-                "Name": name,
-                "Price": price,
-                "Holder": holder,
-                "Supply": supply
-            }
-            top50.append(user)
-        return top50
-    except requests.exceptions.JSONDecodeError as e:
+                user = {
+                    "Name": name,
+                    "Price": price,
+                    "Holder": holder,
+                    "Supply": supply
+                }
+                top50.append(user)
+            return top50
+        else:
+            return None
+    except requests.exceptions.JSONDecodeError:
         return None
 
 
@@ -227,36 +232,39 @@ def get_token_activity(target):
 
     try:
         data = response.json()
-        for item in data["users"]:
-            if item["isBuy"]:
-                activity = "buy"
-                keys += int(item['shareAmount'])
+        if "users" in data:
+            for item in data["users"]:
+                if item["isBuy"]:
+                    activity = "buy"
+                    keys += int(item['shareAmount'])
+                else:
+                    activity = "sell"
+                    keys -= int(item['shareAmount'])
+
+                eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
+                total_eth += eth_value  # increment the counter with each loop iteration
+                _time = timestamp_to_date(int(item['createdAt'] / 1000))
+                raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
+                time_delta = time_ago(int(item["createdAt"]))
+
+                if int(item['shareAmount']) > 1:
+                    item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
+                token_activity.append({
+                    'Trader': item['twitterUsername'],
+                    'Activity': activity,
+                    'Keys': item['shareAmount'],
+                    'Eth': eth_value,
+                    'Timedelta': time_delta
+                })
+                chart_data.append({
+                    'time': _time,
+                    'raw_time': raw_time,
+                    'price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                })
             else:
-                activity = "sell"
-                keys -= int(item['shareAmount'])
-
-            eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
-            total_eth += eth_value  # increment the counter with each loop iteration
-            _time = timestamp_to_date(int(item['createdAt'] / 1000))
-            raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
-            time_delta = time_ago(int(item["createdAt"]))
-
-            if int(item['shareAmount']) > 1:
-                item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
-
-            token_activity.append({
-                'Trader': item['twitterUsername'],
-                'Activity': activity,
-                'Keys': item['shareAmount'],
-                'Eth': eth_value,
-                'Timedelta': time_delta
-            })
-            chart_data.append({
-                'time': _time,
-                'raw_time': raw_time,
-                'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-            })
-    except requests.exceptions.JSONDecodeError as e:
+                return None, None, None, None
+    except requests.exceptions.JSONDecodeError:
         return None, None, None, None
 
     # Search for next page start and make more requests untill the full history is loaded
@@ -274,42 +282,44 @@ def get_token_activity(target):
 
             try:
                 data = response.json()
-                for item in data["users"]:
-                    if item["isBuy"]:
-                        activity = "buy"
-                        keys += int(item['shareAmount'])
+                if "users" in data:
+                    for item in data["users"]:
+                        if item["isBuy"]:
+                            activity = "buy"
+                            keys += int(item['shareAmount'])
+                        else:
+                            activity = "sell"
+                            keys -= int(item['shareAmount'])
+
+                        eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
+                        total_eth += eth_value  # increment the counter with each loop iteration
+                        _time = timestamp_to_date(int(item['createdAt'] / 1000))
+                        raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
+                        time_delta = time_ago(int(item["createdAt"]))
+
+                        if int(item['shareAmount']) > 1:
+                            item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
+                        token_activity.append({
+                            'Trader': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': eth_value,
+                            'Timedelta': time_delta
+                        })
+                        chart_data.append({
+                            'time': _time,
+                            'raw_time': raw_time,
+                            'price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                        })
+
+                    if data['nextPageStart'] is None:
+                        next_page = "0"
                     else:
-                        activity = "sell"
-                        keys -= int(item['shareAmount'])
-
-                    eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
-                    total_eth += eth_value  # increment the counter with each loop iteration
-                    _time = timestamp_to_date(int(item['createdAt'] / 1000))
-                    raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
-                    time_delta = time_ago(int(item["createdAt"]))
-
-                    if int(item['shareAmount']) > 1:
-                        item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
-
-                    token_activity.append({
-                        'Trader': item['twitterUsername'],
-                        'Activity': activity,
-                        'Keys': item['shareAmount'],
-                        'Eth': eth_value,
-                        'Timedelta': time_delta
-                    })
-                    chart_data.append({
-                        'time': _time,
-                        'raw_time': raw_time,
-                        'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                    })
-
-                if data['nextPageStart'] is None:
-                    next_page = "0"
+                        next_page = data['nextPageStart']
                 else:
-                    next_page = data['nextPageStart']
-
-            except requests.exceptions.JSONDecodeError as e:
+                    return token_activity, round(total_eth, 3), chart_data, keys
+            except requests.exceptions.JSONDecodeError:
                 return token_activity, round(total_eth, 3), chart_data, keys
         return token_activity, round(total_eth, 3), chart_data, keys
     else:
@@ -392,34 +402,36 @@ def get_personal_activity(target):
 
     try:
         data = response.json()
-        for item in data["users"]:
-            if item["isBuy"]:
-                activity = "buy"
-                profit -= int(item['ethAmount']) / (10 ** 18)
-                volume += int(item['ethAmount']) / (10 ** 18)
-                buys += 1
+        if "users" in data:
+            for item in data["users"]:
+                if item["isBuy"]:
+                    activity = "buy"
+                    profit -= int(item['ethAmount']) / (10 ** 18)
+                    volume += int(item['ethAmount']) / (10 ** 18)
+                    buys += 1
 
-                if item['ethAmount'] == "0":
-                    date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
-            else:
-                activity = "sell"
-                profit += int(item['ethAmount']) / (10 ** 18)
-                volume += int(item['ethAmount']) / (10 ** 18)
-                sells += 1
+                    if item['ethAmount'] == "0":
+                        date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                else:
+                    activity = "sell"
+                    profit += int(item['ethAmount']) / (10 ** 18)
+                    volume += int(item['ethAmount']) / (10 ** 18)
+                    sells += 1
 
-            time_delta = time_ago(int(item["createdAt"]))
-            account_activity.append({
-                'Subject': item['twitterUsername'],
-                'Activity': activity,
-                'Keys': item['shareAmount'],
-                'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                'Timedelta': time_delta
-            })
+                time_delta = time_ago(int(item["createdAt"]))
+                account_activity.append({
+                    'Subject': item['twitterUsername'],
+                    'Activity': activity,
+                    'Keys': item['shareAmount'],
+                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                    'Timedelta': time_delta
+                })
 
-        volume = round(volume, 3)
-        profit_in_ether = round(profit, 3)
-
-    except requests.exceptions.JSONDecodeError as e:
+            volume = round(volume, 3)
+            profit_in_ether = round(profit, 3)
+        else:
+            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+    except requests.exceptions.JSONDecodeError:
         return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
     # Search for next page start and make more requests until the full history is loaded
@@ -431,38 +443,40 @@ def get_personal_activity(target):
 
             try:
                 data = response.json()
-                for item in data["users"]:
-                    if item["isBuy"]:
-                        activity = "buy"
-                        profit -= int(item['ethAmount']) / (10 ** 18)
-                        volume += int(item['ethAmount']) / (10 ** 18)
-                        buys += 1
+                if "users" in data:
+                    for item in data["users"]:
+                        if item["isBuy"]:
+                            activity = "buy"
+                            profit -= int(item['ethAmount']) / (10 ** 18)
+                            volume += int(item['ethAmount']) / (10 ** 18)
+                            buys += 1
 
-                        if item['ethAmount'] == "0":
-                            date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                            if item['ethAmount'] == "0":
+                                date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                        else:
+                            activity = "sell"
+                            profit += int(item['ethAmount']) / (10 ** 18)
+                            volume += int(item['ethAmount']) / (10 ** 18)
+                            sells += 1
+
+                        time_delta = time_ago(int(item["createdAt"]))
+                        account_activity.append({
+                            'Subject': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                            'Timedelta': time_delta
+                        })
+
+                    if data['nextPageStart'] is None:
+                        next_page = "0"
                     else:
-                        activity = "sell"
-                        profit += int(item['ethAmount']) / (10 ** 18)
-                        volume += int(item['ethAmount']) / (10 ** 18)
-                        sells += 1
-
-                    time_delta = time_ago(int(item["createdAt"]))
-                    account_activity.append({
-                        'Subject': item['twitterUsername'],
-                        'Activity': activity,
-                        'Keys': item['shareAmount'],
-                        'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                        'Timedelta': time_delta
-                    })
-
-                if data['nextPageStart'] is None:
-                    next_page = "0"
+                        next_page = str(data['nextPageStart'])
+                    volume = round(volume, 3)
+                    profit_in_ether = round(profit, 3)
                 else:
-                    next_page = str(data['nextPageStart'])
-                volume = round(volume, 3)
-                profit_in_ether = round(profit, 3)
-
-            except requests.exceptions.JSONDecodeError as e:
+                    return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+            except requests.exceptions.JSONDecodeError:
                 return account_activity, date, profit_in_ether, volume, buys, sells
         return account_activity, date, profit_in_ether, volume, buys, sells
     else:
@@ -478,23 +492,26 @@ def get_watchlist_activity(target_list):
         response = requests.get(url)
         try:
             data = response.json()
-            for item in data["users"]:
-                if item["isBuy"]:
-                    activity = "buy"
-                else:
-                    activity = "sell"
+            if "users" in data:
+                for item in data["users"]:
+                    if item["isBuy"]:
+                        activity = "buy"
+                    else:
+                        activity = "sell"
 
-                time_delta = time_ago(int(item["createdAt"]))
-                if "days ago" not in time_delta:
-                    watchlist.append({
-                        'Timedelta': time_delta,
-                        'Trader': target[1],
-                        'Subject': item['twitterUsername'],
-                        'Activity': activity,
-                        'Keys': item['shareAmount'],
-                        'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                        'BuyerWallet': target[0]
-                    })
+                    time_delta = time_ago(int(item["createdAt"]))
+                    if "days ago" not in time_delta:
+                        watchlist.append({
+                            'Timedelta': time_delta,
+                            'Trader': target[1],
+                            'Subject': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                            'BuyerWallet': target[0]
+                        })
+                    else:
+                        continue
                 else:
                     continue
 
@@ -511,31 +528,33 @@ def get_watchlist_activity(target_list):
                 response = requests.get(url)
                 try:
                     data = response.json()
-                    for item in data["users"]:
-                        if item["isBuy"]:
-                            activity = "buy"
-                        else:
-                            activity = "sell"
+                    if "users" in data:
+                        for item in data["users"]:
+                            if item["isBuy"]:
+                                activity = "buy"
+                            else:
+                                activity = "sell"
 
-                        time_delta = time_ago(int(item["createdAt"]))
-                        if "days ago" not in time_delta:
-                            watchlist.append({
-                                'Timedelta': time_delta,
-                                'Trader': target[1],
-                                'Subject': item['twitterUsername'],
-                                'Activity': activity,
-                                'Keys': item['shareAmount'],
-                                'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                                'BuyerWallet': target[0]
-                            })
-                        else:
-                            continue
+                            time_delta = time_ago(int(item["createdAt"]))
+                            if "days ago" not in time_delta:
+                                watchlist.append({
+                                    'Timedelta': time_delta,
+                                    'Trader': target[1],
+                                    'Subject': item['twitterUsername'],
+                                    'Activity': activity,
+                                    'Keys': item['shareAmount'],
+                                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                                    'BuyerWallet': target[0]
+                                })
+                            else:
+                                continue
 
-                    if data['nextPageStart'] is None:
-                        next_page = "0"
+                        if data['nextPageStart'] is None:
+                            next_page = "0"
+                        else:
+                            next_page = str(data['nextPageStart'])
                     else:
-                        next_page = str(data['nextPageStart'])
-
+                        continue
                 except requests.exceptions.JSONDecodeError:
                     continue
         else:
