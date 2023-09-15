@@ -118,7 +118,7 @@ def load_ft_stats(address, target, dashboard=False):
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
-            st.write(f"**Unofficial Buys:** {total_keys - keys} **or** {round(100 * ((total_keys - keys) / total_keys), 2)}%")
+            st.write(f"**Bots:** {total_keys - keys} **or** {round(100 * ((total_keys - keys) / total_keys), 2)}%")
             st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
             st.write(f"**Key Price:** {price}")
             st.write(f"**Market Cap:** {round(market_cap, 3)}")

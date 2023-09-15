@@ -277,8 +277,10 @@ def get_token_activity(target):
                 for item in data["users"]:
                     if item["isBuy"]:
                         activity = "buy"
+                        keys += 1 * int(item['shareAmount'])
                     else:
                         activity = "sell"
+                        keys -= 1 * int(item['shareAmount'])
 
                     eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                     total_eth += eth_value  # increment the counter with each loop iteration
