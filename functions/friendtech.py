@@ -222,6 +222,7 @@ def get_token_activity(target):
     token_activity = []
     chart_data = []
 
+    keys = 0
     total_eth = 0  # initialize a counter to store the sum of ethAmounts
 
     try:
@@ -229,8 +230,10 @@ def get_token_activity(target):
         for item in data["users"]:
             if item["isBuy"]:
                 activity = "buy"
+                keys += 1 * int(item['shareAmount'])
             else:
                 activity = "sell"
+                keys -= 1 * int(item['shareAmount'])
 
             eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
             total_eth += eth_value  # increment the counter with each loop iteration
@@ -254,7 +257,7 @@ def get_token_activity(target):
                 'price': round((int(item['ethAmount']) * 10 ** -18), 3)
             })
     except requests.exceptions.JSONDecodeError as e:
-        return None, None, None
+        return None, None, None, None
 
     # Search for next page start and make more requests untill the full history is loaded
     if data['nextPageStart'] != "0" and ss['full_data'] is True:
@@ -305,10 +308,10 @@ def get_token_activity(target):
                     next_page = data['nextPageStart']
 
             except requests.exceptions.JSONDecodeError as e:
-                return token_activity, round(total_eth, 3), chart_data
-        return token_activity, round(total_eth, 3), chart_data
+                return token_activity, round(total_eth, 3), chart_data, keys
+        return token_activity, round(total_eth, 3), chart_data, keys
     else:
-        return token_activity, round(total_eth, 3), chart_data
+        return token_activity, round(total_eth, 3), chart_data, keys
 
 
 def get_user_points(address):

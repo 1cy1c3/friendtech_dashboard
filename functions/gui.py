@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
 import functions.friendtech as ft
+import functions.basescan as bs
 import streamlit as st
 import pandas as pd
 
@@ -85,7 +86,7 @@ def load_ft_stats(address, target, dashboard=False):
         with right_col:
             st.markdown("# Activity")
     with st.spinner("Fetching key activity..."):
-        key_activity, key_volume, share_price = ft.get_token_activity(address)
+        key_activity, key_volume, share_price, keys = ft.get_token_activity(address)
 
     if not dashboard:
         st.markdown("# Key Activity")
@@ -98,24 +99,26 @@ def load_ft_stats(address, target, dashboard=False):
         load_ft_df(key_activity, hide=True)
 
     with st.spinner("Fetching friend.tech user info..."):
-        holder, holdings, keys, price = ft.addr_to_user(address, convert=False)
+        holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
         if holder != "N/A" and keys != "N/A":
-            unique_holder = min(100, (100 * holder) / keys)
+            unique_holder = min(100, (100 * holder) / total_keys)
         else:
             unique_holder = 0
 
         if price != "N/A" and keys != "N/A":
-            market_cap = keys * price
+            market_cap = total_keys * price
+
         else:
             market_cap = 0
 
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
-            st.write(f"**Keys:** {keys}")
+            st.write(f"**Keys:** {total_keys}")
+            st.write(f"**Bot Count:** {total_keys - keys} or {round(100 * ((total_keys - keys) / total_keys), 2)}%")
             st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
             st.write(f"**Key Price:** {price}")
             st.write(f"**Market Cap:** {round(market_cap, 3)}")
@@ -142,11 +145,11 @@ def load_ft_stats(address, target, dashboard=False):
                     total = round((profit + portfolio_value + fees), 3)
                 else:
                     total = "N/A"
-                st.write(f"**Profit/Loss:** {profit}")
+                st.write(f"**Unrealized:** {portfolio_value - profit}")
                 st.write(f"**Trading Volume:** {volume}")
                 st.write(f"**Total Profit: {total}**")
+                st.write(f"**Account Balance:** {bs.balance(address)}")
                 st.write(f"**Created: {created_at}**")
-
         if not dashboard:
             with rc_2:
                 st.write(f"**Buys:Sells:** {buys} : {sells}")

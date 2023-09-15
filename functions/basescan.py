@@ -7,6 +7,17 @@ import time
 ss = st.session_state
 
 
+def balance(wallet: str):
+    url = (f"https://api.basescan.org/api?module=account&action=balance&address="
+           f"{wallet}&apikey={st.secrets['basescan_api_key']}")
+
+    response = requests.get(url)
+    response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
+    data = json.loads(response.text)
+    if data['status'] != '1':
+        return "N/A"
+    return round(float(int(data['result']) * 10 ** -18), 3)
+
 # Substituted by ft now
 def account_stats(wallet: str):
     # Initial profit/loss value

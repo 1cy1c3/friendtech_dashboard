@@ -15,7 +15,7 @@ st.set_page_config(
 if "submit" not in ss:
     ss["submit"] = False
     ss["base_mode"] = False
-    ss["full_data"] = False
+    ss["full_data"] = True
 
 
 # Approve Submit
@@ -49,7 +49,6 @@ h_l_2_col, h_r_2_col = h_r_col.columns([1, 1])
 home = h_l_2_col.button("Home")
 with h_l_2_col:
     ss['base_mode'] = st.toggle("Base Scan Trending")
-    ss['full_data'] = st.toggle("Complete Price History")
 
 # Submit Form to handle the submit process
 with h_l_col.form(key="search", clear_on_submit=True):
