@@ -87,6 +87,8 @@ def load_ft_stats(address, target, dashboard=False):
             st.markdown("# Activity")
     with st.spinner("Fetching key activity..."):
         key_activity, key_volume, share_price, keys = ft.get_token_activity(address)
+        if keys is None:
+            keys = "N/A"
 
     if not dashboard:
         st.markdown("# Key Activity")
@@ -103,10 +105,16 @@ def load_ft_stats(address, target, dashboard=False):
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
-        if holder != "N/A" and keys != "N/A":
+        if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
             unique_holder = min(100, (100 * holder) / total_keys)
+            if total_keys < keys:
+                total_keys = keys
+            bots = total_keys - keys
+            bot_percent = round(100 * (bots / total_keys), 2)
         else:
             unique_holder = 0
+            bots = "N/A"
+            bot_percent = "N/A"
 
         if price != "N/A" and keys != "N/A":
             market_cap = total_keys * price
@@ -118,7 +126,7 @@ def load_ft_stats(address, target, dashboard=False):
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
-            st.write(f"**Bots:** {total_keys - keys} **or** {round(100 * ((total_keys - keys) / total_keys), 2)}%")
+            st.write(f"**Bots:** {bots} **or** {bot_percent}%")
             st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
             st.write(f"**Key Price:** {price}")
             st.write(f"**Market Cap:** {round(market_cap, 3)}")
