@@ -7,6 +7,7 @@ import time
 ss = st.session_state
 
 
+@st.cache_resource(show_spinner="Fetching Base Scan")
 def balance(wallet: str):
     url = (f"https://api.basescan.org/api?module=account&action=balance&address="
            f"{wallet}&apikey={st.secrets['basescan_api_key']}")
@@ -17,6 +18,7 @@ def balance(wallet: str):
     if data['status'] != '1':
         return "N/A"
     return round(float(int(data['result']) * 10 ** -18), 3)
+
 
 # Substituted by ft now
 def account_stats(wallet: str):
