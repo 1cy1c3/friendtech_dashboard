@@ -1,6 +1,8 @@
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
+import functions.database as db
+import functions.utils as ut
 
 from streamlit_login_auth_ui.widgets import __login__
 
@@ -8,6 +10,8 @@ ss = st.session_state
 
 ss["base_mode"] = False
 ss["full_data"] = False
+
+ut.init_state()
 
 
 # Approve Submit
@@ -38,6 +42,7 @@ LOGGED_IN = __login__obj.build_login_ui()
 
 # Loads sidebar
 with st.sidebar:
+    gui.load_ft_df(ss["history"], hide=True)
     gui.load_sidebar_ft()
 
 if LOGGED_IN is True:
@@ -55,7 +60,7 @@ if LOGGED_IN is True:
             button = st.form_submit_button("Search User", on_click=submit())
 
     target_name_list = []
-    target_list = ft.get_watchlist(username)
+    target_list = db.get_watchlist(username)
 
     left_col, right_col = st.columns([1, 1])  # Columns Search
 
@@ -68,7 +73,7 @@ if LOGGED_IN is True:
 
         # runs only if wallet address gets returned
         if target_address and target_address != "N/A":
-            add_remove = st.button("**+ / -** Watchlist", on_click=ft.add_remove_wl(target_address, username))
+            add_remove = st.button("**+ / -** Watchlist", on_click=db.add_remove_wl(target_address, username))
             gui.load_ft_stats(target_address, target, dashboard=True)
 
         else:

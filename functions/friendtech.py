@@ -1,97 +1,11 @@
 import requests
-import mysql.connector
+
 import streamlit as st
-from datetime import datetime
+import functions.utils as ut
 from web3 import Web3
 
 ss = st.session_state
 sc = st.secrets
-
-
-@st.cache_data(show_spinner=False, ttl="15m")
-def get_watchlist(name):
-    conn = mysql.connector.connect(
-        host=sc["db_host"],
-        user=sc["db_user"],
-        password=sc["db_pw"],
-        database=sc["db_name"],
-        autocommit=True
-    )
-    cursor = conn.cursor()
-
-    create_table_query = f"""
-        SELECT wallet FROM watchlist WHERE user = %s
-        """
-
-    cursor.execute(create_table_query, (name,))
-    watchlist = cursor.fetchall()
-    return watchlist
-
-
-def add_remove_wl(wallet, name):
-    values = (name, wallet)
-    conn = mysql.connector.connect(
-        host=sc["db_host"],
-        user=sc["db_user"],
-        password=sc["db_pw"],
-        database=sc["db_name"],
-        autocommit=True
-    )
-    cursor = conn.cursor()
-
-    create_table_query = f"""
-        SELECT wallet FROM watchlist WHERE user = %s
-        """
-
-    cursor.execute(create_table_query, (name,))
-    watchlist = [item[0] for item in cursor.fetchall()]
-
-    if wallet not in watchlist:
-        create_table_query = f"""
-        INSERT INTO watchlist (user, wallet) VALUES (%s, %s)
-        """
-
-    else:
-        create_table_query = f"""
-            DELETE FROM watchlist WHERE user = %s AND wallet = %s
-            """
-
-    cursor.execute(create_table_query, values)
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-    st.cache_data.clear()
-
-
-def timestamp_to_date(unix_timestamp):
-    dt = datetime.utcfromtimestamp(int(unix_timestamp))
-    return dt.strftime('%d/%m/%Y')
-
-
-def timestamp_to_datetime(unix_timestamp):
-    dt = datetime.utcfromtimestamp(int(unix_timestamp))
-    return dt.strftime('%d/%m/%Y %H:%M')
-
-
-def time_ago(timestamp_ms):
-    # Convert the timestamp to a datetime object
-    dt_object = datetime.utcfromtimestamp(timestamp_ms / 1000.0)  # converting milliseconds to seconds
-    current_time = datetime.utcnow()
-    difference = current_time - dt_object
-
-    seconds_in_day = 86400  # 60 seconds * 60 minutes * 24 hours
-    seconds_in_hour = 3600  # 60 seconds * 60 minutes
-    seconds_in_minute = 60  # 60 seconds
-
-    if difference.total_seconds() < seconds_in_minute:
-        return f"{int(difference.total_seconds())} secs ago"
-    elif difference.total_seconds() < seconds_in_hour:
-        return f"{int(difference.total_seconds() / seconds_in_minute)} mins ago"
-    elif difference.total_seconds() < seconds_in_day:
-        return f"{int(difference.total_seconds() / seconds_in_hour)} hours ago"
-    else:
-        return f"{int(difference.total_seconds() / seconds_in_day)} days ago"
 
 
 def get_global_activity():
@@ -113,7 +27,7 @@ def get_global_activity():
                     activity = "buy"
                 else:
                     activity = "sell"
-                time_delta = time_ago(int(item["createdAt"]))
+                time_delta = ut.time_ago(int(item["createdAt"]))
                 filtered_data.append({
                     'Timedelta': time_delta,
                     'Trader': item["trader"]['username'],
@@ -243,9 +157,9 @@ def get_token_activity(target):
 
                 eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                 total_eth += eth_value  # increment the counter with each loop iteration
-                _time = timestamp_to_date(int(item['createdAt'] / 1000))
-                raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
-                time_delta = time_ago(int(item["createdAt"]))
+                _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
+                raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
+                time_delta = ut.time_ago(int(item["createdAt"]))
 
                 if int(item['shareAmount']) > 1:
                     item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
@@ -293,9 +207,9 @@ def get_token_activity(target):
 
                         eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                         total_eth += eth_value  # increment the counter with each loop iteration
-                        _time = timestamp_to_date(int(item['createdAt'] / 1000))
-                        raw_time = timestamp_to_datetime(int(item['createdAt'] / 1000))
-                        time_delta = time_ago(int(item["createdAt"]))
+                        _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
+                        raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
+                        time_delta = ut.time_ago(int(item["createdAt"]))
 
                         if int(item['shareAmount']) > 1:
                             item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
@@ -411,14 +325,14 @@ def get_personal_activity(target):
                     buys += 1
 
                     if item['ethAmount'] == "0":
-                        date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                        date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                 else:
                     activity = "sell"
                     profit += int(item['ethAmount']) / (10 ** 18)
                     volume += int(item['ethAmount']) / (10 ** 18)
                     sells += 1
 
-                time_delta = time_ago(int(item["createdAt"]))
+                time_delta = ut.time_ago(int(item["createdAt"]))
                 account_activity.append({
                     'Subject': item['twitterUsername'],
                     'Activity': activity,
@@ -452,14 +366,14 @@ def get_personal_activity(target):
                             buys += 1
 
                             if item['ethAmount'] == "0":
-                                date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
+                                date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                         else:
                             activity = "sell"
                             profit += int(item['ethAmount']) / (10 ** 18) * 0.9
                             volume += int(item['ethAmount']) / (10 ** 18)
                             sells += 1
 
-                        time_delta = time_ago(int(item["createdAt"]))
+                        time_delta = ut.time_ago(int(item["createdAt"]))
                         account_activity.append({
                             'Subject': item['twitterUsername'],
                             'Activity': activity,
@@ -499,7 +413,7 @@ def get_watchlist_activity(target_list):
                     else:
                         activity = "sell"
 
-                    time_delta = time_ago(int(item["createdAt"]))
+                    time_delta = ut.time_ago(int(item["createdAt"]))
                     if "days ago" not in time_delta:
                         watchlist.append({
                             'Timedelta': time_delta,
@@ -535,7 +449,7 @@ def get_watchlist_activity(target_list):
                             else:
                                 activity = "sell"
 
-                            time_delta = time_ago(int(item["createdAt"]))
+                            time_delta = ut.time_ago(int(item["createdAt"]))
                             if "days ago" not in time_delta:
                                 watchlist.append({
                                     'Timedelta': time_delta,

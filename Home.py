@@ -2,7 +2,7 @@ import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
 import functions.basescan as bs
-import functions.utils as utils
+import functions.utils as ut
 
 ss = st.session_state
 
@@ -13,20 +13,7 @@ st.set_page_config(
 )
 
 # Initialize session state
-utils.init_state()
-
-
-# Approve Submit
-def submit():
-    if ss["username"] is None:
-        ss["submit"] = False
-    else:
-        ss["submit"] = True
-
-
-def home():
-    ss["username"] = None
-
+ut.init_state()
 
 # Disables Header and Footer, customizable over css, js and html
 # You can cache css when calling them inside a function
@@ -52,8 +39,8 @@ with h_r_col:
 # Button  and Toggle Columns
 h_l_2_col, h_r_2_col = h_r_col.columns([1, 1])
 
-home = h_l_2_col.button("Home", on_click=home(), help="Navigates or Refreshes Home.")
-refresh = h_r_2_col.button("Refresh/Reload User", on_click=submit(), help="Refresh or Reloads last User-Profiles!")
+home = h_l_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
+refresh = h_r_2_col.button("Refresh/Reload User", on_click=ut.submit(), help="Refresh or Reloads last User-Profiles!")
 
 with h_l_2_col:
     ss['base_mode'] = st.toggle("Base Scan Trending")
@@ -61,7 +48,7 @@ with h_l_2_col:
 # Submit Form to handle the submit process
 with h_l_col.form(key="search", clear_on_submit=True):
     ss["username"] = st.text_input(label="Look up a Twitter-Handle or friend.tech wallet")
-    button = st.form_submit_button("Search User", on_click=submit())
+    button = st.form_submit_button("Search User", on_click=ut.submit())
 
 # Search User
 if button or refresh and ss.get("submit"):
