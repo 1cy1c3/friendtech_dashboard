@@ -16,11 +16,20 @@ if "submit" not in ss:
     ss["submit"] = False
     ss["base_mode"] = False
     ss["full_data"] = True
+    ss["username"] = None
+    ss["history"] = []
 
 
 # Approve Submit
 def submit():
-    ss["submit"] = True
+    if ss["username"] is None:
+        ss["submit"] = False
+    else:
+        ss["submit"] = True
+
+
+def home():
+    ss["username"] = None
 
 
 # Disables Header and Footer, customizable over css, js and html
@@ -30,6 +39,7 @@ gui.load_css_cache("header")
 
 # Loads sidebar
 with st.sidebar:
+    gui.load_ft_df(ss["history"], hide=True)
     gui.load_sidebar_ft()
 
 # Header
@@ -46,35 +56,47 @@ with h_r_col:
 # Button  and Toggle Columns
 h_l_2_col, h_r_2_col = h_r_col.columns([1, 1])
 
-home = h_l_2_col.button("Home")
+home = h_l_2_col.button("Home", on_click=home(), help="Navigates or Refreshes Home.")
+refresh = h_r_2_col.button("Refresh/Reload User", on_click=submit(), help="Refresh or Reloads last User-Profiles!")
+
 with h_l_2_col:
     ss['base_mode'] = st.toggle("Base Scan Trending")
 
 # Submit Form to handle the submit process
 with h_l_col.form(key="search", clear_on_submit=True):
-    target = st.text_input(label="Look up a Twitter-Handle or friend.tech wallet")
+    ss["username"] = st.text_input(label="Look up a Twitter-Handle or friend.tech wallet")
     button = st.form_submit_button("Search User", on_click=submit())
 
 # Search User
-if button and ss.get("submit"):
-    if len(target) == 42 and target.startswith("0x"):
-        target_address = target.lower()
-        target = ft.addr_to_user(target_address, convert=True)
-    else:
-        target_address = ft.user_to_addr(target)
+if button or refresh and ss.get("submit"):
+    if ss["username"]:
+        target = ss["username"]
 
-    # runs only if wallet address gets returned
-    if target_address and target_address != "N/A":
-        gui.load_ft_stats(target_address, target)
+        if len(target) == 42 and target.startswith("0x"):
+            target_address = target.lower()
+            target = ft.addr_to_user(target_address, convert=True)
+        else:
+            target_address = ft.user_to_addr(target)
 
-    else:
-        with right_col:
-            st.write("# USER NOT FOUND")
+        ss["username"] = target.lower()
+        # runs only if wallet address gets returned
+        if target_address and target_address != "N/A":
+            for item in ss["history"]:
+                if item["History"] == target.lower():
+                    ss["history"].remove(item)
+
+            # Insert at the beginning of the list
+            ss["history"].insert(0, {"History": target.lower()})
+            gui.load_ft_stats(target_address, target)
+
+        else:
+            with right_col:
+                st.write("# USER NOT FOUND")
 
     ss["submit"] = False  # reset submit
 
 # Friendtech General Data
-if not button and not ss['base_mode']:
+if not button and not refresh and not ss['base_mode']:
     with left_col:
         st.markdown("# Top 50")
         gui.load_ft_df(ft.get_top_50(), hide=False)
@@ -86,7 +108,7 @@ if not button and not ss['base_mode']:
     gui.load_ft_df(ft.get_global_activity(), hide=True)
 
 # Display Base Scan data
-elif ss['base_mode'] and not button:
+elif ss['base_mode'] and not button and not refresh:
     winners, losers = bs.get_trending(st.secrets['friendtech_contract'])
     with left_col:
         st.markdown("# Trending Gaining 15 min")

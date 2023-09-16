@@ -175,10 +175,7 @@ def load_ft_df(data, hide):
     if data:
         df = pd.DataFrame(data)
         df.index += 1
-        if not hide:
-            st.dataframe(df, use_container_width=True, hide_index=False)
-        else:
-            st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, use_container_width=True, hide_index=hide)
     else:
         pass
 
