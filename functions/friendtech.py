@@ -262,8 +262,8 @@ def get_token_activity(target):
                     'raw_time': raw_time,
                     'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
-            else:
-                return None, None, None, None
+        else:
+            return None, None, None, None
     except requests.exceptions.JSONDecodeError:
         return None, None, None, None
 
