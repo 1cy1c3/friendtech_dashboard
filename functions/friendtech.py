@@ -361,7 +361,7 @@ def get_personal_activity(target):
                     for item in data["users"]:
                         if item["isBuy"]:
                             activity = "buy"
-                            profit -= int(item['ethAmount']) / (10 ** 18) * 1.09
+                            profit -= int(item['ethAmount']) / (10 ** 18) * 1.1
                             volume += int(item['ethAmount']) / (10 ** 18)
                             buys += 1
 
