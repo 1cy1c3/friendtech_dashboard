@@ -447,7 +447,7 @@ def get_personal_activity(target):
                     for item in data["users"]:
                         if item["isBuy"]:
                             activity = "buy"
-                            profit -= int(item['ethAmount']) / (10 ** 18)
+                            profit -= int(item['ethAmount']) / (10 ** 18) * 1.09
                             volume += int(item['ethAmount']) / (10 ** 18)
                             buys += 1
 
@@ -455,7 +455,7 @@ def get_personal_activity(target):
                                 date = str(timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                         else:
                             activity = "sell"
-                            profit += int(item['ethAmount']) / (10 ** 18)
+                            profit += int(item['ethAmount']) / (10 ** 18) * 0.9
                             volume += int(item['ethAmount']) / (10 ** 18)
                             sells += 1
 
