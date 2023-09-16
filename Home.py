@@ -2,6 +2,7 @@ import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
 import functions.basescan as bs
+import functions.utils as utils
 
 ss = st.session_state
 
@@ -12,12 +13,7 @@ st.set_page_config(
 )
 
 # Initialize session state
-if "submit" not in ss:
-    ss["submit"] = False
-    ss["base_mode"] = False
-    ss["full_data"] = True
-    ss["username"] = None
-    ss["history"] = []
+utils.init_state()
 
 
 # Approve Submit
