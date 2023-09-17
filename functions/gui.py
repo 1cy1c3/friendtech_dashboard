@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 
+import matplotlib.pyplot as plt
 import functions.friendtech as ft
 import functions.basescan as bs
 import streamlit as st
@@ -71,13 +72,48 @@ def load_ft_graph(data):
         })
         if raw:
             st.write(data[0]["time"][:-6])
-        st.line_chart(df.set_index('time')['price'], use_container_width=True)
+        st.line_chart(df.set_index('time')['price'], use_container_width=True, height=550)
     else:
         st.write("No Data found")
 
 
+def load_pie_chart(data):
+    # Convert data to a DataFrame
+    df = pd.DataFrame(data)
+    df['Balance'] = df['Balance'].astype(int)  # Convert 'Balance' column to integers
+
+    # Calculate the percentages
+    total_balance = df['Balance'].sum()
+    df['Percentage'] = df['Balance'] / total_balance * 100
+
+    fig, ax = plt.subplots()
+
+    patches, labels, percents = ax.pie(df['Balance'], labels=df['Holder'], autopct='%1.1f%%', startangle=90)
+
+    # Set text color to white for labels with percentage > 10%
+    for i, patch in enumerate(patches):
+        percentage = df['Percentage'].iloc[i]
+        if percentage >= 5:
+            labels[i].set_color('white')
+        else:
+            labels[i].set_text('')
+
+    # Set text color to white
+    for text in labels:
+        text.set_color('white')
+
+    for i, text in enumerate(percents):
+        percents[i].set_text('')
+
+    ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
+    fig.set_facecolor('#0e1117')
+    st.pyplot(fig)
+
+
 def load_ft_stats(address, target, dashboard=False):
     left_col, right_col = st.columns([1, 1])
+    st.markdown("")
+    left_stats, right_stats = st.columns([1, 1])
     with left_col:
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
@@ -90,11 +126,7 @@ def load_ft_stats(address, target, dashboard=False):
         if keys is None:
             keys = "N/A"
 
-    if not dashboard:
-        st.markdown("# Key Activity")
-        load_ft_graph(share_price)
-        load_ft_df(key_activity, hide=True)
-    elif dashboard:
+    if dashboard:
         with right_col:
             st.markdown("# Key Activity")
             load_ft_graph(share_price)
@@ -122,28 +154,42 @@ def load_ft_stats(address, target, dashboard=False):
         else:
             market_cap = "N/A"
 
+        self_count, key_holders = ft.get_holders(address)
+        if self_count is None:
+            self_count = "N/A"
+
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
 
-            if bot_percent == "N/A":
-                st.markdown(f":**Bots:** {bots} **or** {bot_percent}%")
-            elif bot_percent < 10:
-                st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
-            elif 10 >= bot_percent < 25:
-                st.markdown(f":orange[**Bots:** {bots} **or** {bot_percent}%]")
-            elif bot_percent >= 25:
-                st.markdown(f":red[**Bots:** {bots} **or** {bot_percent}%]")
+            if not dashboard:
+                if bot_percent == "N/A":
+                    st.markdown(f":**Bots:** {bots} **or** {bot_percent}%")
+                elif bot_percent < 10:
+                    st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
+                elif 10 >= bot_percent < 25:
+                    st.markdown(f":orange[**Bots:** {bots} **or** {bot_percent}%]")
+                elif bot_percent >= 25:
+                    st.markdown(f":red[**Bots:** {bots} **or** {bot_percent}%]")
 
-            if unique_holder == "N/A":
-                st.markdown(f":**Unique Holder:** {unique_holder}%")
-            elif unique_holder > 75:
-                st.markdown(f":green[**Unique Holder:** {unique_holder}%]")
-            elif 75 >= unique_holder > 50:
-                st.markdown(f":orange[**Unique Holder:** {unique_holder}%]")
-            elif unique_holder <= 50:
-                st.markdown(f":red[**Unique Holder:** {unique_holder}%]")
+                if unique_holder == "N/A":
+                    st.markdown(f"**Unique Holder:** {unique_holder}%")
+                elif unique_holder > 75:
+                    st.markdown(f":green[**Unique Holder:** {unique_holder}%]")
+                elif 75 >= unique_holder > 50:
+                    st.markdown(f":orange[**Unique Holder:** {unique_holder}%]")
+                elif unique_holder <= 50:
+                    st.markdown(f":red[**Unique Holder:** {unique_holder}%]")
+
+                if self_count == "N/A":
+                    st.markdown(f"**Own Keys:** {self_count}")
+                elif self_count <= 3:
+                    st.markdown(f":green[**Own Keys:** {self_count}]")
+                elif 3 < self_count <= 10:
+                    st.markdown(f":orange[**Own Keys:** {self_count}]")
+                elif self_count > 10:
+                    st.markdown(f":red[**Own Keys:** {self_count}]")
 
             st.write(f"**Key Price:** {price}")
             st.write(f"**Market Cap:** {market_cap}")
@@ -183,6 +229,13 @@ def load_ft_stats(address, target, dashboard=False):
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     if not dashboard:
+        st.markdown("# Key Activity")
+        with right_stats:
+            load_pie_chart(key_holders)
+        with left_stats:
+            st.markdown("")
+            load_ft_graph(share_price)
+        load_ft_df(key_activity, hide=True)
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True)

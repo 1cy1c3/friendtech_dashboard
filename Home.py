@@ -54,7 +54,6 @@ with h_l_col.form(key="search", clear_on_submit=True):
 if button or refresh and ss.get("submit"):
     if ss["username"]:
         target = ss["username"]
-
         if len(target) == 42 and target.startswith("0x"):
             target_address = target.lower()
             target = ft.addr_to_user(target_address, convert=True)
@@ -70,7 +69,7 @@ if button or refresh and ss.get("submit"):
 
             # Insert at the beginning of the list
             ss["history"].insert(0, {"History": target.lower()})
-            gui.load_ft_stats(target_address, target)
+            gui.load_ft_stats(target_address.lower(), target)
 
         else:
             with right_col:
@@ -79,7 +78,7 @@ if button or refresh and ss.get("submit"):
     ss["submit"] = False  # reset submit
 
 # Friendtech General Data
-if not button and not refresh and not ss['base_mode']:
+elif not button and not refresh and not ss['base_mode']:
     with left_col:
         st.markdown("# Top 50")
         gui.load_ft_df(ft.get_top_50(), hide=False)

@@ -389,7 +389,7 @@ def get_personal_activity(target):
                     volume = round(volume, 3)
                     profit_in_ether = round(profit, 3)
                 else:
-                    return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+                    return account_activity, date, profit_in_ether, volume, buys, sells
             except requests.exceptions.JSONDecodeError:
                 return account_activity, date, profit_in_ether, volume, buys, sells
         return account_activity, date, profit_in_ether, volume, buys, sells
@@ -474,3 +474,56 @@ def get_watchlist_activity(target_list):
         else:
             return watchlist
     return watchlist
+
+
+def get_holders(target):
+    url = f'https://prod-api.kosetto.com/users/{target}/token/holders'
+    response = requests.get(url)
+    self_count = 0
+    holder_total = []
+    try:
+        data = response.json()
+        if 'users' in data:
+            for item in data['users']:
+                if item['address'].lower() == target:
+                    self_count = int(item['balance'])
+
+                holder_total.append({
+                    'Holder': item['twitterUsername'],
+                    'Balance': int(item['balance'])
+                })
+        else:
+            return None, None
+    except requests.exceptions.JSONDecodeError:
+        return None, None
+
+    # Search for next page start and make more requests until the full history is loaded
+    if data['nextPageStart'] != "0":
+        next_page = data['nextPageStart']
+        while next_page != "0":
+            url = f'https://prod-api.kosetto.com/users/{target}/token/holders?pageStart={next_page}'
+            response = requests.get(url)
+            try:
+                data = response.json()
+                if 'users' in data:
+                    for item in data['users']:
+                        if item['address'] == target.lower():
+                            self_count = int(item['balance'])
+
+                        holder_total.append({
+                            'Holder': item['twitterUsername'],
+                            'Balance': int(item['balance'])
+                        })
+
+                    if data['nextPageStart'] is None:
+                        next_page = "0"
+                    else:
+                        next_page = str(data['nextPageStart'])
+
+                else:
+                    return self_count, holder_total
+
+                return self_count, holder_total
+            except requests.exceptions.JSONDecodeError:
+                return self_count, holder_total
+        return self_count, holder_total
