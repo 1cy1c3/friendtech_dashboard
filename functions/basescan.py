@@ -20,7 +20,7 @@ def balance(wallet: str):
             return "N/A"
         return round(float(int(data['result']) * 10 ** -18), 3)
     except requests.exceptions.JSONDecodeError:
-        return ("N/A")
+        return "N/A"
 
 
 # Substituted by ft now
