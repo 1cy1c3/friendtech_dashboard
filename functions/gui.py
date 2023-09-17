@@ -72,7 +72,7 @@ def load_ft_graph(data):
         })
         if raw:
             st.write(data[0]["time"][:-6])
-        st.line_chart(df.set_index('time')['price'], use_container_width=True, height=550)
+        st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
     else:
         st.write("No Data found")
 
