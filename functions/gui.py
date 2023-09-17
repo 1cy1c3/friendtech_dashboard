@@ -78,36 +78,39 @@ def load_ft_graph(data):
 
 
 def load_pie_chart(data):
-    # Convert data to a DataFrame
-    df = pd.DataFrame(data)
-    df['Balance'] = df['Balance'].astype(int)  # Convert 'Balance' column to integers
+    if data:
+        # Convert data to a DataFrame
+        df = pd.DataFrame(data)
+        df['Balance'] = df['Balance'].astype(int)  # Convert 'Balance' column to integers
 
-    # Calculate the percentages
-    total_balance = df['Balance'].sum()
-    df['Percentage'] = df['Balance'] / total_balance * 100
+        # Calculate the percentages
+        total_balance = df['Balance'].sum()
+        df['Percentage'] = df['Balance'] / total_balance * 100
 
-    fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
 
-    patches, labels, percents = ax.pie(df['Balance'], labels=df['Holder'], autopct='%1.1f%%', startangle=90)
+        patches, labels, percents = ax.pie(df['Balance'], labels=df['Holder'], autopct='%1.1f%%', startangle=90)
 
-    # Set text color to white for labels with percentage > 10%
-    for i, patch in enumerate(patches):
-        percentage = df['Percentage'].iloc[i]
-        if percentage >= 5:
-            labels[i].set_color('white')
-        else:
-            labels[i].set_text('')
+        # Set text color to white for labels with percentage > 10%
+        for i, patch in enumerate(patches):
+            percentage = df['Percentage'].iloc[i]
+            if percentage >= 5:
+                labels[i].set_color('white')
+            else:
+                labels[i].set_text('')
 
-    # Set text color to white
-    for text in labels:
-        text.set_color('white')
+        # Set text color to white
+        for text in labels:
+            text.set_color('white')
 
-    for i, text in enumerate(percents):
-        percents[i].set_text('')
+        for i, text in enumerate(percents):
+            percents[i].set_text('')
 
-    ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
-    fig.set_facecolor('#0e1117')
-    st.pyplot(fig)
+        ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
+        fig.set_facecolor('#0e1117')
+        st.pyplot(fig)
+    else:
+        st.write("No Data Found")
 
 
 def load_ft_stats(address, target, dashboard=False):
