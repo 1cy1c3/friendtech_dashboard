@@ -220,12 +220,10 @@ def load_ft_stats(address, target, dashboard=False):
                     activity, created_at, profit, volume, buys, sells = ft.get_personal_activity(address)
                 if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                     total = round((profit + portfolio_value + fees), 3)
-                    unrealized = round(portfolio_value - profit, 3)
                 else:
                     total = "N/A"
-                    unrealized = "N/A"
 
-                st.write(f"**Unrealized:** {unrealized}")
+                st.write(f"**Profit:** {profit}")
                 st.write(f"**Trading Volume:** {volume}")
                 st.write(f"**Total Profit: {total}**")
                 st.write(f"**Account Balance:** {bs.balance(address)}")
