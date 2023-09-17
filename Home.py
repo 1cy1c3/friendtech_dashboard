@@ -22,7 +22,7 @@ gui.load_css_cache("header")
 
 # Loads sidebar
 with st.sidebar:
-    gui.load_ft_df(ss["history"], hide=True)
+    gui.load_ft_df(ss["history"][:10], hide=True)
     gui.load_sidebar_ft()
 
 # Header
