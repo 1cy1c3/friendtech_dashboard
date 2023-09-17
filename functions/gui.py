@@ -106,30 +106,47 @@ def load_ft_stats(address, target, dashboard=False):
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
         if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
-            unique_holder = min(100, (100 * holder) / total_keys)
+            unique_holder = round(min(100, (100 * holder) / total_keys), 2)
             if total_keys < keys:
                 total_keys = keys
             bots = total_keys - keys
             bot_percent = round(100 * (bots / total_keys), 2)
         else:
-            unique_holder = 0
+            unique_holder = "N/A"
             bots = "N/A"
             bot_percent = "N/A"
 
         if price != "N/A" and keys != "N/A":
-            market_cap = total_keys * price
+            market_cap = round(total_keys * price, 3)
 
         else:
-            market_cap = 0
+            market_cap = "N/A"
 
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
-            st.write(f"**Bots:** {bots} **or** {bot_percent}%")
-            st.write(f"**Unique Holder:** {round(unique_holder, 2)}%")
+
+            if bot_percent == "N/A":
+                st.markdown(f":**Bots:** {bots} **or** {bot_percent}%")
+            elif bot_percent < 10:
+                st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
+            elif 10 >= bot_percent < 25:
+                st.markdown(f":orange[**Bots:** {bots} **or** {bot_percent}%]")
+            elif bot_percent >= 25:
+                st.markdown(f":red[**Bots:** {bots} **or** {bot_percent}%]")
+
+            if unique_holder == "N/A":
+                st.markdown(f":**Unique Holder:** {unique_holder}%")
+            elif unique_holder > 75:
+                st.markdown(f":green[**Unique Holder:** {unique_holder}%]")
+            elif 75 >= unique_holder > 50:
+                st.markdown(f":orange[**Unique Holder:** {unique_holder}%]")
+            elif unique_holder <= 50:
+                st.markdown(f":red[**Unique Holder:** {unique_holder}%]")
+
             st.write(f"**Key Price:** {price}")
-            st.write(f"**Market Cap:** {round(market_cap, 3)}")
+            st.write(f"**Market Cap:** {market_cap}")
 
         with lc_2:
             with st.spinner("Fetching friend.tech rank..."):
