@@ -14,10 +14,13 @@ def balance(wallet: str):
 
     response = requests.get(url)
     response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
-    data = json.loads(response.text)
-    if data['status'] != '1':
-        return "N/A"
-    return round(float(int(data['result']) * 10 ** -18), 3)
+    try:
+        data = json.loads(response.text)
+        if data['status'] != '1':
+            return "N/A"
+        return round(float(int(data['result']) * 10 ** -18), 3)
+    except requests.exceptions.JSONDecodeError:
+        return ("N/A")
 
 
 # Substituted by ft now
@@ -99,7 +102,10 @@ def get_trending(wallet: str):
 
     response = requests.get(url)
     response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
-    data = json.loads(response.text)
+    try:
+        data = json.loads(response.text)
+    except requests.exceptions.JSONDecodeError:
+        return None, None, None, None, None
 
     if data['status'] != '1':
         return None, None, None, None, None
@@ -164,8 +170,12 @@ def get_block_by_timestamp(timestamp):
            f"&closest=before&apikey={st.secrets['basescan_api_key']}")
     response = requests.get(url)
     response.raise_for_status()  # Raises a HTTPError if the response status is 4XX or 5XX
-    data = json.loads(response.text)
+    try:
+        data = json.loads(response.text)
+    except requests.exceptions.JSONDecodeError:
+        return "0"
 
     if data['status'] != '1':
         return "0"  # To avoid crash at failed request
     return data['result']
+
