@@ -1,6 +1,6 @@
 import requests
 import streamlit as st
-import functions.friendtech as ft
+import functions.utils as ut
 import json
 import time
 
@@ -65,7 +65,7 @@ def account_stats(wallet: str):
                 data_block = json.loads(response.text)
 
                 if data_block['status'] == '1':
-                    timestamp = ft.timestamp_to_datetime(int(data_block["result"]["timeStamp"]))
+                    timestamp = ut.timestamp_to_datetime(int(data_block["result"]["timeStamp"]))
                     date = str(timestamp + " (UTC)")
 
         # If the transaction is a sellShares transaction, add the value from profit
