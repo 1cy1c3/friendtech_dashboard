@@ -63,12 +63,13 @@ if button or refresh and ss.get("submit"):
         ss["username"] = target.lower()
         # runs only if wallet address gets returned
         if target_address and target_address != "N/A":
-            for item in ss["history"]:
-                if item["History"] == target.lower():
-                    ss["history"].remove(item)
+            if "history" in ss:
+                for item in ss["history"]:
+                    if item["History"] == target.lower():
+                        ss["history"].remove(item)
 
-            # Insert at the beginning of the list
-            ss["history"].insert(0, {"History": target.lower()})
+                # Insert at the beginning of the list
+                ss["history"].insert(0, {"History": target.lower()})
             gui.load_ft_stats(target_address.lower(), target)
 
         else:
