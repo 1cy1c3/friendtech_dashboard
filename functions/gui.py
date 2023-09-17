@@ -222,11 +222,12 @@ def load_ft_stats(address, target, dashboard=False):
                     total = round((profit + portfolio_value + fees), 3)
                 else:
                     total = "N/A"
+                balance = bs.balance(address)
 
                 st.write(f"**Profit:** {profit}")
                 st.write(f"**Trading Volume:** {volume}")
                 st.write(f"**Total Profit: {total}**")
-                st.write(f"**Account Balance:** {bs.balance(address)}")
+                st.write(f"**Account Balance:** {balance}")
                 st.write(f"**Created: {created_at}**")
         if not dashboard:
             with rc_2:
