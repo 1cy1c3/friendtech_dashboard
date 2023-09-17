@@ -117,6 +117,9 @@ def load_ft_stats(address, target, dashboard=False):
     left_col, right_col = st.columns([1, 1])
     st.markdown("")
     left_stats, right_stats = st.columns([1, 1])
+    st.markdown("")
+    left_df, right_df = st.columns([1, 1])
+
     with left_col:
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
@@ -232,16 +235,22 @@ def load_ft_stats(address, target, dashboard=False):
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     if not dashboard:
-        st.markdown("# Key Activity")
-        with right_stats:
-            load_pie_chart(key_holders)
-        with left_stats:
-            st.markdown("")
-            load_ft_graph(share_price)
-        load_ft_df(key_activity, hide=True)
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True)
+        with right_stats:
+            st.markdown("# Holder Pie Chart")
+            load_pie_chart(key_holders)
+        with left_stats:
+            st.markdown("# Key Price Graph")
+            load_ft_graph(share_price)
+
+        with left_df:
+            st.markdown("# Key Activity")
+            load_ft_df(key_activity, hide=True)
+        with right_df:
+            st.markdown("# Key Holders")
+            load_ft_df(key_holders, hide=True)
 
 
 def load_ft_df(data, hide):
