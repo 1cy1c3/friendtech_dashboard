@@ -10,9 +10,6 @@ ss = st.session_state
 
 ut.init_state()
 
-ss["base_mode"] = False
-ss["full_data"] = False
-
 
 # Approve Submit
 def submit():

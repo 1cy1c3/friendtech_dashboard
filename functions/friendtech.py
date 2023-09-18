@@ -182,7 +182,7 @@ def get_token_activity(target):
         return None, None, None, None
 
     # Search for next page start and make more requests untill the full history is loaded
-    if data['nextPageStart'] != "0" and ss['full_data'] is True:
+    if data['nextPageStart'] != "0":
         next_page = data['nextPageStart']
         while next_page != "0":
             url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity?pageStart={next_page}'
@@ -527,3 +527,70 @@ def get_holders(target):
             except requests.exceptions.JSONDecodeError:
                 return self_count, holder_total
         return self_count, holder_total
+
+
+def get_holdings(target):
+    url = f'https://prod-api.kosetto.com/users/{target}/token-holdings'
+    response = requests.get(url)
+
+    portfolio = []
+    try:
+        data = response.json()
+
+        if 'users' in data:
+            for item in data['users']:
+                portfolio.append({
+                    'Holding': item['twitterUsername'],
+                    'Balance': int(item['balance']),
+                    'Wallet': item['address']
+                })
+        else:
+            return None
+    except requests.exceptions.JSONDecodeError:
+        return None
+
+    # Search for next page start and make more requests until the full history is loaded
+    if data['nextPageStart'] != "0":
+        next_page = data['nextPageStart']
+        while next_page != "0":
+            url = f'https://prod-api.kosetto.com/users/{target}/token-holdings?pageStart={next_page}'
+            response = requests.get(url)
+            try:
+                data = response.json()
+                if 'users' in data:
+                    for item in data['users']:
+                        portfolio.append({
+                            'Holding': item['twitterUsername'],
+                            'Balance': int(item['balance']),
+                            'Wallet': item['address']
+                        })
+
+                    if data['nextPageStart'] is None:
+                        next_page = "0"
+                    else:
+                        next_page = str(data['nextPageStart'])
+
+                else:
+                    return portfolio
+
+                return portfolio
+            except requests.exceptions.JSONDecodeError:
+                return portfolio
+        return portfolio
+
+
+@st.cache_resource(show_spinner=False, ttl="1h")
+def get_dump_values(data):
+    dump_data = []
+    dump_value = 0
+    for item in data:
+        _, _, _, price = addr_to_user(item['Wallet'], convert=False)
+        value = ut.get_value(ut.get_supply(price), -(item['Balance']))
+        dump_data.append({
+            'Holding': item['Holding'],
+            'Balance': item['Balance'],
+            'DumpValue': value,
+            'Wallet': item['Wallet']
+        })
+        dump_value += value
+    return dump_data, dump_value

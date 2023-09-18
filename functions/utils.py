@@ -9,8 +9,6 @@ def init_state():
         ss["submit"] = False
     if "base_mode" not in ss:
         ss["base_mode"] = False
-    if "full_data" not in ss:
-        ss["full_data"] = True
     if "username" not in ss:
         ss["username"] = None
     if "history" not in ss:
@@ -56,3 +54,24 @@ def time_ago(timestamp_ms):
         return f"{int(difference.total_seconds() / seconds_in_hour)} hours ago"
     else:
         return f"{int(difference.total_seconds() / seconds_in_day)} days ago"
+
+
+def get_supply(price):
+    price = float(price * 16000)
+    summation = 0.0
+    supply = 0
+
+    while price > summation:
+        supply += 1
+        sum1 = (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
+        sum2 = (supply + 1) * supply * (2 * supply + 1) // 6
+        summation = float(sum2 - sum1)
+
+    return supply
+
+
+def get_value(supply, amount):
+    sum1 = 0 if supply == 0 else (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
+    sum2 = 0 if supply == 0 and amount == 1 else (supply - 1 + amount) * (supply + amount) * (2 * (supply - 1 + amount) + 1) // 6
+    summation = float(sum2 - sum1)
+    return round(0-(summation / 16000), 3)
