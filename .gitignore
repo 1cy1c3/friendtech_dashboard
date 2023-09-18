@@ -1,7 +1,7 @@
 /shelf/
 /workspace.xml
 /_secret_auth_.json
-.streamlit/
+.streamlit/secrets.toml
 .idea/
 watchlist/
 /start.bat
