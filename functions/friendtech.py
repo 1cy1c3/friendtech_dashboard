@@ -586,11 +586,14 @@ def get_dump_values(data):
     for item in data:
         _, _, _, price = addr_to_user(item['Wallet'], convert=False)
         value = ut.get_value(ut.get_supply(price), -(item['Balance']))
-        dump_data.append({
-            'Holding': item['Holding'],
-            'Balance': item['Balance'],
-            'DumpValue': value,
-            'Wallet': item['Wallet']
-        })
-        dump_value += value
+        if value != "N/A":
+            dump_data.append({
+                'Holding': item['Holding'],
+                'Balance': item['Balance'],
+                'DumpValue': value,
+                'Wallet': item['Wallet']
+            })
+            dump_value += value
+        else:
+            pass
     return dump_data, round(dump_value, 3)

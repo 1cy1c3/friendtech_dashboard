@@ -57,21 +57,27 @@ def time_ago(timestamp_ms):
 
 
 def get_supply(price):
-    price = float(price * 16000)
-    summation = 0.0
-    supply = 0
+    if price > 0:
+        price = float(price * 16000)
+        summation = 0.0
+        supply = 0
 
-    while price > summation:
-        supply += 1
-        sum1 = (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
-        sum2 = (supply + 1) * supply * (2 * supply + 1) // 6
-        summation = float(sum2 - sum1)
+        while price > summation:
+            supply += 1
+            sum1 = (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
+            sum2 = (supply + 1) * supply * (2 * supply + 1) // 6
+            summation = float(sum2 - sum1)
 
-    return supply
+        return supply
+    else:
+        return "N/A"
 
 
 def get_value(supply, amount):
-    sum1 = 0 if supply == 0 else (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
-    sum2 = 0 if supply == 0 and amount == 1 else (supply - 1 + amount) * (supply + amount) * (2 * (supply - 1 + amount) + 1) // 6
-    summation = float(sum2 - sum1)
-    return round(0-(summation / 16000), 3)
+    if supply != "N/A":
+        sum1 = 0 if supply == 0 else (supply - 1) * supply * (2 * (supply - 1) + 1) // 6
+        sum2 = 0 if supply == 0 and amount == 1 else (supply - 1 + amount) * (supply + amount) * (2 * (supply - 1 + amount) + 1) // 6
+        summation = float(sum2 - sum1)
+        return round(0-(summation / 16000), 3)
+    else:
+        return "N/A"
