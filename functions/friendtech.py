@@ -593,4 +593,4 @@ def get_dump_values(data):
             'Wallet': item['Wallet']
         })
         dump_value += value
-    return dump_data, dump_value
+    return dump_data, round(dump_value, 3)
