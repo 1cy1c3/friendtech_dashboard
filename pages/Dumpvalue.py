@@ -35,7 +35,7 @@ with st.sidebar:
     gui.load_sidebar_ft()
 
 with header_l:
-    st.write("Drop in any friend.tech name and get a full portfolio breakdown!\n\nThis process might take some time,"
+    st.write("Drop in any friend.tech name and get a full portfolio breakdown!\nThis process might take some time,"
              " depending on the targets Portfolio")
 
 with header_r:
@@ -60,8 +60,8 @@ if button and ss.get("submit"):
         with st.spinner("Collection Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
 
-        left_col.markdown(f"# {target}'s Portfolio-Value:\n\n# {portfolio_value} ETH")
-        right_col.markdown(f"# {target}'s Total Dump-Value:\n\n# {dump_value} ETH")
+        left_col.markdown(f"# {target}'s Portfolio-Value:\n# {portfolio_value} ETH")
+        right_col.markdown(f"# {target}'s Total Dump-Value:\n# {dump_value} ETH")
         gui.load_ft_df(dump_data, hide=True)
         ss["submit"] = False
 
