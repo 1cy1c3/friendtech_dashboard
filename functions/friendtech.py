@@ -580,20 +580,28 @@ def get_holdings(target):
 
 
 @st.cache_resource(show_spinner=False, ttl="1h")
-def get_dump_values(data):
+def get_dump_values(data, address):
     dump_data = []
     dump_value = 0
     for item in data:
         _, _, _, price = addr_to_user(item['Wallet'], convert=False)
         value = ut.get_value(ut.get_supply(price), -(item['Balance']))
         if value != "N/A":
-            dump_data.append({
-                'Holding': item['Holding'],
-                'Balance': item['Balance'],
-                'DumpValue': value,
-                'Wallet': item['Wallet']
-            })
-            dump_value += value
-        else:
-            pass
+            if item['Wallet'].lower() == address:
+                dump_data.append({
+                    'Holding': item['Holding'],
+                    'Balance': item['Balance'],
+                    'DumpValue': round(value * 0.95, 3),
+                    'Wallet': item['Wallet']
+                })
+                dump_value += value
+            else:
+                dump_data.append({
+                    'Holding': item['Holding'],
+                    'Balance': item['Balance'],
+                    'DumpValue': round(value * 0.9, 3),
+                    'Wallet': item['Wallet']
+                })
+                dump_value += value
+
     return dump_data, round(dump_value, 3)

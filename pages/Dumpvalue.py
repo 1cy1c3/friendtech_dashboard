@@ -58,7 +58,7 @@ if button and ss.get("submit"):
         with st.spinner("Getting Account Portfolio"):
             portfolio = ft.get_holdings(target_address)
         with st.spinner("Collection Portfolio Data"):
-            dump_data, dump_value = ft.get_dump_values(portfolio)
+            dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
 
         left_col.markdown(f"# {target}'s Portfolio-Value:\n\n# {portfolio_value} ETH")
         right_col.markdown(f"# {target}'s Total Dump-Value:\n\n# {dump_value} ETH")
