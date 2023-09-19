@@ -118,7 +118,7 @@ def load_ft_stats(address, target, dashboard=False):
     st.markdown("")
     left_stats, right_stats = st.columns([1, 1])
     st.markdown("")
-    left_df, right_df = st.columns([1, 1])
+    left_df, mid_df, right_df = st.columns([1, 1, 1])
 
     with left_col:
         st.markdown(f"# {target}")
@@ -255,11 +255,10 @@ def load_ft_stats(address, target, dashboard=False):
             st.markdown("# Key Activity")
             load_ft_df(key_activity, hide=True)
 
-        lc, rc = right_df.columns([1, 1])
-        with lc:
+        with mid_df:
             st.markdown("# Holdings")
             load_ft_df(portfolio, hide=True)
-        with rc:
+        with right_df:
             st.markdown("# Key Holders")
             load_ft_df(key_holders, hide=True)
 
