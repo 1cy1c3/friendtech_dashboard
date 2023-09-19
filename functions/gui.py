@@ -118,7 +118,7 @@ def load_ft_stats(address, target, dashboard=False):
     st.markdown("")
     left_stats, right_stats = st.columns([1, 1])
     st.markdown("")
-    left_df, mid_df, right_df = st.columns([1, 1, 1])
+    left_df, mid_df, right_df = st.columns([3, 2, 1])
 
     with left_col:
         st.markdown(f"# {target}")
