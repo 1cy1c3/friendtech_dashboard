@@ -239,6 +239,8 @@ def load_ft_stats(address, target, dashboard=False):
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     if not dashboard:
+        with st.spinner("Getting Portfolio"):
+            portfolio = ft.get_holdings(address)
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True)
@@ -252,7 +254,12 @@ def load_ft_stats(address, target, dashboard=False):
         with left_df:
             st.markdown("# Key Activity")
             load_ft_df(key_activity, hide=True)
-        with right_df:
+
+        lc, rc = right_df.columns([1, 1])
+        with lc:
+            st.markdown("# Holdings")
+            load_ft_df(portfolio, hide=True)
+        with rc:
             st.markdown("# Key Holders")
             load_ft_df(key_holders, hide=True)
 
