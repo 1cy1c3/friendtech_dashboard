@@ -57,7 +57,7 @@ def time_ago(timestamp_ms):
 
 
 def get_supply(price):
-    if price is float and price > 0.0:
+    if price > 0.0:
         price = float(price * 16000)
         summation = 0.0
         supply = 0
@@ -80,4 +80,4 @@ def get_value(supply, amount):
         summation = float(sum2 - sum1)
         return round(0-(summation / 16000), 3)
     else:
-        return "N/A"
+        return 0.0
