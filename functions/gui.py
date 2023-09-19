@@ -143,12 +143,21 @@ def load_ft_stats(address, target, dashboard=False):
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
+        self_count, key_holders = ft.get_holders(address)
+        if self_count is None:
+            self_count = "N/A"
+
         if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
             unique_holder = round(min(100, (100 * holder) / total_keys), 2)
             if total_keys < keys:
                 total_keys = keys
             bots = total_keys - keys
             bot_percent = round(100 * (bots / total_keys), 2)
+            if bots > 0:
+                key_holders.append({
+                    'Holder': 'BOTS',
+                    'Balance': bots
+                })
         else:
             unique_holder = "N/A"
             bots = "N/A"
@@ -159,10 +168,6 @@ def load_ft_stats(address, target, dashboard=False):
 
         else:
             market_cap = "N/A"
-
-        self_count, key_holders = ft.get_holders(address)
-        if self_count is None:
-            self_count = "N/A"
 
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
