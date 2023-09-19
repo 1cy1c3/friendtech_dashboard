@@ -267,9 +267,12 @@ def user_to_addr(user):
     response = requests.get(url, headers=headers, params=params)
     try:
         data = response.json()
+
         if 'users' in data and len(data['users']) > 0:
-            address = data['users'][0]['address']
-            return Web3.to_checksum_address(address)  # Convert to checksum address
+            for item in data['users']:
+                if item['twitterUsername'].lower() == user.lower():
+                    address = item['address']
+                    return Web3.to_checksum_address(address)  # Convert to checksum address
         else:
             return None
     except requests.exceptions.JSONDecodeError as e:
