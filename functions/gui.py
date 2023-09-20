@@ -227,7 +227,11 @@ def load_ft_stats(address, target, dashboard=False):
                     total = round((profit + portfolio_value + fees), 3)
                 else:
                     total = "N/A"
-                balance = bs.balance(address)
+
+                try:
+                    balance = bs.balance(address)
+                except Exception:
+                    balance = "N/A"
 
                 st.write(f"**Trading Profit:** {profit}")
                 st.write(f"**Trading Volume:** {volume}")
