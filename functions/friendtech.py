@@ -586,25 +586,28 @@ def get_holdings(target):
 def get_dump_values(data, address):
     dump_data = []
     dump_value = 0
+    x = 0
     for item in data:
         _, _, _, price = addr_to_user(item['Wallet'], convert=False)
-        value = ut.get_value(ut.get_supply(price), -(item['Balance']))
+        value = ut.get_value(ut.get_supply(price) - (item['Balance']) - 1, (item['Balance']))
         if value != "N/A":
+            if item['Balance'] ==1:
+                x = .1
             if item['Wallet'].lower() == address:
                 dump_data.append({
                     'Holding': item['Holding'],
                     'Balance': item['Balance'],
                     'ShownValue': round(price * item['Balance'], 3),
-                    'DumpValue': round(value * 0.95, 3)
+                    'DumpValue': round(-value * (.95 + x), 3)
                 })
-                dump_value += value
+                dump_value += round(-value * (.95 + x), 3)
             else:
                 dump_data.append({
                     'Holding': item['Holding'],
                     'Balance': item['Balance'],
                     'ShownValue': round(price * item['Balance'], 3),
-                    'DumpValue': round(value * 0.9, 3)
+                    'DumpValue': round(-value * (.9 + x), 3)
                 })
-                dump_value += value
+                dump_value += round(-value * (.9 + x), 3)
 
     return dump_data, round(dump_value, 3)
