@@ -594,16 +594,16 @@ def get_dump_values(data, address):
                 dump_data.append({
                     'Holding': item['Holding'],
                     'Balance': item['Balance'],
-                    'DumpValue': round(value * 0.95, 3),
-                    'Wallet': item['Wallet']
+                    'ShownValue': round(price * item['Balance'], 3),
+                    'DumpValue': round(value * 0.95, 3)
                 })
                 dump_value += value
             else:
                 dump_data.append({
                     'Holding': item['Holding'],
                     'Balance': item['Balance'],
-                    'DumpValue': round(value * 0.9, 3),
-                    'Wallet': item['Wallet']
+                    'ShownValue': round(price * item['Balance'], 3),
+                    'DumpValue': round(value * 0.9, 3)
                 })
                 dump_value += value
 

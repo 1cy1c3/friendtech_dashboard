@@ -229,7 +229,7 @@ def load_ft_stats(address, target, dashboard=False):
                     total = "N/A"
                 balance = bs.balance(address)
 
-                st.write(f"**Profit:** {profit}")
+                st.write(f"**Trading Profit:** {profit}")
                 st.write(f"**Trading Volume:** {volume}")
                 st.write(f"**Total Profit: {total}**")
                 st.write(f"**Account Balance:** {balance}")
