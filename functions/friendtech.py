@@ -311,6 +311,7 @@ def get_personal_activity(target):
     volume = 0
     buys = 0
     sells = 0
+    investment = 0
     date = None
 
     url = f'https://prod-api.kosetto.com/users/{target}/trade-activity'
@@ -323,16 +324,17 @@ def get_personal_activity(target):
             for item in data["users"]:
                 if item["isBuy"]:
                     activity = "buy"
-                    profit -= int(item['ethAmount']) / (10 ** 18)
-                    volume += int(item['ethAmount']) / (10 ** 18)
+                    profit -= int(item['ethAmount']) / (10 ** 18) * 1.1
+                    volume += int(item['ethAmount']) / (10 ** 18) * 1.1
+                    investment += int(item['ethAmount']) / (10 ** 18) * 1.1
                     buys += 1
 
                     if item['ethAmount'] == "0":
                         date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                 else:
                     activity = "sell"
-                    profit += int(item['ethAmount']) / (10 ** 18)
-                    volume += int(item['ethAmount']) / (10 ** 18)
+                    profit += int(item['ethAmount']) / (10 ** 18) * 0.9
+                    volume += int(item['ethAmount']) / (10 ** 18) * 0.9
                     sells += 1
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
@@ -346,10 +348,11 @@ def get_personal_activity(target):
 
             volume = round(volume, 3)
             profit_in_ether = round(profit, 3)
+            investment = round(investment, 3)
         else:
-            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
-        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
     # Search for next page start and make more requests until the full history is loaded
     if data['nextPageStart'] != "0":
@@ -365,7 +368,8 @@ def get_personal_activity(target):
                         if item["isBuy"]:
                             activity = "buy"
                             profit -= int(item['ethAmount']) / (10 ** 18) * 1.1
-                            volume += int(item['ethAmount']) / (10 ** 18)
+                            volume += int(item['ethAmount']) / (10 ** 18) * 1.1
+                            investment += int(item['ethAmount']) / (10 ** 18) * 1.1
                             buys += 1
 
                             if item['ethAmount'] == "0":
@@ -373,7 +377,7 @@ def get_personal_activity(target):
                         else:
                             activity = "sell"
                             profit += int(item['ethAmount']) / (10 ** 18) * 0.9
-                            volume += int(item['ethAmount']) / (10 ** 18)
+                            volume += int(item['ethAmount']) / (10 ** 18) * 0.9
                             sells += 1
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
@@ -391,13 +395,14 @@ def get_personal_activity(target):
                         next_page = str(data['nextPageStart'])
                     volume = round(volume, 3)
                     profit_in_ether = round(profit, 3)
+                    investment = round(investment, 3)
                 else:
-                    return account_activity, date, profit_in_ether, volume, buys, sells
+                    return account_activity, date, profit_in_ether, volume, buys, sells, investment
             except requests.exceptions.JSONDecodeError:
-                return account_activity, date, profit_in_ether, volume, buys, sells
-        return account_activity, date, profit_in_ether, volume, buys, sells
+                return account_activity, date, profit_in_ether, volume, buys, sells, investment
+        return account_activity, date, profit_in_ether, volume, buys, sells, investment
     else:
-        return account_activity, date, profit_in_ether, volume, buys, sells
+        return account_activity, date, profit_in_ether, volume, buys, sells, investment
 
 
 @st.cache_data(show_spinner=False, ttl="5m")

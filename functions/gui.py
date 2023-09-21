@@ -172,7 +172,7 @@ def load_ft_stats(address, target, dashboard=False):
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
-            st.write(f"**Keys:** {total_keys}")
+            st.write(f"**Keys:** {total_keys} ETH")
 
             if not dashboard:
                 if bot_percent == "N/A":
@@ -202,8 +202,8 @@ def load_ft_stats(address, target, dashboard=False):
                 elif self_count > 10:
                     st.markdown(f":red[**Own Keys:** {self_count}]")
 
-            st.write(f"**Key Price:** {price}")
-            st.write(f"**Market Cap:** {market_cap}")
+            st.write(f"**Key Price:** {price} ETH")
+            st.write(f"**Market Cap:** {market_cap} ETH")
 
         with lc_2:
             with st.spinner("Fetching friend.tech rank..."):
@@ -217,27 +217,35 @@ def load_ft_stats(address, target, dashboard=False):
             else:
                 fees = fees_collected / 2
 
-            st.write(f"**Portfolio Value:** {portfolio_value}")
-            st.write(f"**Collected Fees:** {fees}")
+            st.write(f"**Portfolio Value:** {portfolio_value} ETH")
+            st.write(f"**Collected Fees:** {fees} ETH")
 
             if not dashboard:
                 with st.spinner("Fetching friend.tech user activity..."):
-                    activity, created_at, profit, volume, buys, sells = ft.get_personal_activity(address)
+                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
                 if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                     total = round((profit + portfolio_value + fees), 3)
                 else:
                     total = "N/A"
+
+                if total != "N/A" and investment != "N/A":
+                    capital_efficiency = round(100 * total / investment, 2)
+                else:
+                    capital_efficiency = "N/A"
 
                 try:
                     balance = bs.balance(address)
                 except Exception:
                     balance = "N/A"
 
-                st.write(f"**Trading Profit:** {profit}")
-                st.write(f"**Trading Volume:** {volume}")
+                st.write(f"**Investment:** {investment} ETH")
+                st.write(f"**Trading Profit:** {profit} ETH")
+                st.write(f"**Trading Volume:** {volume} ETH")
                 st.write(f"**Total Profit: {total}**")
-                st.write(f"**Account Balance:** {balance}")
+                st.write(f"**Capital Efficiency:** {capital_efficiency}%")
+                st.write(f"**Account Balance:** {balance} ETH")
                 st.write(f"**Created: {created_at}**")
+
         if not dashboard:
             with rc_2:
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
