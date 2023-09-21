@@ -176,7 +176,7 @@ def load_ft_stats(address, target, dashboard=False):
 
             if not dashboard:
                 if bot_percent == "N/A":
-                    st.markdown(f":**Bots:** {bots} **or** {bot_percent}%")
+                    st.markdown(f"**Bots:** {bots} **or** {bot_percent}%")
                 elif bot_percent <= 10:
                     st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
                 elif 10 < bot_percent <= 25:
