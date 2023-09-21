@@ -94,7 +94,8 @@ def load_pie_chart(data):
         # Set text color to white for labels with percentage > 10%
         for i, patch in enumerate(patches):
             percentage = df['Percentage'].iloc[i]
-            if percentage >= 5:
+            holder = df['Holder'].iloc[i]
+            if percentage >= 5 or holder == 'BOTS':
                 labels[i].set_color('white')
             else:
                 labels[i].set_text('')
