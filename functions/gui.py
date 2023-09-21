@@ -8,6 +8,7 @@ import pandas as pd
 
 import datetime
 import csv
+import time
 
 from io import StringIO
 from pandas.api.types import (
@@ -114,7 +115,12 @@ def load_pie_chart(data):
         st.write("No Data Found")
 
 
-def load_ft_stats(address, target, dashboard=False):
+def load_ft_stats(address, target, progress, watchlist=False):
+    with st.sidebar:
+        progress.progress(value=0, text="Loading Stats")
+        load_ft_df(ss["history"][:10], hide=True)
+        load_sidebar_ft()
+
     left_col, right_col = st.columns([1, 1])
     st.markdown("")
     left_stats, right_stats = st.columns([1, 1])
@@ -125,15 +131,17 @@ def load_ft_stats(address, target, dashboard=False):
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
 
-    if not dashboard:
+    if not watchlist:
         with right_col:
             st.markdown("# Activity")
     with st.spinner("Fetching key activity..."):
         key_activity, key_volume, share_price, keys = ft.get_token_activity(address)
         if keys is None:
             keys = "N/A"
+    if not watchlist:
+        progress.progress(value=20, text="Loading Stats")
 
-    if dashboard:
+    if watchlist:
         with right_col:
             st.markdown("# Key Activity")
             load_ft_graph(share_price)
@@ -141,6 +149,10 @@ def load_ft_stats(address, target, dashboard=False):
 
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
+    if not watchlist:
+        progress.progress(value=40, text="Loading Stats")
+    else:
+        progress.progress(value=50, text="Loading Stats")
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
@@ -175,7 +187,7 @@ def load_ft_stats(address, target, dashboard=False):
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys} ETH")
 
-            if not dashboard:
+            if not watchlist:
                 if bot_percent == "N/A":
                     st.markdown(f"**Bots:** {bots} **or** {bot_percent}%")
                 elif bot_percent <= 10:
@@ -221,7 +233,7 @@ def load_ft_stats(address, target, dashboard=False):
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
             st.write(f"**Collected Fees:** {fees} ETH")
 
-            if not dashboard:
+            if not watchlist:
                 with st.spinner("Fetching friend.tech user activity..."):
                     activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
                 if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
@@ -247,13 +259,15 @@ def load_ft_stats(address, target, dashboard=False):
                 st.write(f"**Account Balance:** {balance} ETH")
                 st.write(f"**Created: {created_at}**")
 
-        if not dashboard:
+        if not watchlist:
             with rc_2:
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
 
-    if not dashboard:
+    if not watchlist:
+        progress.progress(value=60, text="Loading Stats")
         with st.spinner("Getting Portfolio"):
             portfolio = ft.get_holdings(address)
+        progress.progress(value=80, text="Loading Stats")
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True)
@@ -274,6 +288,10 @@ def load_ft_stats(address, target, dashboard=False):
         with right_df:
             st.markdown("# Key Holders")
             load_ft_df(key_holders, hide=True)
+
+    progress.progress(value=100, text="Completed")
+    time.sleep(3)
+    progress.empty()
 
 
 def load_ft_df(data, hide):

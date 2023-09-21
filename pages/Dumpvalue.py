@@ -1,3 +1,5 @@
+import time
+
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
@@ -31,6 +33,7 @@ left_col, right_col = st.columns([1, 1])
 
 # Loads sidebar
 with st.sidebar:
+    progress = st.empty()
     gui.load_ft_df(ss["history"], hide=True)
     gui.load_sidebar_ft()
 
@@ -53,12 +56,18 @@ if button and ss.get("submit"):
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":
+        progress.progress(value=0, text="Loading Stats")
         with st.spinner("Getting Account Balance"):
             portfolio_value, _ = ft.get_portfolio_value(target_address)
+        progress.progress(value=33, text="Loading Stats")
         with st.spinner("Getting Account Portfolio"):
             portfolio = ft.get_holdings(target_address)
+        progress.progress(value=67, text="Loading Stats")
         with st.spinner("Collection Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
+        progress.progress(value=100, text="Completed")
+        time.sleep(3)
+        progress.empty()
 
         left_col.markdown(f"# {target}'s Portfolio-Value:\n# {portfolio_value} ETH")
         right_col.markdown(f"# {target}'s Total Dump-Value:\n# {dump_value} ETH")

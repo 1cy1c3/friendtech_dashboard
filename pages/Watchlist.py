@@ -44,6 +44,7 @@ if __login__obj:
 
     # Loads sidebar
     with st.sidebar:
+        progress = st.empty()
         gui.load_ft_df(ss["history"], hide=True)
         gui.load_sidebar_ft()
 
@@ -82,7 +83,7 @@ if __login__obj:
                 # runs only if wallet address gets returned
                 if target_address and target_address != "N/A":
                     add_remove = st.button("**+ / -** Watchlist", on_click=db.add_remove_wl(target_address, username))
-                    gui.load_ft_stats(target_address, target, dashboard=True)
+                    gui.load_ft_stats(target_address, target, progress, watchlist=True)
 
                 else:
                     with right_col:

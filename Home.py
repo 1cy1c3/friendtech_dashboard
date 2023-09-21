@@ -22,6 +22,7 @@ gui.load_css_cache("header")
 
 # Loads sidebar
 with st.sidebar:
+    progress = st.empty()
     gui.load_ft_df(ss["history"][:10], hide=True)
     gui.load_sidebar_ft()
 
@@ -70,7 +71,7 @@ if button or refresh and ss.get("submit"):
 
                 # Insert at the beginning of the list
                 ss["history"].insert(0, {"History": target.lower()})
-            gui.load_ft_stats(target_address.lower(), target)
+            gui.load_ft_stats(target_address.lower(), target, progress)
 
         else:
             with right_col:
