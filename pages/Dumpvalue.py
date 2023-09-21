@@ -1,5 +1,3 @@
-import time
-
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
@@ -66,7 +64,7 @@ if button and ss.get("submit"):
         with st.spinner("Collection Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
         progress.progress(value=100, text="Completed")
-        time.sleep(3)
+
         progress.empty()
 
         left_col.markdown(f"# {target}'s Portfolio-Value:\n# {portfolio_value} ETH")

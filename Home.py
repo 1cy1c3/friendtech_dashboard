@@ -1,5 +1,3 @@
-import time
-
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
@@ -74,7 +72,6 @@ if button or refresh and ss.get("submit"):
                 # Insert at the beginning of the list
                 ss["history"].insert(0, {"History": target.lower()})
             gui.load_ft_stats(target_address.lower(), target, progress)
-            time.sleep(3)
             progress.empty()
 
         else:

@@ -8,6 +8,7 @@ import pandas as pd
 
 import datetime
 import csv
+import time
 
 from io import StringIO
 from pandas.api.types import (
@@ -289,7 +290,6 @@ def load_ft_stats(address, target, progress, watchlist=False):
             load_ft_df(key_holders, hide=True)
 
     progress.progress(value=100, text="Completed")
-    progress.empty()
 
 
 def load_ft_df(data, hide):

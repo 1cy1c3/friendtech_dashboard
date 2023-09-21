@@ -1,5 +1,3 @@
-import time
-
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
@@ -86,7 +84,6 @@ if __login__obj:
                 if target_address and target_address != "N/A":
                     add_remove = st.button("**+ / -** Watchlist", on_click=db.add_remove_wl(target_address, username))
                     gui.load_ft_stats(target_address, target, progress, watchlist=True)
-                    time.sleep(3)
                     progress.empty()
                 else:
                     with right_col:
