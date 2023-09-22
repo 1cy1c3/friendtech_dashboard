@@ -185,7 +185,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
-            st.write(f"**Keys:** {total_keys} ETH")
+            st.write(f"**Keys:** {total_keys}")
 
             if not watchlist:
                 if bot_percent == "N/A":
