@@ -3,7 +3,6 @@ import functions.gui as gui
 import functions.friendtech as ft
 import functions.basescan as bs
 import functions.utils as ut
-from bokeh.models.widgets import Div
 
 
 ss = st.session_state
