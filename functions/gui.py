@@ -241,7 +241,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 else:
                     total = "N/A"
 
-                if total != "N/A" and investment != "N/A":
+                if total != "N/A" and investment != "N/A" and investment != 0:
                     capital_efficiency = round(100 * total / investment, 2)
                 else:
                     capital_efficiency = "N/A"

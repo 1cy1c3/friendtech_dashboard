@@ -1,7 +1,6 @@
 import streamlit as st
 import functions.gui as gui
 import functions.friendtech as ft
-import functions.basescan as bs
 import functions.utils as ut
 
 ss = st.session_state
