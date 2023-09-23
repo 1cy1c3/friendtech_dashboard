@@ -52,7 +52,11 @@ st.markdown("# Global Activity")
 gui.load_ft_df(ft.get_global_activity(), hide=True)
 
 # Display Base Scan data
-winners, losers = bs.get_trending(st.secrets['friendtech_contract'])
+try:
+    winners, losers = bs.get_trending(st.secrets['friendtech_contract'])
+except Exception:
+    winners, losers = None, None
+
 with b_l_c:
     st.markdown("# Basescan Gaining 15 min")
     gui.load_ft_df(winners, hide=False)

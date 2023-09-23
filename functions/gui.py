@@ -220,9 +220,18 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
         with lc_2:
             with st.spinner("Fetching friend.tech rank..."):
-                points, tier = ft.get_user_points(address)
+                points, tier, rank = ft.get_user_points(address)
+            if tier.lower() == "bronze":
+                st.write(f"**Rank:** {rank} **Points:** {points}")
+            elif tier.lower() == "silver":
+                st.write(f":gray[**Rank:** {rank}]x**Points:** {points}")
+            elif tier.lower() == "gold":
+                st.write(f":orange[**Rank:** {rank}] **Points:** {points}")
+            elif tier.lower() == "diamond":
+                st.write(f":violet[**Rank:** {rank}] **Points:** {points}")
+            else:
+                st.write(f"**Rank:** {rank} **Points:** {points}")
 
-            st.write(f"**{tier}:** {points} Points")
             with st.spinner("Fetching friend.tech wallet info..."):
                 portfolio_value, fees_collected = ft.get_portfolio_value(address)
             if fees_collected == "N/A":
