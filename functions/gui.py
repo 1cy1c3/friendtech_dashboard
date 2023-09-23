@@ -222,13 +222,13 @@ def load_ft_stats(address, target, progress, watchlist=False):
             with st.spinner("Fetching friend.tech rank..."):
                 points, tier, rank = ft.get_user_points(address)
             if tier.lower() == "bronze":
-                st.write(f"**Rank:** {rank} **Points:** {points}")
+                st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
             elif tier.lower() == "silver":
-                st.write(f":gray[**Rank:** {rank}]x**Points:** {points}")
+                st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
             elif tier.lower() == "gold":
-                st.write(f":orange[**Rank:** {rank}] **Points:** {points}")
+                st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
             elif tier.lower() == "diamond":
-                st.write(f":violet[**Rank:** {rank}] **Points:** {points}")
+                st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
             else:
                 st.write(f"**Rank:** {rank} **Points:** {points}")
 
