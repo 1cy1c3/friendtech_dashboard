@@ -245,11 +245,13 @@ def get_user_points(address):
     response = requests.get(url)
     try:
         data = response.json()
-        if "tier" in data:
+        if "leaderboard" in data:
             return data["totalPoints"], data["tier"], data["leaderboard"]
+        elif "totalPoints" in data and "tier" in data:
+            return data["totalPoints"], data["tier"], "N/A"
         else:
             return "N/A", "N/A", "N/A"
-    except requests.exceptions.JSONDecodeError as e:
+    except requests.exceptions.JSONDecodeError:
         return "N/A", "N/A", "N/A"
 
 
