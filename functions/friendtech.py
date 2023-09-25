@@ -599,8 +599,9 @@ def get_dump_values(data, address):
     x = 0
     for item in data:
         _, _, _, price = addr_to_user(item['Wallet'], convert=False)
-        if price != "N/A":
-            value = ut.get_value(ut.get_supply(price) - (item['Balance']) - 1, (item['Balance']))
+        supply = ut.get_supply(price)
+        if price != "N/A" and supply != "N/A":
+            value = ut.get_value(supply - int((item['Balance'])) - 1, int((item['Balance'])))
             if value != "N/A":
                 if item['Balance'] == 1:
                     x = .1
