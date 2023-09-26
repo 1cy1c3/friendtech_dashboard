@@ -49,8 +49,9 @@ def load_ft_graph(data):
 
         # Now compute average for each date
         for date in date_to_values:
-            date_to_values[date] = sum(date_to_values[date]) / len(date_to_values[date])
             _date_to_values[date] = date_to_values[date]
+            date_to_values[date] = sum(date_to_values[date]) / len(date_to_values[date])
+
 
         # Get today's date as a datetime.date object
         today = datetime.datetime.now()
