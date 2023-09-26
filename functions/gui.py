@@ -37,10 +37,13 @@ def load_ft_graph(data):
                 item['time'] = item['raw_time']
             raw = True
         for trans in data:
+
             if raw:
                 date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
             else:
                 date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
 
             if date in date_to_values:
                 date_to_values[date].append(float(trans["price"]))
@@ -50,7 +53,6 @@ def load_ft_graph(data):
         # Now compute average for each date
         for date in date_to_values:
             date_to_values[date] = sum(date_to_values[date]) / len(date_to_values[date])
-            _date_to_values[date] = date_to_values[date]
 
         # Get today's date as a datetime.date object
         today = datetime.datetime.now()
@@ -73,10 +75,7 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
-        df2 = pd.DataFrame({
-            "time": sorted(_date_to_values.keys()),
-            "price": [_date_to_values[date] for date in sorted(_date_to_values.keys())]
-        })
+        df2 = pd.DataFrame(data)
         st.subheader("Key Price Chart")
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
         st.subheader("Buys/Sells Chart")
