@@ -30,6 +30,7 @@ def load_ft_graph(data):
         count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
         # Create a dictionary to store average values per date
         date_to_values = {}
+        _date_to_values = {}
 
         if len(data) == count:
             for item in data:
@@ -49,6 +50,7 @@ def load_ft_graph(data):
         # Now compute average for each date
         for date in date_to_values:
             date_to_values[date] = sum(date_to_values[date]) / len(date_to_values[date])
+            _date_to_values[date] = date_to_values[date]
 
         # Get today's date as a datetime.date object
         today = datetime.datetime.now()
@@ -71,14 +73,20 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
-        if raw:
-            st.write(data[0]["time"][:-6])
+        df2 = pd.DataFrame({
+            "time": sorted(_date_to_values.keys()),
+            "price": [_date_to_values[date] for date in sorted(_date_to_values.keys())]
+        })
+        st.subheader("Key Price Chart")
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
+        st.subheader("Buys/Sells Chart")
+
+        st.scatter_chart(df2.set_index('time')['price'], use_container_width=True, height=500)
     else:
         st.write("No Data found")
 
 
-def load_pie_chart(data):
+def load_pie_chart_holders(data):
     if data:
         # Convert data to a DataFrame
         df = pd.DataFrame(data)
@@ -96,6 +104,43 @@ def load_pie_chart(data):
         for i, patch in enumerate(patches):
             percentage = df['Percentage'].iloc[i]
             holder = df['Holder'].iloc[i]
+            if percentage >= 5 or holder == 'BOTS':
+                labels[i].set_color('white')
+            else:
+                labels[i].set_text('')
+
+        # Set text color to white
+        for text in labels:
+            text.set_color('white')
+
+        for i, text in enumerate(percents):
+            percents[i].set_text('')
+
+        ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
+        fig.set_facecolor('#0e1117')
+        st.pyplot(fig)
+    else:
+        st.write("No Data Found")
+
+
+def load_pie_chart_holdings(data):
+    if data:
+        # Convert data to a DataFrame
+        df = pd.DataFrame(data)
+        df['Balance'] = df['Balance'].astype(int)  # Convert 'Balance' column to integers
+
+        # Calculate the percentages
+        total_balance = df['Balance'].sum()
+        df['Percentage'] = df['Balance'] / total_balance * 100
+
+        fig, ax = plt.subplots()
+
+        patches, labels, percents = ax.pie(df['Balance'], labels=df['Holding'], autopct='%1.1f%%', startangle=90)
+
+        # Set text color to white for labels with percentage > 10%
+        for i, patch in enumerate(patches):
+            percentage = df['Percentage'].iloc[i]
+            holder = df['Holding'].iloc[i]
             if percentage >= 5 or holder == 'BOTS':
                 labels[i].set_color('white')
             else:
@@ -143,7 +188,6 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
     if watchlist:
         with right_col:
-            st.markdown("# Key Activity")
             load_ft_graph(share_price)
         load_ft_df(key_activity, hide=True)
 
@@ -281,10 +325,13 @@ def load_ft_stats(address, target, progress, watchlist=False):
             if activity != "N/A":
                 load_ft_df(activity, hide=True)
         with right_stats:
-            st.markdown("# Holder Pie Chart")
-            load_pie_chart(key_holders)
+            st.subheader("Holder Pie Chart")
+            load_pie_chart_holders(key_holders)
+            st.markdown("")
+            st.markdown("")
+            st.subheader("Holdings Pie Chart")
+            load_pie_chart_holdings(portfolio)
         with left_stats:
-            st.markdown("# Key Price Graph")
             load_ft_graph(share_price)
 
         with left_df:

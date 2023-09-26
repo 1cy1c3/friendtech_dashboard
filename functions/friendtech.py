@@ -151,9 +151,11 @@ def get_token_activity(target):
                 if item["isBuy"]:
                     activity = "buy"
                     keys += int(item['shareAmount'])
+                    color = "#0000FF"
                 else:
                     activity = "sell"
                     keys -= int(item['shareAmount'])
+                    color = "#FF0000"
 
                 eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                 total_eth += eth_value  # increment the counter with each loop iteration
@@ -574,8 +576,7 @@ def get_holdings(target):
                     for item in data['users']:
                         portfolio.append({
                             'Holding': item['twitterUsername'],
-                            'Balance': int(item['balance']),
-                            'Wallet': item['address']
+                            'Balance': int(item['balance'])
                         })
 
                     if data['nextPageStart'] is None:
