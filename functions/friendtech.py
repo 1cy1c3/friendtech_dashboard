@@ -140,6 +140,7 @@ def get_token_activity(target):
     response = requests.get(url, headers=headers)
     token_activity = []
     chart_data = []
+    scatter_data = []
 
     keys = 0
     total_eth = 0  # initialize a counter to store the sum of ethAmounts
@@ -148,23 +149,30 @@ def get_token_activity(target):
         data = response.json()
         if "users" in data:
             for item in data["users"]:
-                if item["isBuy"]:
-                    activity = "buy"
-                    keys += int(item['shareAmount'])
-                    color = "#0000FF"
-                else:
-                    activity = "sell"
-                    keys -= int(item['shareAmount'])
-                    color = "#FF0000"
-
                 eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                 total_eth += eth_value  # increment the counter with each loop iteration
                 _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
                 raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
                 time_delta = ut.time_ago(int(item["createdAt"]))
-
                 if int(item['shareAmount']) > 1:
                     item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
+                if item["isBuy"]:
+                    activity = "buy"
+                    keys += int(item['shareAmount'])
+                    scatter_data.append({
+                        'time': _time,
+                        'raw_time': raw_time,
+                        'buy_price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                    })
+                else:
+                    activity = "sell"
+                    keys -= int(item['shareAmount'])
+                    scatter_data.append({
+                        'time': _time,
+                        'raw_time': raw_time,
+                        'sell_price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                    })
 
                 token_activity.append({
                     'Trader': item['twitterUsername'],
@@ -179,9 +187,9 @@ def get_token_activity(target):
                     'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
         else:
-            return None, None, None, None
+            return None, None, None, None, None
     except requests.exceptions.JSONDecodeError:
-        return None, None, None, None
+        return None, None, None, None, None
 
     # Search for next page start and make more requests untill the full history is loaded
     if data['nextPageStart'] != "0":
@@ -200,21 +208,30 @@ def get_token_activity(target):
                 data = response.json()
                 if "users" in data:
                     for item in data["users"]:
-                        if item["isBuy"]:
-                            activity = "buy"
-                            keys += int(item['shareAmount'])
-                        else:
-                            activity = "sell"
-                            keys -= int(item['shareAmount'])
-
                         eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
                         total_eth += eth_value  # increment the counter with each loop iteration
                         _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
                         raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
                         time_delta = ut.time_ago(int(item["createdAt"]))
-
                         if int(item['shareAmount']) > 1:
                             item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
+
+                        if item["isBuy"]:
+                            activity = "buy"
+                            keys += int(item['shareAmount'])
+                            scatter_data.append({
+                                'time': _time,
+                                'raw_time': raw_time,
+                                'buy_price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                            })
+                        else:
+                            activity = "sell"
+                            keys -= int(item['shareAmount'])
+                            scatter_data.append({
+                                'time': _time,
+                                'raw_time': raw_time,
+                                'sell_price': round((int(item['ethAmount']) * 10 ** -18), 3)
+                            })
 
                         token_activity.append({
                             'Trader': item['twitterUsername'],
@@ -234,12 +251,12 @@ def get_token_activity(target):
                     else:
                         next_page = data['nextPageStart']
                 else:
-                    return token_activity, round(total_eth, 3), chart_data, keys
+                    return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
             except requests.exceptions.JSONDecodeError:
-                return token_activity, round(total_eth, 3), chart_data, keys
-        return token_activity, round(total_eth, 3), chart_data, keys
+                return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
+        return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
     else:
-        return token_activity, round(total_eth, 3), chart_data, keys
+        return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
 
 
 def get_user_points(address):

@@ -18,7 +18,6 @@ from pandas.api.types import (
     is_object_dtype,
 )
 
-
 ss = st.session_state
 
 
@@ -30,7 +29,6 @@ def load_ft_graph(data):
         count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
         # Create a dictionary to store average values per date
         date_to_values = {}
-        _date_to_values = {}
 
         if len(data) == count:
             for item in data:
@@ -40,10 +38,9 @@ def load_ft_graph(data):
 
             if raw:
                 date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
-                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+
             else:
                 date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
-                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
 
             if date in date_to_values:
                 date_to_values[date].append(float(trans["price"]))
@@ -75,12 +72,36 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
-        df2 = pd.DataFrame(data)
         st.subheader("Key Price Chart")
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
-        st.subheader("Buys/Sells Chart")
 
-        st.scatter_chart(df2.set_index('time')['price'], use_container_width=True, height=500)
+    else:
+        st.write("No Data found")
+
+
+def load_ft_scatter(data):
+    raw = False
+    if data and len(data) > 1:
+        # Sort the transactions by date
+        data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
+        count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
+
+        if len(data) == count:
+            for item in data:
+                item['time'] = item['raw_time']
+            raw = True
+
+        for trans in data:
+            if raw:
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+            else:
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+
+        df = pd.DataFrame(data, columns=["time", "buy_price", "sell_price"])
+        st.subheader("Buys/Sells Chart")
+        st.scatter_chart(df, x="time", y=["buy_price", "sell_price"], color=["#008000", "#FF0000"],
+                         use_container_width=True, height=500)
+
     else:
         st.write("No Data found")
 
@@ -179,7 +200,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with right_col:
             st.markdown("# Activity")
     with st.spinner("Fetching key activity..."):
-        key_activity, key_volume, share_price, keys = ft.get_token_activity(address)
+        key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
         if keys is None:
             keys = "N/A"
     if not watchlist:
@@ -332,6 +353,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             load_pie_chart_holdings(portfolio)
         with left_stats:
             load_ft_graph(share_price)
+            load_ft_scatter(scatter_data)
 
         with left_df:
             st.markdown("# Key Activity")
