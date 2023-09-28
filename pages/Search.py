@@ -33,8 +33,9 @@ h_l_col, h_r_col = st.columns([1, 1])  # Columns header
 left_col, right_col = st.columns([1, 1])  # Columns Search
 
 with h_r_col:
-    h_l_2_col, h_r_2_col, _ = st.columns([1, 2, 3])
-    home = h_l_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
+    h_l_2_col, h_r_2_col = st.columns([1, 1])
+    pfp_img = h_l_2_col.empty()
+    home = h_r_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
     refresh = h_r_2_col.button("Refresh/Reload User", on_click=ut.submit(), help="Refresh or Reloads last User-Profiles!")
 
 
@@ -49,9 +50,9 @@ if button or refresh and ss.get("submit"):
         target = ss["username"]
         if len(target) == 42 and target.startswith("0x"):
             target_address = target.lower()
-            target = ft.addr_to_user(target_address, convert=True)
+            target, pfp = ft.addr_to_user(target_address, convert=True)
         else:
-            target_address = ft.user_to_addr(target)
+            target_address, pfp = ft.user_to_addr(target)
 
         ss["username"] = target.lower()
         # runs only if wallet address gets returned
@@ -63,6 +64,8 @@ if button or refresh and ss.get("submit"):
 
                 # Insert at the beginning of the list
                 ss["history"].insert(0, {"History": target.lower()})
+
+            pfp_img.image(pfp, width=150)
             gui.load_ft_stats(target_address.lower(), target, progress)
             progress.empty()
 

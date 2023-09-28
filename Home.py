@@ -42,10 +42,10 @@ with h_r_col:
 
 with left_col:
     st.markdown("# Top 50")
-    gui.load_ft_df(ft.get_top_50(), hide=False)
+    gui.load_ft_df(ft.get_top_50(), hide=True, image=True)
 with right_col:
     st.markdown("# Trending")
-    gui.load_ft_df(ft.get_trending(), hide=False)
+    gui.load_ft_df(ft.get_trending(), hide=True, image=True)
 
 st.markdown("")  # Spacer for columns
 st.markdown("# Global Activity")

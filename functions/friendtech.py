@@ -62,6 +62,7 @@ def get_trending():
                     temp_p = item["volume"].split(".")
                     item["volume"] = temp_p[0]
                 filtered_data.append({
+                    'PFP': item["twitterPfpUrl"],
                     'Subject': item['twitterUsername'],
                     'Volume': round((int(item['volume']) * 10 ** -18), 3),
                     'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
@@ -99,11 +100,11 @@ def get_portfolio_value(address):
 
 
 def get_top_50():
+    top50 = []
     url = f'https://prod-api.kosetto.com/lists/top-by-price'
     response = requests.get(url)
     try:
         data = response.json()
-        top50 = []
         if "users" in data:
             for rank in data["users"]:
                 name = rank["twitterUsername"]
@@ -115,6 +116,7 @@ def get_top_50():
                 supply = rank["shareSupply"]
 
                 user = {
+                    "PFP": rank["twitterPfpUrl"],
                     "Name": name,
                     "Price": price,
                     "Holder": holder,
@@ -175,6 +177,7 @@ def get_token_activity(target):
                     })
 
                 token_activity.append({
+                    'PFP': item["twitterPfpUrl"],
                     'Trader': item['twitterUsername'],
                     'Activity': activity,
                     'Keys': item['shareAmount'],
@@ -296,11 +299,11 @@ def user_to_addr(user):
             for item in data['users']:
                 if item['twitterUsername'].lower() == user.lower():
                     address = item['address']
-                    return Web3.to_checksum_address(address)  # Convert to checksum address
+                    return Web3.to_checksum_address(address), item['twitterPfpUrl']  # Convert to checksum address
         else:
-            return None
-    except requests.exceptions.JSONDecodeError as e:
-        return None
+            return None, None
+    except requests.exceptions.JSONDecodeError:
+        return None, None
 
 
 def addr_to_user(address, convert):
@@ -310,10 +313,10 @@ def addr_to_user(address, convert):
     try:
         data = response.json()
         if convert and "twitterUsername" in data:
-            return data["twitterUsername"]
+            return data["twitterUsername"], data["twitterPfpUrl"]
 
         elif convert and "twitterUsername" not in data:
-            return "N/A"
+            return "N/A", "N/A"
 
         else:
             if "displayPrice" in data and "." in data["displayPrice"]:
@@ -326,7 +329,7 @@ def addr_to_user(address, convert):
                 return "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
         if convert:
-            return "N/A"
+            return "N/A", "N/A"
         return "N/A", "N/A", "N/A", "N/A"
 
 
@@ -363,6 +366,7 @@ def get_personal_activity(target):
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 account_activity.append({
+                    'PFP': item["twitterPfpUrl"],
                     'Subject': item['twitterUsername'],
                     'Activity': activity,
                     'Keys': item['shareAmount'],
@@ -521,6 +525,7 @@ def get_holders(target):
                     self_count = int(item['balance'])
 
                 holder_total.append({
+                    'PFP': item["twitterPfpUrl"],
                     'Holder': item['twitterUsername'],
                     'Balance': int(item['balance'])
                 })
@@ -561,7 +566,7 @@ def get_holders(target):
         return self_count, holder_total
 
 
-def get_holdings(target):
+def get_holdings(target, dump_value=False):
     url = f'https://prod-api.kosetto.com/users/{target}/token-holdings'
     response = requests.get(url)
 
@@ -571,11 +576,19 @@ def get_holdings(target):
 
         if 'users' in data:
             for item in data['users']:
-                portfolio.append({
-                    'Holding': item['twitterUsername'],
-                    'Balance': int(item['balance']),
-                    'Wallet': item['address']
-                })
+                if dump_value is True:
+                    portfolio.append({
+                        'PFP': item["twitterPfpUrl"],
+                        'Holding': item['twitterUsername'],
+                        'Balance': int(item['balance']),
+                        'Wallet': item['address']
+                    })
+                else:
+                    portfolio.append({
+                        'PFP': item["twitterPfpUrl"],
+                        'Holding': item['twitterUsername'],
+                        'Balance': int(item['balance'])
+                    })
         else:
             return None
     except requests.exceptions.JSONDecodeError:

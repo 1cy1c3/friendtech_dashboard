@@ -36,8 +36,9 @@ with st.sidebar:
     gui.load_sidebar_ft()
 
 with header_l:
-    st.write("Drop in any friend.tech name and get a full portfolio breakdown!\nThis process might take some time,"
-             " depending on the targets Portfolio")
+    placeholder = st.write(
+        "Drop in any friend.tech name and get a full portfolio breakdown!\nThis process might take some time,"
+        " depending on the targets Portfolio")
 
 with header_r:
     # Submit Form to handle the submit process
@@ -48,9 +49,9 @@ with header_r:
 if button and ss.get("submit"):
     if len(target) == 42 and target.startswith("0x"):
         target_address = target.lower()
-        target = ft.addr_to_user(target_address, convert=True)
+        target, pfp = ft.addr_to_user(target_address, convert=True)
     else:
-        target_address = ft.user_to_addr(target)
+        target_address, pfp = ft.user_to_addr(target)
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":
@@ -59,12 +60,11 @@ if button and ss.get("submit"):
             portfolio_value, _ = ft.get_portfolio_value(target_address)
         progress.progress(value=33, text="Loading Stats")
         with st.spinner("Getting Account Portfolio"):
-            portfolio = ft.get_holdings(target_address)
+            portfolio = ft.get_holdings(target_address, dump_value=True)
         progress.progress(value=67, text="Loading Stats")
-        with st.spinner("Collection Portfolio Data"):
+        with st.spinner("Collecting Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
         progress.progress(value=100, text="Completed")
-
         progress.empty()
 
         left_col.markdown(f"# {target}'s Portfolio-Value:\n# {portfolio_value} ETH")

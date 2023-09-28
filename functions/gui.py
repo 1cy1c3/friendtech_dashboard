@@ -209,7 +209,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
     if watchlist:
         with right_col:
             load_ft_graph(share_price)
-        load_ft_df(key_activity, hide=True)
+        load_ft_df(key_activity, hide=True, image=True)
 
     with st.spinner("Fetching friend.tech user info..."):
         holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
@@ -232,6 +232,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             bot_percent = round(100 * (bots / total_keys), 2)
             if bots > 0:
                 key_holders.append({
+                    'PFP': None,
                     'Holder': 'BOTS',
                     'Balance': bots
                 })
@@ -343,7 +344,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         progress.progress(value=80, text="Loading Stats")
         with right_col:
             if activity != "N/A":
-                load_ft_df(activity, hide=True)
+                load_ft_df(activity, hide=True, image=True)
         with right_stats:
             st.subheader("Holder Pie Chart")
             load_pie_chart_holders(key_holders)
@@ -357,23 +358,36 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
         with left_df:
             st.markdown("# Key Activity")
-            load_ft_df(key_activity, hide=True)
+            load_ft_df(key_activity, hide=True, image=True)
 
         with mid_df:
             st.markdown("# Holdings")
-            load_ft_df(portfolio, hide=True)
+            load_ft_df(portfolio, hide=True, image=True)
         with right_df:
             st.markdown("# Key Holders")
-            load_ft_df(key_holders, hide=True)
+            load_ft_df(key_holders, hide=True, image=True)
 
     progress.progress(value=100, text="Completed")
 
 
-def load_ft_df(data, hide):
+def load_ft_df(data, hide, image=False):
     if data:
-        df = pd.DataFrame(data)
-        df.index += 1
-        st.dataframe(df, use_container_width=True, hide_index=hide)
+        if image is False:
+            df = pd.DataFrame(data)
+            df.index += 1
+            st.dataframe(df, use_container_width=True, hide_index=hide)
+        else:
+            df = pd.DataFrame(data)
+            st.data_editor(
+                df,
+                column_config={
+                    "PFP": st.column_config.ImageColumn(
+                        "PFP"
+                    )
+                },
+                hide_index=True,
+                use_container_width = True
+            )
     else:
         pass
 
