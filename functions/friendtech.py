@@ -617,28 +617,29 @@ def get_dump_values(data, address):
     x = 0
     if data:
         for item in data:
-            _, _, _, price = addr_to_user(item['Wallet'], convert=False)
-            supply = ut.get_supply(price)
-            if price != "N/A" and supply != "N/A":
-                value = ut.get_value(supply - int((item['Balance'])) - 1, int((item['Balance'])))
-                if value != "N/A":
-                    if item['Balance'] == 1:
-                        x = .1
-                    if 'Wallet' in item and item['Wallet'].lower() == address:
-                        dump_data.append({
-                            'Holding': item['Holding'],
-                            'Balance': item['Balance'],
-                            'ShownValue': round(price * item['Balance'], 3),
-                            'DumpValue': round(-value * (.95 + x), 3)
-                        })
-                        dump_value += round(-value * (.95 + x), 3)
-                    else:
-                        dump_data.append({
-                            'Holding': item['Holding'],
-                            'Balance': item['Balance'],
-                            'ShownValue': round(price * item['Balance'], 3),
-                            'DumpValue': round(-value * (.9 + x), 3)
-                        })
-                        dump_value += round(-value * (.9 + x), 3)
+            if 'Wallet' in item:
+                _, _, _, price = addr_to_user(item['Wallet'], convert=False)
+                supply = ut.get_supply(price)
+                if price != "N/A" and supply != "N/A":
+                    value = ut.get_value(supply - int((item['Balance'])) - 1, int((item['Balance'])))
+                    if value != "N/A":
+                        if item['Balance'] == 1:
+                            x = .1
+                        if item['Wallet'].lower() == address:
+                            dump_data.append({
+                                'Holding': item['Holding'],
+                                'Balance': item['Balance'],
+                                'ShownValue': round(price * item['Balance'], 3),
+                                'DumpValue': round(-value * (.95 + x), 3)
+                            })
+                            dump_value += round(-value * (.95 + x), 3)
+                        else:
+                            dump_data.append({
+                                'Holding': item['Holding'],
+                                'Balance': item['Balance'],
+                                'ShownValue': round(price * item['Balance'], 3),
+                                'DumpValue': round(-value * (.9 + x), 3)
+                            })
+                            dump_value += round(-value * (.9 + x), 3)
 
     return dump_data, round(dump_value, 3)
