@@ -624,7 +624,7 @@ def get_dump_values(data, address):
                 if value != "N/A":
                     if item['Balance'] == 1:
                         x = .1
-                    if item['Wallet'].lower() == address:
+                    if 'Wallet' in item and item['Wallet'].lower() == address:
                         dump_data.append({
                             'Holding': item['Holding'],
                             'Balance': item['Balance'],
