@@ -316,7 +316,7 @@ def addr_to_user(address, convert):
             return data["twitterUsername"], data["twitterPfpUrl"]
 
         elif convert and "twitterUsername" not in data:
-            return "N/A", "N/A"
+            return "N/A", None
 
         else:
             if "displayPrice" in data and "." in data["displayPrice"]:
@@ -329,7 +329,7 @@ def addr_to_user(address, convert):
                 return "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
         if convert:
-            return "N/A", "N/A"
+            return "N/A", None
         return "N/A", "N/A", "N/A", "N/A"
 
 
