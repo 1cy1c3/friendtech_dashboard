@@ -225,7 +225,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
     with left_col:
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
-
+    progress.progress(value=5, text="Loading Stats")
     if not watchlist:
         with right_col:
             st.markdown("# Activity")
@@ -239,7 +239,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 balance = bs.balance(address)
             except Exception:
                 balance = "N/A"
-
+            progress.progress(value=15, text="Loading Stats")
             with st.spinner("Fetching friend.tech rank..."):
                 points, tier, rank = ft.get_user_points(address)
             if tier.lower() == "bronze":
@@ -261,7 +261,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 fees = "N/A"
             else:
                 fees = fees_collected / 2
-
+            progress.progress(value=25, text="Loading Stats")
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
             st.write(f"**Collected Fees:** {fees} ETH")
 
@@ -284,7 +284,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 st.write(f"**Total Profit: {total}**")
                 st.write(f"**Capital Efficiency:** {capital_efficiency}%")
                 st.write(f"**Created: {created_at}**")
-
+        progress.progress(value=35, text="Loading Stats")
         if not watchlist:
             with rc_2:
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
@@ -293,8 +293,8 @@ def load_ft_stats(address, target, progress, watchlist=False):
             key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
             if keys is None:
                 keys = "N/A"
+        progress.progress(value=45, text="Loading Stats")
         if not watchlist:
-            progress.progress(value=20, text="Loading Stats")
             with left_stats:
                 st.subheader("Key Price Chart")
                 metrics = load_ft_graph(share_price)
@@ -302,6 +302,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 st.subheader("Buys/Sells Chart")
                 load_ft_scatter(scatter_data)
 
+        progress.progress(value=55, text="Loading Stats")
         if watchlist:
             with right_col:
                 load_ft_graph(share_price)
@@ -310,7 +311,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with st.spinner("Fetching friend.tech user info..."):
             holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
         if not watchlist:
-            progress.progress(value=40, text="Loading Stats")
+            progress.progress(value=65, text="Loading Stats")
         else:
             progress.progress(value=50, text="Loading Stats")
         with rc_2:
@@ -318,6 +319,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
             self_count, key_holders = ft.get_holders(address)
+            progress.progress(value=75, text="Loading Stats")
             if self_count is None:
                 self_count = "N/A"
 
@@ -394,10 +396,10 @@ def load_ft_stats(address, target, progress, watchlist=False):
                               value=f"{round(metrics[0]['month'])}ETH",
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
 
-        progress.progress(value=60, text="Loading Stats")
+        progress.progress(value=85, text="Loading Stats")
         with st.spinner("Getting Portfolio"):
             portfolio = ft.get_holdings(address)
-        progress.progress(value=80, text="Loading Stats")
+        progress.progress(value=95, text="Loading Stats")
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True, image=True)
