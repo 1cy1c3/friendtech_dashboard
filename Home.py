@@ -36,10 +36,6 @@ left_col, right_col = st.columns([1, 1])  # Columns Search
 b_l_c, b_r_c = st.columns([1, 1])
 
 
-# Load Status message
-with h_r_col:
-    gui.load_status()
-
 with left_col:
     st.markdown("# Top 50")
     gui.load_ft_df(ft.get_top_50(), hide=True, image=True)
