@@ -67,7 +67,8 @@ if button or refresh and ss.get("submit"):
                 # Insert at the beginning of the list
                 ss["history"].insert(0, {"History": target.lower()})
 
-            pfp_img.image(pfp, width=150)
+            if pfp is not None:
+                pfp_img.image(pfp, width=150)
             twitter_url = f"https://twitter.com/{target.lower()}"
             base_scan_url = f"https://basescan.org/address/{target_address}"
             base_scan.link_button("Base Scan", url=base_scan_url, use_container_width=True)
