@@ -22,6 +22,7 @@ ss = st.session_state
 
 def load_ft_graph(data):
     raw = False
+    metric_data = []
     if data and len(data) > 1:
         # Sort the transactions by date
         data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
@@ -71,9 +72,36 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
+        now = datetime.datetime.now()
+        last_week = now - datetime.timedelta(days=7)
+        last_month = now - datetime.timedelta(days=30)
+        week_date = last_week.strftime("%d/%m/%Y")
+        month_date = last_month.strftime("%d/%m/%Y")
+
+        today = df.iloc[-1]['price']
+        try:
+            yesterday = df.iloc[-2]['price']
+        except:
+            yesterday = 0
+        try:
+            week = df[df["time"] == week_date].iloc[0]['price']
+        except:
+            week = 0
+
+        try:
+            month = df[df["time"] == month_date].iloc[0]['price']
+        except:
+            month = 0
+
+        metric_data.append({
+            'today': today,
+            'yesterday': yesterday,
+            'week': week,
+            'month': month
+        })
         st.subheader("Key Price Chart")
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
-
+        return metric_data
     else:
         st.write("No Data found")
 
@@ -204,6 +232,9 @@ def load_ft_stats(address, target, progress, watchlist=False):
             keys = "N/A"
     if not watchlist:
         progress.progress(value=20, text="Loading Stats")
+        with left_stats:
+            metrics = load_ft_graph(share_price)
+            load_ft_scatter(scatter_data)
 
     if watchlist:
         with right_col:
@@ -219,6 +250,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
+        metric_l, metric_m, metric_r = st.columns([1, 1, 1])
         self_count, key_holders = ft.get_holders(address)
         if self_count is None:
             self_count = "N/A"
@@ -337,6 +369,24 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     if not watchlist:
+        if price != "N/A":
+            with metric_l:
+                if metrics[0]['yesterday'] > 0.0:
+                    st.metric(label="day to day",
+                              value=f"{round(metrics[0]['yesterday'], 3)}ETH",
+                              delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
+
+            with metric_m:
+                if metrics[0]['week'] > 0.0:
+                    st.metric(label="day to week",
+                              value=f"{round(metrics[0]['week'], 3)}ETH",
+                              delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
+            with metric_r:
+                if metrics[0]['month'] > 0.0:
+                    st.metric(label="day to month",
+                              value=f"{round(metrics[0]['month'])}ETH",
+                              delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
+
         progress.progress(value=60, text="Loading Stats")
         with st.spinner("Getting Portfolio"):
             portfolio = ft.get_holdings(address)
@@ -344,6 +394,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with right_col:
             if activity != "N/A":
                 load_ft_df(activity, hide=True, image=True)
+
         with right_stats:
             st.subheader("Holder Pie Chart")
             load_pie_chart_holders(key_holders)
@@ -351,9 +402,6 @@ def load_ft_stats(address, target, progress, watchlist=False):
             st.markdown("")
             st.subheader("Holdings Pie Chart")
             load_pie_chart_holdings(portfolio)
-        with left_stats:
-            load_ft_graph(share_price)
-            load_ft_scatter(scatter_data)
 
         with left_df:
             st.markdown("# Key Activity")
@@ -385,7 +433,7 @@ def load_ft_df(data, hide, image=False):
                     )
                 },
                 hide_index=True,
-                use_container_width = True
+                use_container_width=True
             )
     else:
         pass
