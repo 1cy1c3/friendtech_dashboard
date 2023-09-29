@@ -79,6 +79,7 @@ def load_ft_graph(data):
         month_date = last_month.strftime("%d/%m/%Y")
 
         today = df.iloc[-1]['price']
+        creation = df.iloc[0]['price']
         try:
             yesterday = df.iloc[-2]['price']
         except:
@@ -97,7 +98,8 @@ def load_ft_graph(data):
             'today': today,
             'yesterday': yesterday,
             'week': week,
-            'month': month
+            'month': month,
+            'creation': creation
         })
 
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=700)
@@ -232,7 +234,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
-        metric_l, metric_m, metric_r = st.columns([1, 1, 1])
+        metric_l, metric_lm, metric_rm, metric_r = st.columns([1, 1, 1, 1])
 
         with lc_2:
             try:
@@ -385,16 +387,23 @@ def load_ft_stats(address, target, progress, watchlist=False):
                               value=f"{round(metrics[0]['yesterday'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
 
-            with metric_m:
+            with metric_lm:
                 if metrics[0]['week'] > 0.0:
                     st.metric(label="day to week",
                               value=f"{round(metrics[0]['week'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
-            with metric_r:
+            with metric_rm:
                 if metrics[0]['month'] > 0.0:
                     st.metric(label="day to month",
                               value=f"{round(metrics[0]['month'])}ETH",
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
+            with metric_r:
+                if metrics[0]['creation'] == 0:
+                    metrics[0]['creation'] = 0.0000625
+
+                st.metric(label="day to month",
+                          value=f"{round(metrics[0]['creation'])}ETH",
+                          delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
         with st.spinner("Getting Portfolio"):
@@ -454,7 +463,6 @@ def load_sidebar_ft():
     with open("text/sidebar_ft.txt") as file:
         sidebar_txt = file.read()
     st.write(sidebar_txt, unsafe_allow_html=True)
-
 
 
 @st.cache_data(show_spinner=False)
