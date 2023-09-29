@@ -71,7 +71,7 @@ if button or refresh and ss.get("submit"):
             if pfp is not None:
                 pfp_img.image(pfp, width=150)
 
-            ft_url = f"https://https://friend.tech/{target.lower()}"
+            ft_url = f"https://friend.tech/{target.lower()}"
             twitter_url = f"https://twitter.com/{target.lower()}"
             base_scan_url = f"https://basescan.org/address/{target_address}"
 
