@@ -448,8 +448,9 @@ def load_ft_df(data, hide, image=False):
 
 
 def load_sidebar_ft():
-    st.link_button("My Twitter", url="https://twitter.com/1cy1c3")
-    st.link_button("My friend.tech", url="https://friend.tech/1cy1c3")
+    l, r = st.columns([1, 1])
+    l.link_button("My Twitter", url="https://twitter.com/1cy1c3", use_container_width=True)
+    r.link_button("My friend.tech", url="https://friend.tech/1cy1c3", use_container_width=True)
     with open("text/sidebar_ft.txt") as file:
         sidebar_txt = file.read()
     st.write(sidebar_txt, unsafe_allow_html=True)

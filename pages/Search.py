@@ -37,7 +37,7 @@ with h_r_col:
     pfp_img = h_l_2_col.empty()
     # home = h_r_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
     refresh = h_r_2_col.button("Refresh/Reload User", on_click=ut.submit(),
-                               help="Refresh or Reloads last User-Profiles!")
+                               help="Refresh or Reloads last User-Profiles!", use_container_width=True)
     base_scan = h_r_2_col.empty()
     twitter = h_r_2_col.empty()
 
@@ -70,8 +70,8 @@ if button or refresh and ss.get("submit"):
             pfp_img.image(pfp, width=150)
             twitter_url = f"https://twitter.com/{target.lower()}"
             base_scan_url = f"https://basescan.org/address/{target_address}"
-            base_scan.link_button("Base Scan", url=base_scan_url)
-            twitter.link_button("Twitter", url=twitter_url)
+            base_scan.link_button("Base Scan", url=base_scan_url, use_container_width=True)
+            twitter.link_button("Twitter", url=twitter_url, use_container_width=True)
             gui.load_ft_stats(target_address.lower(), target, progress)
             progress.empty()
 
