@@ -100,7 +100,7 @@ def load_ft_graph(data):
             'month': month
         })
 
-        st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
+        st.line_chart(df.set_index('time')['price'], use_container_width=True, height=700)
         return metric_data
     else:
         st.write("No Data found")
@@ -126,7 +126,7 @@ def load_ft_scatter(data):
 
         df = pd.DataFrame(data, columns=["time", "buy_price", "sell_price"])
         st.scatter_chart(df, x="time", y=["buy_price", "sell_price"], color=["#008000", "#FF0000"],
-                         use_container_width=True, height=500)
+                         use_container_width=True, height=700)
 
     else:
         st.write("No Data found")
@@ -164,6 +164,7 @@ def load_pie_chart_holders(data):
 
         ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
         fig.set_facecolor('#0e1117')
+        fig.set_size_inches(5, 5)
         st.pyplot(fig)
     else:
         st.write("No Data Found")
@@ -201,6 +202,7 @@ def load_pie_chart_holdings(data):
 
         ax.set_ylabel("")  # Remove the 'Balance' label on the pie chart
         fig.set_facecolor('#0e1117')
+        fig.set_size_inches(5, 5)
         st.pyplot(fig)
     else:
         st.write("No Data Found")
@@ -227,65 +229,120 @@ def load_ft_stats(address, target, progress, watchlist=False):
     if not watchlist:
         with right_col:
             st.markdown("# Activity")
-    with st.spinner("Fetching key activity..."):
-        key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
-        if keys is None:
-            keys = "N/A"
-    if not watchlist:
-        progress.progress(value=20, text="Loading Stats")
-        with left_stats:
-            st.subheader("Key Price Chart")
-            metrics = load_ft_graph(share_price)
-        with left_stats2:
-            st.subheader("Buys/Sells Chart")
-            load_ft_scatter(scatter_data)
-
-    if watchlist:
-        with right_col:
-            load_ft_graph(share_price)
-        load_ft_df(key_activity, hide=True, image=True)
-
-    with st.spinner("Fetching friend.tech user info..."):
-        holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
-    if not watchlist:
-        progress.progress(value=40, text="Loading Stats")
-    else:
-        progress.progress(value=50, text="Loading Stats")
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
         metric_l, metric_m, metric_r = st.columns([1, 1, 1])
-        self_count, key_holders = ft.get_holders(address)
-        if self_count is None:
-            self_count = "N/A"
 
-        if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
-            unique_holder = round(min(100, (100 * holder) / total_keys), 2)
-            if total_keys < keys:
-                total_keys = keys
-            bots = total_keys - keys
-            bot_percent = round(100 * (bots / total_keys), 2)
-            if bots > 0:
-                key_holders.append({
-                    'PFP': None,
-                    'Holder': 'BOTS',
-                    'Balance': bots
-                })
+        with lc_2:
+            try:
+                balance = bs.balance(address)
+            except Exception:
+                balance = "N/A"
+
+            with st.spinner("Fetching friend.tech rank..."):
+                points, tier, rank = ft.get_user_points(address)
+            if tier.lower() == "bronze":
+                st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
+            elif tier.lower() == "silver":
+                st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
+            elif tier.lower() == "gold":
+                st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
+            elif tier.lower() == "diamond":
+                st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
+            else:
+                st.write(f"**Rank:** {rank} **Points:** {points}")
+
+            st.write(f"**Account Balance:** {balance} ETH")
+            
+            with st.spinner("Fetching friend.tech wallet info..."):
+                portfolio_value, fees_collected = ft.get_portfolio_value(address)
+            if fees_collected == "N/A":
+                fees = "N/A"
+            else:
+                fees = fees_collected / 2
+
+            st.write(f"**Portfolio Value:** {portfolio_value} ETH")
+            st.write(f"**Collected Fees:** {fees} ETH")
+
+            if not watchlist:
+                with st.spinner("Fetching friend.tech user activity..."):
+                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
+                if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+                    total = round((profit + portfolio_value + fees), 3)
+                else:
+                    total = "N/A"
+
+                if total != "N/A" and investment != "N/A" and investment != 0:
+                    capital_efficiency = round(100 * total / investment, 2)
+                else:
+                    capital_efficiency = "N/A"
+
+                st.write(f"**Investment:** {investment} ETH")
+                st.write(f"**Trading Profit:** {profit} ETH")
+                st.write(f"**Trading Volume:** {volume} ETH")
+                st.write(f"**Total Profit: {total}**")
+                st.write(f"**Capital Efficiency:** {capital_efficiency}%")
+                st.write(f"**Created: {created_at}**")
+
+        if not watchlist:
+            with rc_2:
+                st.write(f"**Buys:Sells:** {buys} : {sells}")
+
+        with st.spinner("Fetching key activity..."):
+            key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
+            if keys is None:
+                keys = "N/A"
+        if not watchlist:
+            progress.progress(value=20, text="Loading Stats")
+            with left_stats:
+                st.subheader("Key Price Chart")
+                metrics = load_ft_graph(share_price)
+            with left_stats2:
+                st.subheader("Buys/Sells Chart")
+                load_ft_scatter(scatter_data)
+
+        if watchlist:
+            with right_col:
+                load_ft_graph(share_price)
+            load_ft_df(key_activity, hide=True, image=True)
+
+        with st.spinner("Fetching friend.tech user info..."):
+            holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
+        if not watchlist:
+            progress.progress(value=40, text="Loading Stats")
         else:
-            unique_holder = "N/A"
-            bots = "N/A"
-            bot_percent = "N/A"
-
-        if price != "N/A" and keys != "N/A":
-            market_cap = round(total_keys * price, 3)
-
-        else:
-            market_cap = "N/A"
-
+            progress.progress(value=50, text="Loading Stats")
         with rc_2:
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
+            self_count, key_holders = ft.get_holders(address)
+            if self_count is None:
+                self_count = "N/A"
+
+            if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
+                unique_holder = round(min(100, (100 * holder) / total_keys), 2)
+                if total_keys < keys:
+                    total_keys = keys
+                bots = total_keys - keys
+                bot_percent = round(100 * (bots / total_keys), 2)
+                if bots > 0:
+                    key_holders.append({
+                        'PFP': None,
+                        'Holder': 'BOTS',
+                        'Balance': bots
+                    })
+            else:
+                unique_holder = "N/A"
+                bots = "N/A"
+                bot_percent = "N/A"
+
+            if price != "N/A" and keys != "N/A":
+                market_cap = round(total_keys * price, 3)
+
+            else:
+                market_cap = "N/A"
 
             if not watchlist:
                 if bot_percent == "N/A":
@@ -317,60 +374,6 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
             st.write(f"**Key Price:** {price} ETH")
             st.write(f"**Market Cap:** {market_cap} ETH")
-
-        with lc_2:
-            with st.spinner("Fetching friend.tech rank..."):
-                points, tier, rank = ft.get_user_points(address)
-            if tier.lower() == "bronze":
-                st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
-            elif tier.lower() == "silver":
-                st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
-            elif tier.lower() == "gold":
-                st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
-            elif tier.lower() == "diamond":
-                st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
-            else:
-                st.write(f"**Rank:** {rank} **Points:** {points}")
-
-            with st.spinner("Fetching friend.tech wallet info..."):
-                portfolio_value, fees_collected = ft.get_portfolio_value(address)
-            if fees_collected == "N/A":
-                fees = "N/A"
-            else:
-                fees = fees_collected / 2
-
-            st.write(f"**Portfolio Value:** {portfolio_value} ETH")
-            st.write(f"**Collected Fees:** {fees} ETH")
-
-            if not watchlist:
-                with st.spinner("Fetching friend.tech user activity..."):
-                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
-                if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
-                    total = round((profit + portfolio_value + fees), 3)
-                else:
-                    total = "N/A"
-
-                if total != "N/A" and investment != "N/A" and investment != 0:
-                    capital_efficiency = round(100 * total / investment, 2)
-                else:
-                    capital_efficiency = "N/A"
-
-                try:
-                    balance = bs.balance(address)
-                except Exception:
-                    balance = "N/A"
-
-                st.write(f"**Investment:** {investment} ETH")
-                st.write(f"**Trading Profit:** {profit} ETH")
-                st.write(f"**Trading Volume:** {volume} ETH")
-                st.write(f"**Total Profit: {total}**")
-                st.write(f"**Capital Efficiency:** {capital_efficiency}%")
-                st.write(f"**Account Balance:** {balance} ETH")
-                st.write(f"**Created: {created_at}**")
-
-        if not watchlist:
-            with rc_2:
-                st.write(f"**Buys:Sells:** {buys} : {sells}")
 
     if not watchlist:
         if price != "N/A":
