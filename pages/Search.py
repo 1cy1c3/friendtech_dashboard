@@ -33,13 +33,14 @@ h_l_col, h_r_col = st.columns([1, 1])  # Columns header
 left_col, right_col = st.columns([1, 1])  # Columns Search
 
 with h_r_col:
-    h_l_2_col, h_r_2_col = st.columns([1, 1])
+    h_l_2_col, h_m_2_col, h_r_2_col = st.columns([1, 1, 2])
     pfp_img = h_l_2_col.empty()
     # home = h_r_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
-    refresh = h_r_2_col.button("Refresh/Reload User", on_click=ut.submit(),
+    refresh = h_m_2_col.button("Refresh/Reload User", on_click=ut.submit(),
                                help="Refresh or Reloads last User-Profiles!", use_container_width=True)
     base_scan = h_r_2_col.empty()
     twitter = h_r_2_col.empty()
+    friendtech = h_r_2_col.empty()
 
 # Submit Form to handle the submit process
 with h_l_col.form(key="search", clear_on_submit=True):
@@ -69,10 +70,15 @@ if button or refresh and ss.get("submit"):
 
             if pfp is not None:
                 pfp_img.image(pfp, width=150)
+
+            ft_url = f"https://https://friend.tech/{target.lower()}"
             twitter_url = f"https://twitter.com/{target.lower()}"
             base_scan_url = f"https://basescan.org/address/{target_address}"
-            base_scan.link_button("Base Scan", url=base_scan_url, use_container_width=True)
+
+            friendtech.link_button("friend.tech", url=ft_url, use_container_width=True)
             twitter.link_button("Twitter", url=twitter_url, use_container_width=True)
+            base_scan.link_button("Base Scan", url=base_scan_url, use_container_width=True)
+
             gui.load_ft_stats(target_address.lower(), target, progress)
             progress.empty()
 
