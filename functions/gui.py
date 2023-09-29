@@ -395,14 +395,14 @@ def load_ft_stats(address, target, progress, watchlist=False):
             with metric_rm:
                 if metrics[0]['month'] > 0.0:
                     st.metric(label="day to month",
-                              value=f"{round(metrics[0]['month'])}ETH",
+                              value=f"{round(metrics[0]['month'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
             with metric_r:
                 if metrics[0]['creation'] == 0:
                     metrics[0]['creation'] = 0.0000625
 
                 st.metric(label="day to creation",
-                          value=f"{round(metrics[0]['creation'])}ETH",
+                          value=f"{round(metrics[0]['creation'], 3)}ETH",
                           delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
