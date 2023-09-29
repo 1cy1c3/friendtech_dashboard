@@ -299,9 +299,10 @@ def user_to_addr(user):
             for item in data['users']:
                 if item['twitterUsername'].lower() == user.lower():
                     address = item['address']
-                    return Web3.to_checksum_address(address), item['twitterPfpUrl']  # Convert to checksum address
+                    return address, item['twitterPfpUrl']  # Convert to checksum address
         else:
             return None, None
+        return None, None
     except requests.exceptions.JSONDecodeError:
         return None, None
 

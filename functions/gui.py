@@ -8,7 +8,6 @@ import pandas as pd
 
 import datetime
 import csv
-import time
 
 from io import StringIO
 from pandas.api.types import (
