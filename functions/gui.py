@@ -99,7 +99,7 @@ def load_ft_graph(data):
             'week': week,
             'month': month
         })
-        st.subheader("Key Price Chart")
+
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=500)
         return metric_data
     else:
@@ -125,7 +125,6 @@ def load_ft_scatter(data):
                 trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
 
         df = pd.DataFrame(data, columns=["time", "buy_price", "sell_price"])
-        st.subheader("Buys/Sells Chart")
         st.scatter_chart(df, x="time", y=["buy_price", "sell_price"], color=["#008000", "#FF0000"],
                          use_container_width=True, height=500)
 
@@ -217,6 +216,8 @@ def load_ft_stats(address, target, progress, watchlist=False):
     st.markdown("")
     left_stats, right_stats = st.columns([1, 1])
     st.markdown("")
+    left_stats2, right_stats2 = st.columns([1, 1])
+    st.markdown("")
     left_df, mid_df, right_df = st.columns([2, 1, 1])
 
     with left_col:
@@ -233,7 +234,10 @@ def load_ft_stats(address, target, progress, watchlist=False):
     if not watchlist:
         progress.progress(value=20, text="Loading Stats")
         with left_stats:
+            st.subheader("Key Price Chart")
             metrics = load_ft_graph(share_price)
+        with left_stats2:
+            st.subheader("Buys/Sells Chart")
             load_ft_scatter(scatter_data)
 
     if watchlist:
@@ -398,8 +402,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with right_stats:
             st.subheader("Holder Pie Chart")
             load_pie_chart_holders(key_holders)
-            st.markdown("")
-            st.markdown("")
+        with right_stats2:
             st.subheader("Holdings Pie Chart")
             load_pie_chart_holdings(portfolio)
 
