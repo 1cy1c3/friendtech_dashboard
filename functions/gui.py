@@ -401,7 +401,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 if metrics[0]['creation'] == 0:
                     metrics[0]['creation'] = 0.0000625
 
-                st.metric(label="day to month",
+                st.metric(label="day to creation",
                           value=f"{round(metrics[0]['creation'])}ETH",
                           delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
