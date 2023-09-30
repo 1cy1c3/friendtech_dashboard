@@ -79,7 +79,7 @@ def load_ft_graph(data):
         last_week = now - datetime.timedelta(days=7)
         last_month = now - datetime.timedelta(days=30)
 
-        yesterday_date = last_week.strftime("%d/%m/%Y")
+        yesterday_date = _yesterday.strftime("%d/%m/%Y")
         week_date = last_week.strftime("%d/%m/%Y")
         month_date = last_month.strftime("%d/%m/%Y")
 
@@ -90,6 +90,7 @@ def load_ft_graph(data):
             yesterday = df[df["time"] == yesterday_date].iloc[0]['price']
         except:
             yesterday = 0
+
         try:
             week = df[df["time"] == week_date].iloc[0]['price']
         except:
@@ -240,6 +241,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
 
     with left_col:
         lc_2, rc_2 = st.columns([1, 1])
+        expander = st.empty()
         metric_l, metric_lm, metric_rm, metric_r = st.columns([1, 1, 1, 1])
 
         with lc_2:
@@ -273,117 +275,121 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
             st.write(f"**Collected Fees:** {fees} ETH")
 
+            with st.spinner("Fetching friend.tech user info..."):
+                holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
             if not watchlist:
-                with st.spinner("Fetching friend.tech user activity..."):
-                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
-                if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
-                    total = round((profit + portfolio_value + fees), 3)
-                else:
-                    total = "N/A"
+                progress.progress(value=35, text="Loading Stats")
+            else:
+                progress.progress(value=40, text="Loading Stats")
 
-                if total != "N/A" and investment != "N/A" and investment != 0:
-                    capital_efficiency = round(100 * total / investment, 2)
-                else:
-                    capital_efficiency = "N/A"
-
-                st.write(f"**Investment:** {investment} ETH")
-                st.write(f"**Trading Profit:** {profit} ETH")
-                st.write(f"**Trading Volume:** {volume} ETH")
-                st.write(f"**Total Profit: {total}**")
-                st.write(f"**Capital Efficiency:** {capital_efficiency}%")
-                st.write(f"**Created: {created_at}**")
-        progress.progress(value=35, text="Loading Stats")
-        if not watchlist:
             with rc_2:
-                st.write(f"**Buys:Sells:** {buys} : {sells}")
+                st.write(f"**Holdings:** {holdings}")
+                st.write(f"**Holder:** {holder}")
+                st.write(f"**Keys:** {total_keys}")
+                self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
+                progress.progress(value=45, text="Loading Stats")
 
         with st.spinner("Fetching key activity..."):
             key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
             if keys is None:
                 keys = "N/A"
-        progress.progress(value=45, text="Loading Stats")
-        if not watchlist:
-            with left_stats:
-                st.subheader("Key Price Chart")
-                metrics = load_ft_graph(share_price)
-            with left_stats2:
-                st.subheader("Buys/Sells Chart")
-                load_ft_scatter(scatter_data)
-
         progress.progress(value=55, text="Loading Stats")
-        if watchlist:
-            with right_col:
-                load_ft_graph(share_price)
-            load_ft_df(key_activity, hide=True, image=True)
 
-        with st.spinner("Fetching friend.tech user info..."):
-            holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
-        if not watchlist:
-            progress.progress(value=65, text="Loading Stats")
+        if self_count is None:
+            self_count = "N/A"
+
+        if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
+            unique_holder = round(min(100, (100 * holder) / total_keys), 2)
+            if total_keys < keys:
+                total_keys = keys
+            bots = total_keys - keys
+            bot_percent = round(100 * (bots / total_keys), 2)
+            if bots > 0:
+                key_holders.append({
+                    'PFP': None,
+                    'Holder': 'BOTS',
+                    'Balance': bots
+                })
         else:
-            progress.progress(value=50, text="Loading Stats")
-        with rc_2:
-            st.write(f"**Holdings:** {holdings}")
-            st.write(f"**Holder:** {holder}")
-            st.write(f"**Keys:** {total_keys}")
-            self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
-            progress.progress(value=75, text="Loading Stats")
-            if self_count is None:
-                self_count = "N/A"
+            unique_holder = "N/A"
+            bots = "N/A"
+            bot_percent = "N/A"
 
-            if holder != "N/A" and total_keys != "N/A" and keys != "N/A":
-                unique_holder = round(min(100, (100 * holder) / total_keys), 2)
-                if total_keys < keys:
-                    total_keys = keys
-                bots = total_keys - keys
-                bot_percent = round(100 * (bots / total_keys), 2)
-                if bots > 0:
-                    key_holders.append({
-                        'PFP': None,
-                        'Holder': 'BOTS',
-                        'Balance': bots
-                    })
-            else:
-                unique_holder = "N/A"
-                bots = "N/A"
-                bot_percent = "N/A"
+        if price != "N/A" and keys != "N/A":
+            market_cap = round(total_keys * price, 3)
 
-            if price != "N/A" and keys != "N/A":
-                market_cap = round(total_keys * price, 3)
+        else:
+            market_cap = "N/A"
 
-            else:
-                market_cap = "N/A"
+        if not watchlist:
+            with expander.expander("Advanced Stats"):
+                l, r = st.columns([1, 1])
+                with l:
+                    with st.spinner("Fetching friend.tech user activity..."):
+                        activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
+                    if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+                        total = round((profit + portfolio_value + fees), 3)
+                    else:
+                        total = "N/A"
 
-            if not watchlist:
-                if bot_percent == "N/A":
-                    st.markdown(f"**Bots:** {bots} **or** {bot_percent}%")
-                elif bot_percent <= 10:
-                    st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
-                elif 10 < bot_percent <= 25:
-                    st.markdown(f":orange[**Bots:** {bots} **or** {bot_percent}%]")
-                elif bot_percent > 25:
-                    st.markdown(f":red[**Bots:** {bots} **or** {bot_percent}%]")
+                    if total != "N/A" and investment != "N/A" and investment != 0:
+                        capital_efficiency = round(100 * total / investment, 2)
+                    else:
+                        capital_efficiency = "N/A"
 
-                if unique_holder == "N/A":
-                    st.markdown(f"**Unique Holder:** {unique_holder}%")
-                elif unique_holder > 75:
-                    st.markdown(f":green[**Unique Holder:** {unique_holder}%]")
-                elif 75 >= unique_holder > 50:
-                    st.markdown(f":orange[**Unique Holder:** {unique_holder}%]")
-                elif unique_holder <= 50:
-                    st.markdown(f":red[**Unique Holder:** {unique_holder}%]")
+                    st.write(f"**Buy Volume:** {investment} ETH")
+                    st.write(f"**Trading Profit:** {profit} ETH")
+                    st.write(f"**Trading Volume:** {volume} ETH")
+                    st.write(f"**Total Profit: {total}**")
+                    st.write(f"**Capital Efficiency:** {capital_efficiency}%")
+                    st.write(f"**Created: {created_at}**")
 
-                if self_count == "N/A":
-                    st.markdown(f"**Own Keys:** {self_count}")
-                elif self_count <= 3:
-                    st.markdown(f":green[**Own Keys:** {self_count}]")
-                elif 3 < self_count <= 10:
-                    st.markdown(f":orange[**Own Keys:** {self_count}]")
-                elif self_count > 10:
-                    st.markdown(f":red[**Own Keys:** {self_count}]")
+                    with r:
+                        progress.progress(value=65, text="Loading Stats")
+                        st.write(f"**Buys:Sells:** {buys} : {sells}")
+                        if bot_percent == "N/A":
+                            st.markdown(f"**Bots:** {bots} **or** {bot_percent}%")
+                        elif bot_percent <= 10:
+                            st.markdown(f":green[**Bots:** {bots} **or** {bot_percent}%]")
+                        elif 10 < bot_percent <= 25:
+                            st.markdown(f":orange[**Bots:** {bots} **or** {bot_percent}%]")
+                        elif bot_percent > 25:
+                            st.markdown(f":red[**Bots:** {bots} **or** {bot_percent}%]")
 
-            st.write(f"**Key Price:** {price} ETH")
-            st.write(f"**Market Cap:** {market_cap} ETH")
+                        if unique_holder == "N/A":
+                            st.markdown(f"**Unique Holder:** {unique_holder}%")
+                        elif unique_holder > 75:
+                            st.markdown(f":green[**Unique Holder:** {unique_holder}%]")
+                        elif 75 >= unique_holder > 50:
+                            st.markdown(f":orange[**Unique Holder:** {unique_holder}%]")
+                        elif unique_holder <= 50:
+                            st.markdown(f":red[**Unique Holder:** {unique_holder}%]")
+
+                        if self_count == "N/A":
+                            st.markdown(f"**Own Keys:** {self_count}")
+                        elif self_count <= 3:
+                            st.markdown(f":green[**Own Keys:** {self_count}]")
+                        elif 3 < self_count <= 10:
+                            st.markdown(f":orange[**Own Keys:** {self_count}]")
+                        elif self_count > 10:
+                            st.markdown(f":red[**Own Keys:** {self_count}]")
+
+                        st.write(f"**Key Price:** {price} ETH")
+                        st.write(f"**Market Cap:** {market_cap} ETH")
+
+    if not watchlist:
+        with left_stats:
+            st.subheader("Key Price Chart")
+            metrics = load_ft_graph(share_price)
+        with left_stats2:
+            st.subheader("Buys/Sells Chart")
+            load_ft_scatter(scatter_data)
+
+    progress.progress(value=75, text="Loading Stats")
+    if watchlist:
+        with right_col:
+            load_ft_graph(share_price)
+        load_ft_df(key_activity, hide=True, image=True)
 
     if not watchlist:
         if price != "N/A":
