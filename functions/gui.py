@@ -415,7 +415,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                     if c_hodl == 0:
                         st.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
                     if c_hodl > 0:
-                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {100 * _3_count / c_hodl}")
+                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {int(100 * _3_count / c_hodl)}%")
 
         progress.progress(value=95, text="Loading Stats")
         with right_col:
