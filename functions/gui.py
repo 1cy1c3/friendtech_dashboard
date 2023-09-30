@@ -383,18 +383,18 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
     if not watchlist:
         if price != "N/A":
             with metric_l:
-                if metrics[0]['yesterday'] > 0.0:
+                if 'yesterday' in metrics[0] and metrics[0]['yesterday'] > 0.0:
                     st.metric(label="day to day",
                               value=f"{round(metrics[0]['yesterday'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
 
             with metric_lm:
-                if metrics[0]['week'] > 0.0:
+                if 'week' in metrics[0] and metrics[0]['week'] > 0.0:
                     st.metric(label="day to week",
                               value=f"{round(metrics[0]['week'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
             with metric_rm:
-                if metrics[0]['month'] > 0.0:
+                if 'month' in metrics[0] and metrics[0]['month'] > 0.0:
                     st.metric(label="day to month",
                               value=f"{round(metrics[0]['month'], 3)}ETH",
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
