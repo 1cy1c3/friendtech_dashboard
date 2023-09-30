@@ -34,7 +34,7 @@ left_col, right_col = st.columns([1, 1])  # Columns Search
 b_l_c, b_r_c = st.columns([1, 1])
 
 h_l_col.header("Home Page")
-h_r_col.button("Refresh")
+h_r_col.button("Refresh", use_container_width=True)
 
 
 with left_col:
