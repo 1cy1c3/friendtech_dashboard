@@ -77,7 +77,8 @@ if button or refresh and ss.get("submit"):
             twitter.link_button("Twitter", url=f"https://twitter.com/{target.lower()}", use_container_width=True)
             base_scan.link_button("Base Scan", url=f"https://basescan.org/address/{target_address}", use_container_width=True)
 
-            gui.load_ft_stats(target_address.lower(), target, progress, _3=_3)
+            with st.spinner("Loading Stats"):
+                gui.load_ft_stats(target_address.lower(), target, progress, _3=_3)
             progress.empty()
 
         else:

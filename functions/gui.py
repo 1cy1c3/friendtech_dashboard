@@ -250,8 +250,8 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
             except Exception:
                 balance = "N/A"
             progress.progress(value=15, text="Loading Stats")
-            with st.spinner("Fetching friend.tech rank..."):
-                points, tier, rank = ft.get_user_points(address)
+
+            points, tier, rank = ft.get_user_points(address)
             if tier.lower() == "bronze":
                 st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
             elif tier.lower() == "silver":
@@ -265,8 +265,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
 
             st.write(f"**Account Balance:** {balance} ETH")
             
-            with st.spinner("Fetching friend.tech wallet info..."):
-                portfolio_value, fees_collected = ft.get_portfolio_value(address)
+            portfolio_value, fees_collected = ft.get_portfolio_value(address)
             if fees_collected == "N/A":
                 fees = "N/A"
             else:
@@ -275,8 +274,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
             st.write(f"**Collected Fees:** {fees} ETH")
 
-            with st.spinner("Fetching friend.tech user info..."):
-                holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
+            holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
             if not watchlist:
                 progress.progress(value=35, text="Loading Stats")
             else:
@@ -289,10 +287,10 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                 self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
                 progress.progress(value=45, text="Loading Stats")
 
-        with st.spinner("Fetching key activity..."):
-            key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
-            if keys is None:
-                keys = "N/A"
+
+        key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
+        if keys is None:
+            keys = "N/A"
         progress.progress(value=55, text="Loading Stats")
 
         if self_count is None:
@@ -325,8 +323,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
             with expander.expander("Advanced Stats"):
                 l, r = st.columns([1, 1])
                 with l:
-                    with st.spinner("Fetching friend.tech user activity..."):
-                        activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
+                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
                     if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                         total = round((profit + portfolio_value + fees), 3)
                     else:
@@ -418,15 +415,14 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                           delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
-        with st.spinner("Getting Portfolio"):
-            portfolio, _3_holdings = ft.get_holdings(address, _3=_3)
-            with rc_2:
-                if not watchlist and _3 is True:
-                    _3_count, c_hodl = ut.list_unity(_3_holders, _3_holdings)
-                    if c_hodl == 0:
-                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
-                    if c_hodl > 0:
-                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {int(100 * _3_count / c_hodl)}%")
+        portfolio, _3_holdings = ft.get_holdings(address, _3=_3)
+        with rc_2:
+            if not watchlist and _3 is True:
+                _3_count, c_hodl = ut.list_unity(_3_holders, _3_holdings)
+                if c_hodl == 0:
+                    st.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
+                if c_hodl > 0:
+                    st.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {int(100 * _3_count / c_hodl)}%")
 
         progress.progress(value=95, text="Loading Stats")
         with right_col:
