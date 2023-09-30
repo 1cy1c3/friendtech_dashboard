@@ -49,9 +49,9 @@ with header_r:
 if button and ss.get("submit"):
     if len(target) == 42 and target.startswith("0x"):
         target_address = target.lower()
-        target, pfp = ft.addr_to_user(target_address, convert=True)
+        target, pfp, _3 = ft.addr_to_user(target_address, convert=True)
     else:
-        target_address, pfp = ft.user_to_addr(target)
+        target_address, pfp, _3 = ft.user_to_addr(target)
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":
@@ -60,7 +60,7 @@ if button and ss.get("submit"):
             portfolio_value, _ = ft.get_portfolio_value(target_address)
         progress.progress(value=33, text="Loading Stats")
         with st.spinner("Getting Account Portfolio"):
-            portfolio = ft.get_holdings(target_address, dump_value=True)
+            portfolio, _ = ft.get_holdings(target_address, dump_value=True)
         progress.progress(value=67, text="Loading Stats")
         with st.spinner("Collecting Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())

@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 import matplotlib.pyplot as plt
 import functions.friendtech as ft
 import functions.basescan as bs
+import functions.utils as ut
 import streamlit as st
 import pandas as pd
 
@@ -210,7 +211,7 @@ def load_pie_chart_holdings(data):
         st.write("No Data Found")
 
 
-def load_ft_stats(address, target, progress, watchlist=False):
+def load_ft_stats(address, target, progress, watchlist=False, _3=False):
     with st.sidebar:
         progress.progress(value=0, text="Loading Stats")
         load_ft_df(ss["history"][:10], hide=True)
@@ -320,7 +321,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             st.write(f"**Holdings:** {holdings}")
             st.write(f"**Holder:** {holder}")
             st.write(f"**Keys:** {total_keys}")
-            self_count, key_holders = ft.get_holders(address)
+            self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
             progress.progress(value=75, text="Loading Stats")
             if self_count is None:
                 self_count = "N/A"
@@ -407,7 +408,15 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
         progress.progress(value=85, text="Loading Stats")
         with st.spinner("Getting Portfolio"):
-            portfolio = ft.get_holdings(address)
+            portfolio, _3_holdings = ft.get_holdings(address, _3=_3)
+            with rc_2:
+                if not watchlist and _3 is True:
+                    _3_count, c_hodl = ut.list_unity(_3_holders, _3_holdings)
+                    if c_hodl == 0:
+                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
+                    if c_hodl > 0:
+                        st.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {100 * _3_count / c_hodl}")
+
         progress.progress(value=95, text="Loading Stats")
         with right_col:
             if activity != "N/A":

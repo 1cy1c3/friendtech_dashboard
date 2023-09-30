@@ -81,3 +81,13 @@ def get_value(supply, amount):
         return round(0-(summation / 16000), 3)
     else:
         return 0.0
+
+
+def list_unity(list1, list2):
+    count = 0
+    c_hodl = len(list1)
+    for item in list1:
+        if item in list2:
+            count += 1
+
+    return count, c_hodl

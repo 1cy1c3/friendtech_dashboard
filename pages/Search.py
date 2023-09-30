@@ -53,11 +53,13 @@ if button or refresh and ss.get("submit"):
         target = ss["username"]
         if len(target) == 42 and target.startswith("0x"):
             target_address = target.lower()
-            target, pfp = ft.addr_to_user(target_address, convert=True)
+            target, pfp, _3 = ft.addr_to_user(target_address, convert=True)
+
         else:
-            target_address, pfp = ft.user_to_addr(target)
+            target_address, pfp, _3 = ft.user_to_addr(target)
 
         ss["username"] = target.lower()
+
         # runs only if wallet address gets returned
         if target_address and target_address != "N/A":
             if "history" in ss:
@@ -71,15 +73,11 @@ if button or refresh and ss.get("submit"):
             if pfp is not None:
                 pfp_img.image(pfp, width=150)
 
-            ft_url = f"https://friend.tech/{target.lower()}"
-            twitter_url = f"https://twitter.com/{target.lower()}"
-            base_scan_url = f"https://basescan.org/address/{target_address}"
+            friendtech.link_button("friend.tech", url=f"https://friend.tech/{target.lower()}", use_container_width=True)
+            twitter.link_button("Twitter", url=f"https://twitter.com/{target.lower()}", use_container_width=True)
+            base_scan.link_button("Base Scan", url=f"https://basescan.org/address/{target_address}", use_container_width=True)
 
-            friendtech.link_button("friend.tech", url=ft_url, use_container_width=True)
-            twitter.link_button("Twitter", url=twitter_url, use_container_width=True)
-            base_scan.link_button("Base Scan", url=base_scan_url, use_container_width=True)
-
-            gui.load_ft_stats(target_address.lower(), target, progress)
+            gui.load_ft_stats(target_address.lower(), target, progress, _3=_3)
             progress.empty()
 
         else:
