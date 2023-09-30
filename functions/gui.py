@@ -73,16 +73,21 @@ def load_ft_graph(data):
             "time": sorted(date_to_values.keys()),
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
+
         now = datetime.datetime.now()
+        _yesterday = now - datetime.timedelta(days=1)
         last_week = now - datetime.timedelta(days=7)
         last_month = now - datetime.timedelta(days=30)
+
+        yesterday_date = last_week.strftime("%d/%m/%Y")
         week_date = last_week.strftime("%d/%m/%Y")
         month_date = last_month.strftime("%d/%m/%Y")
 
         today = df.iloc[-1]['price']
         creation = df.iloc[0]['price']
+
         try:
-            yesterday = df.iloc[-2]['price']
+            yesterday = df[df["time"] == yesterday_date].iloc[0]['price']
         except:
             yesterday = 0
         try:
