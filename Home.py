@@ -27,13 +27,14 @@ with st.sidebar:
     gui.load_ft_df(ss["history"][:10], hide=True)
     gui.load_sidebar_ft()
 
-# Header
-st.header("Home Page")
 
 # Columns for responsive Page layout and page structure
-h_l_col, h_r_col = st.columns([1, 1])  # Columns header
+h_l_col, h_r_col = st.columns([8, 1])  # Columns header
 left_col, right_col = st.columns([1, 1])  # Columns Search
 b_l_c, b_r_c = st.columns([1, 1])
+
+h_l_col.header("Home Page")
+h_r_col.button("Refresh")
 
 
 with left_col:

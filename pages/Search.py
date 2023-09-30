@@ -35,7 +35,6 @@ left_col, right_col = st.columns([1, 1])  # Columns Search
 with h_r_col:
     h_l_2_col, h_m_2_col, h_r_2_col = st.columns([1, 1, 2])
     pfp_img = h_l_2_col.empty()
-    # home = h_r_2_col.button("Home", on_click=ut.home(), help="Navigates or Refreshes Home.")
     refresh = h_m_2_col.button("Refresh/Reload User", on_click=ut.submit(),
                                help="Refresh or Reloads last User-Profiles!", use_container_width=True)
     base_scan = h_r_2_col.empty()
