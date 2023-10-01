@@ -100,7 +100,6 @@ def load_ft_graph(data):
                 'creation': creation
             })
 
-        st.dataframe(df)
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=700)
         return metric_data
     else:
