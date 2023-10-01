@@ -211,7 +211,8 @@ def load_pie_chart_holdings(data):
 def load_ft_stats(address, target, progress, watchlist=False, _3=False):
     with st.sidebar:
         progress.progress(value=0, text="Loading Stats")
-        load_ft_df(ss["history"][:10], hide=True)
+        if 'history' in ss:
+            load_ft_df(ss["history"][:10], hide=True)
         load_sidebar_ft()
 
     left_col, right_col = st.columns([1, 1])
