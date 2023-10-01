@@ -287,7 +287,6 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                 self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
                 progress.progress(value=45, text="Loading Stats")
 
-
         key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
         if keys is None:
             keys = "N/A"
@@ -390,29 +389,30 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
 
     if not watchlist:
         if price != "N/A":
-            with metric_l:
-                if 'yesterday' in metrics[0] and metrics[0]['yesterday'] > 0.0:
-                    st.metric(label="day to day",
-                              value=f"{round(metrics[0]['yesterday'], 3)}ETH",
-                              delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
+            if metrics is not None:
+                with metric_l:
+                    if 'yesterday' in metrics[0] and metrics[0]['yesterday'] > 0.0:
+                        st.metric(label="day to day",
+                                  value=f"{round(metrics[0]['yesterday'], 3)}ETH",
+                                  delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
 
-            with metric_lm:
-                if 'week' in metrics[0] and metrics[0]['week'] > 0.0:
-                    st.metric(label="day to week",
-                              value=f"{round(metrics[0]['week'], 3)}ETH",
-                              delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
-            with metric_rm:
-                if 'month' in metrics[0] and metrics[0]['month'] > 0.0:
-                    st.metric(label="day to month",
-                              value=f"{round(metrics[0]['month'], 3)}ETH",
-                              delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
-            with metric_r:
-                if metrics[0]['creation'] == 0:
-                    metrics[0]['creation'] = 0.0000625
+                with metric_lm:
+                    if 'week' in metrics[0] and metrics[0]['week'] > 0.0:
+                        st.metric(label="day to week",
+                                  value=f"{round(metrics[0]['week'], 3)}ETH",
+                                  delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
+                with metric_rm:
+                    if 'month' in metrics[0] and metrics[0]['month'] > 0.0:
+                        st.metric(label="day to month",
+                                  value=f"{round(metrics[0]['month'], 3)}ETH",
+                                  delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
+                with metric_r:
+                    if metrics[0]['creation'] == 0:
+                        metrics[0]['creation'] = 0.0000625
 
-                st.metric(label="day to creation",
-                          value=f"{round(metrics[0]['creation'], 3)}ETH",
-                          delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
+                    st.metric(label="day to creation",
+                              value=f"{round(metrics[0]['creation'], 3)}ETH",
+                              delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
         portfolio, _3_holdings = ft.get_holdings(address, _3=_3)
