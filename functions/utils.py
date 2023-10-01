@@ -89,5 +89,4 @@ def list_unity(list1, list2):
     for item in list1:
         if item in list2:
             count += 1
-
     return count, c_hodl
