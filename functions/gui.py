@@ -380,7 +380,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
 
     if not watchlist:
         if price != "N/A":
-            if metrics is not None:
+            if metrics[0] is not None:
                 with metric_l:
                     if 'yesterday' in metrics[0] and metrics[0]['yesterday'] > 0.0:
                         st.metric(label="day to day",
