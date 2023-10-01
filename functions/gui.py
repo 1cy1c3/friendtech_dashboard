@@ -74,41 +74,33 @@ def load_ft_graph(data):
             "price": [date_to_values[date] for date in sorted(date_to_values.keys())]
         })
 
-        now = datetime.datetime.now()
-        _yesterday = now - datetime.timedelta(days=1)
-        last_week = now - datetime.timedelta(days=7)
-        last_month = now - datetime.timedelta(days=30)
-
-        yesterday_date = _yesterday.strftime("%d/%m/%Y")
-        week_date = last_week.strftime("%d/%m/%Y")
-        month_date = last_month.strftime("%d/%m/%Y")
-
         today = df.iloc[-1]['price']
         creation = df.iloc[0]['price']
+        if not raw:
+            try:
+                yesterday = df.iloc[-2]['price']
+            except:
+                yesterday = 0
 
-        try:
-            yesterday = df[df["time"] == yesterday_date].iloc[0]['price']
-        except:
-            yesterday = 0
+            try:
+                week = df.iloc[-8]['price']
+            except:
+                week = 0
 
-        try:
-            week = df[df["time"] == week_date].iloc[0]['price']
-        except:
-            week = 0
+            try:
+                month = df.iloc[-31]['price']
+            except:
+                month = 0
 
-        try:
-            month = df[df["time"] == month_date].iloc[0]['price']
-        except:
-            month = 0
+            metric_data.append({
+                'today': today,
+                'yesterday': yesterday,
+                'week': week,
+                'month': month,
+                'creation': creation
+            })
 
-        metric_data.append({
-            'today': today,
-            'yesterday': yesterday,
-            'week': week,
-            'month': month,
-            'creation': creation
-        })
-
+        st.dataframe(df)
         st.line_chart(df.set_index('time')['price'], use_container_width=True, height=700)
         return metric_data
     else:
