@@ -276,8 +276,9 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                 st.write(f"**Holdings:** {holdings}")
                 st.write(f"**Holder:** {holder}")
                 st.write(f"**Keys:** {total_keys}")
-                self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
-                progress.progress(value=45, text="Loading Stats")
+                st.write(f"**Key Price:** {price} ETH")
+            self_count, key_holders, _3_holders = ft.get_holders(address, _3=_3)
+            progress.progress(value=45, text="Loading Stats")
 
         key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
         if keys is None:
@@ -362,7 +363,6 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
                         elif self_count > 10:
                             st.markdown(f":red[**Own Keys:** {self_count}]")
 
-                        st.write(f"**Key Price:** {price} ETH")
                         st.write(f"**Market Cap:** {market_cap} ETH")
 
     if not watchlist:
