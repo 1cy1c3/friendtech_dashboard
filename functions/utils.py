@@ -86,17 +86,18 @@ def get_value(supply, amount):
 def list_unity(list1, list2):
     count = 0
     c_hodl = len(list1)
-    if len(list1) > 0 and len(list2) > 0:
-        if 'Holder' in list1[0] and 'Holding' in list2[0]:
-            # Get a list of 'twitterUsername' values from portfolio
-            portfolio_usernames = [item['Holding'] for item in list2]
+    if list1 is not None and list2 is not None:
+        if len(list1) > 0 and len(list2) > 0:
+            if 'Holder' in list1[0] and 'Holding' in list2[0]:
+                # Get a list of 'twitterUsername' values from portfolio
+                portfolio_usernames = [item['Holding'] for item in list2]
 
-            # Get a list of 'twitterUsername' values from holder_total
-            holder_total_usernames = [item['Holder'] for item in list1]
+                # Get a list of 'twitterUsername' values from holder_total
+                holder_total_usernames = [item['Holder'] for item in list1]
 
-            # Find the matching usernames
-            matching_usernames = set(portfolio_usernames) & set(holder_total_usernames)
+                # Find the matching usernames
+                matching_usernames = set(portfolio_usernames) & set(holder_total_usernames)
 
-            # Count the number of matching usernames
-            count = len(matching_usernames)
+                # Count the number of matching usernames
+                count = len(matching_usernames)
     return count, c_hodl
