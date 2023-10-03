@@ -409,7 +409,7 @@ def load_ft_stats(address, target, progress, watchlist=False, _3=False):
         progress.progress(value=85, text="Loading Stats")
         portfolio, _3_holdings = ft.get_holdings(address, _3=_3)
         with rc_2:
-            if not watchlist and _3 is True:
+            if not watchlist:
                 _3_count, c_hodl = ut.list_unity(_3_holders, _3_holdings)
                 if c_hodl == 0:
                     st.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
