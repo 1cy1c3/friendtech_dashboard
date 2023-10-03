@@ -280,7 +280,7 @@ def get_user_points(address):
 
 def user_to_addr(user):
     url = 'https://prod-api.kosetto.com/search/users?'
-    _3 = False
+
     headers = {
         'Authorization': sc["auth_token"],
         'Content-Type': 'application/json',
@@ -299,30 +299,25 @@ def user_to_addr(user):
             for item in data['users']:
                 if item['twitterUsername'].lower() == user.lower():
                     address = item['address']
-                    if "3,3" in item["twitterName"]:
-                        _3 = True
-                    return address, item['twitterPfpUrl'], _3  # Convert to checksum address
+                    return address, item['twitterPfpUrl']  # Convert to checksum address
         else:
-            return None, None, _3
-        return None, None, _3
+            return None, None
+        return None, None
     except requests.exceptions.JSONDecodeError:
-        return None, None, _3
+        return None, None
 
 
 def addr_to_user(address, convert):
     url = f'https://prod-api.kosetto.com/users/{address}'
     response = requests.get(url)
-    _3 = False
 
     try:
         data = response.json()
         if convert and "twitterUsername" in data:
-            if "3,3" in data["twitterName"]:
-                _3 = True
-            return data["twitterUsername"], data["twitterPfpUrl"], _3
+            return data["twitterUsername"], data["twitterPfpUrl"]
 
         elif convert and "twitterUsername" not in data:
-            return "N/A", None, _3
+            return "N/A", None
 
         else:
             if "displayPrice" in data and "." in data["displayPrice"]:
@@ -335,7 +330,7 @@ def addr_to_user(address, convert):
                 return "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
         if convert:
-            return "N/A", None, _3
+            return "N/A", None
         return "N/A", "N/A", "N/A", "N/A"
 
 
@@ -518,13 +513,13 @@ def get_watchlist_activity(target_list):
     return watchlist
 
 
-def get_holders(target, _3=False):
+def get_holders(target):
     url = f'https://prod-api.kosetto.com/users/{target}/token/holders'
     response = requests.get(url)
 
     self_count = 0
     holder_total = []
-    _3_holders = []
+
     try:
         data = response.json()
         if 'users' in data:
@@ -538,13 +533,10 @@ def get_holders(target, _3=False):
                     'Balance': int(item['balance'])
                 })
 
-                if _3 is True and ("3,3" in item["twitterName"]):
-                    _3_holders.append(item['twitterUsername'])
-
         else:
-            return None, holder_total, _3_holders
+            return None, holder_total
     except requests.exceptions.JSONDecodeError:
-        return None, holder_total, _3_holders
+        return None, holder_total
 
     # Search for next page start and make more requests until the full history is loaded
     if data['nextPageStart'] != "0":
@@ -564,27 +556,24 @@ def get_holders(target, _3=False):
                             'Balance': int(item['balance'])
                         })
 
-                        if _3 is True and ("3,3" in item["twitterName"]):
-                            _3_holders.append(item['twitterUsername'])
-
                     if data['nextPageStart'] is None:
                         next_page = "0"
                     else:
                         next_page = str(data['nextPageStart'])
 
                 else:
-                    return self_count, holder_total, _3_holders
+                    return self_count, holder_total
 
-                return self_count, holder_total, _3_holders
+                return self_count, holder_total
             except requests.exceptions.JSONDecodeError:
-                return self_count, holder_total, _3_holders
-        return self_count, holder_total, _3_holders
+                return self_count, holder_total
+        return self_count, holder_total
 
 
-def get_holdings(target, dump_value=False, _3=False):
+def get_holdings(target, dump_value=False):
     url = f'https://prod-api.kosetto.com/users/{target}/token-holdings'
     response = requests.get(url)
-    _3_holdings = []
+
     portfolio = []
     try:
         data = response.json()
@@ -605,12 +594,10 @@ def get_holdings(target, dump_value=False, _3=False):
                         'Balance': int(item['balance'])
                     })
 
-                if _3 is True and ("3,3" in item["twitterName"]):
-                    _3_holdings.append(item['twitterUsername'])
         else:
-            return None, _3_holdings
+            return None
     except requests.exceptions.JSONDecodeError:
-        return None, _3_holdings
+        return None
 
     # Search for next page start and make more requests until the full history is loaded
     if data['nextPageStart'] != "0":
@@ -627,21 +614,18 @@ def get_holdings(target, dump_value=False, _3=False):
                             'Balance': int(item['balance'])
                         })
 
-                        if _3 is True and ("3,3" in item["twitterName"]):
-                            _3_holdings.append(item['twitterUsername'])
-
                     if data['nextPageStart'] is None:
                         next_page = "0"
                     else:
                         next_page = str(data['nextPageStart'])
 
                 else:
-                    return portfolio, _3_holdings
+                    return portfolio
 
-                return portfolio, _3_holdings
+                return portfolio
             except requests.exceptions.JSONDecodeError:
-                return portfolio, _3_holdings
-        return portfolio, _3_holdings
+                return portfolio
+        return portfolio
 
 
 @st.cache_resource(show_spinner=False, ttl="1h")

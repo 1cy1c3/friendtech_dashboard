@@ -52,10 +52,10 @@ if button or refresh and ss.get("submit"):
         target = ss["username"]
         if len(target) == 42 and target.startswith("0x"):
             target_address = target.lower()
-            target, pfp, _3 = ft.addr_to_user(target_address, convert=True)
+            target, pfp = ft.addr_to_user(target_address, convert=True)
 
         else:
-            target_address, pfp, _3 = ft.user_to_addr(target)
+            target_address, pfp = ft.user_to_addr(target)
 
         ss["username"] = target.lower()
 
@@ -77,7 +77,7 @@ if button or refresh and ss.get("submit"):
             base_scan.link_button("Base Scan", url=f"https://basescan.org/address/{target_address}", use_container_width=True)
 
             with st.spinner("Loading Stats"):
-                gui.load_ft_stats(target_address.lower(), target, progress, _3=_3)
+                gui.load_ft_stats(target_address.lower(), target, progress)
             progress.empty()
 
         else:
