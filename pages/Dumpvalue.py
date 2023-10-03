@@ -49,9 +49,9 @@ with header_r:
 if button and ss.get("submit"):
     if len(target) == 42 and target.startswith("0x"):
         target_address = target.lower()
-        target, pfp, _3 = ft.addr_to_user(target_address, convert=True)
+        target, pfp = ft.addr_to_user(target_address, convert=True)
     else:
-        target_address, pfp, _3 = ft.user_to_addr(target)
+        target_address, pfp = ft.user_to_addr(target)
 
     # runs only if wallet address gets returned
     if target_address and target_address != "N/A":

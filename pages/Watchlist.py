@@ -78,9 +78,9 @@ if __login__obj:
             if button and ss.get("submit"):
                 if len(target) == 42 and target.startswith("0x"):
                     target_address = target.lower()
-                    target, pfp, _3 = ft.addr_to_user(target_address, convert=True)
+                    target, pfp = ft.addr_to_user(target_address, convert=True)
                 else:
-                    target_address, pfp, _3 = ft.user_to_addr(target)
+                    target_address, pfp = ft.user_to_addr(target)
 
                 if pfp is not None:
                     pfp_ph.image(pfp, width=200)
@@ -97,7 +97,7 @@ if __login__obj:
             elif not button:
                 if target_list:
                     for target_address in target_list:
-                        target, pfp, _ = ft.addr_to_user(target_address[0].lower(), convert=True)
+                        target, pfp = ft.addr_to_user(target_address[0].lower(), convert=True)
                         target_name_list.append((target_address[0].lower(), target))
 
                     watchlist = ft.get_watchlist_activity(target_name_list)
