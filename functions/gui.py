@@ -223,7 +223,6 @@ def load_ft_stats(address, target, progress, watchlist=False):
     st.markdown("")
     left_df, mid_df, right_df = st.columns([2, 1, 1])
 
-
     with left_col:
         st.markdown(f"# {target}")
         st.write(f"**Wallet:** {address}")
@@ -265,7 +264,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 fees = fees_collected / 2
             progress.progress(value=25, text="Loading Stats")
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
-            created_text = st.write("**Created:**")
+            created_text = st.empty()
 
             holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
             if not watchlist:
@@ -366,7 +365,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                             st.markdown(f":red[**Own Keys:** {self_count}]")
 
                         st.write(f"**Market Cap:** {market_cap} ETH")
-                        _3_text = st.write("**3,3-Rate:**")
+                        _3_text = st.empty()
     if not watchlist:
         with left_stats:
             st.subheader("Key Price Chart")
