@@ -60,7 +60,7 @@ if button and ss.get("submit"):
             portfolio_value, _ = ft.get_portfolio_value(target_address)
         progress.progress(value=33, text="Loading Stats")
         with st.spinner("Getting Account Portfolio"):
-            portfolio, _ = ft.get_holdings(target_address, dump_value=True)
+            portfolio = ft.get_holdings(target_address, dump_value=True)
         progress.progress(value=67, text="Loading Stats")
         with st.spinner("Collecting Portfolio Data"):
             dump_data, dump_value = ft.get_dump_values(portfolio, target_address.lower())
