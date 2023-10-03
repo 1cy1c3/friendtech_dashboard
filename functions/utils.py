@@ -85,8 +85,9 @@ def get_value(supply, amount):
 
 def list_unity(list1, list2):
     count = 0
-    c_hodl = len(list1)
+    c_hodl = 0
     if list1 is not None and list2 is not None:
+        c_hodl = len(list1)
         if len(list1) > 0 and len(list2) > 0:
             if 'Holder' in list1[0] and 'Holding' in list2[0]:
                 # Get a list of 'twitterUsername' values from portfolio
