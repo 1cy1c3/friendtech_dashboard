@@ -237,6 +237,7 @@ def get_token_activity(target):
                             })
 
                         token_activity.append({
+                            'PFP': item["twitterPfpUrl"],
                             'Trader': item['twitterUsername'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
