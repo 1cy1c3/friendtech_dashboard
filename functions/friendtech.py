@@ -21,7 +21,7 @@ def get_global_activity():
         data = response.json()
         response.raise_for_status()
         filtered_data = []
-        if data["events"]:
+        if "events" in data:
             for item in data["events"]:
                 if item["isBuy"]:
                     activity = "buy"
@@ -80,7 +80,7 @@ def get_portfolio_value(address):
 
     try:
         data = response.json()
-        if data["portfolioValue"] and data["feesCollected"]:
+        if "portfolioValue" in data and "feesCollected" in data:
             if "." in data["portfolioValue"]:
                 temp_p = data["portfolioValue"].split(".")
                 data["portfolioValue"] = temp_p[0]
