@@ -413,6 +413,7 @@ def get_personal_activity(target):
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
                         account_activity.append({
+                            'PFP': item["twitterPfpUrl"],
                             'Subject': item['twitterUsername'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
@@ -554,6 +555,7 @@ def get_holders(target):
                             self_count = int(item['balance'])
 
                         holder_total.append({
+                            'PFP': item["twitterPfpUrl"],
                             'Holder': item['twitterUsername'],
                             'Balance': int(item['balance'])
                         })
@@ -612,6 +614,7 @@ def get_holdings(target, dump_value=False):
                 if 'users' in data:
                     for item in data['users']:
                         portfolio.append({
+                            'PFP': item["twitterPfpUrl"],
                             'Holding': item['twitterUsername'],
                             'Balance': int(item['balance'])
                         })
