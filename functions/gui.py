@@ -38,7 +38,7 @@ def load_ft_graph(data):
         for trans in data:
 
             if raw:
-                date = datetime.datetime.strptime(trans["time"], "%Y/%m/%d%H:%M")
+                date = datetime.datetime.strptime(trans["time"], "%Y/%m/%d %H:%M")
 
             else:
                 date = datetime.datetime.strptime(trans["time"], "%Y/%m/%d")
