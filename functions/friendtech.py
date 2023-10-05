@@ -2,7 +2,6 @@ import requests
 
 import streamlit as st
 import functions.utils as ut
-from web3 import Web3
 
 ss = st.session_state
 sc = st.secrets
@@ -81,18 +80,21 @@ def get_portfolio_value(address):
     try:
         data = response.json()
         if "portfolioValue" in data and "feesCollected" in data:
-            if "." in data["portfolioValue"]:
-                temp_p = data["portfolioValue"].split(".")
-                data["portfolioValue"] = temp_p[0]
-            if "+" in str(data["feesCollected"]):
-                temp_f = data["feesCollected"].split("+")
-                data["feesCollected"] = str(temp_f[0])[:6]
-                data["feesCollected"] = data["feesCollected"].replace(".", "")
-                exp = int(temp_f[1]) - len(data["feesCollected"]) + 1
-                data["feesCollected"] = int(data["feesCollected"]) * 10 ** exp  # This calculation lol
+            if data["portfolioValue"] is not None:
+                if "." in data["portfolioValue"]:
+                    temp_p = data["portfolioValue"].split(".")
+                    data["portfolioValue"] = temp_p[0]
+                if "+" in str(data["feesCollected"]):
+                    temp_f = data["feesCollected"].split("+")
+                    data["feesCollected"] = str(temp_f[0])[:6]
+                    data["feesCollected"] = data["feesCollected"].replace(".", "")
+                    exp = int(temp_f[1]) - len(data["feesCollected"]) + 1
+                    data["feesCollected"] = int(data["feesCollected"]) * 10 ** exp  # This calculation lol
 
-            return round((int(data["portfolioValue"]) * 10 ** -18), 3), round((int(data["feesCollected"]) * 10 ** -19),
-                                                                              3)
+                return round((int(data["portfolioValue"]) * 10 ** -18), 3), round((int(data["feesCollected"]) * 10 ** -19),
+                                                                                  3)
+            else:
+                return "N/A", "N/A"
         else:
             return "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
@@ -637,27 +639,28 @@ def get_dump_values(data, address):
         for item in data:
             if 'Wallet' in item:
                 _, _, _, price = addr_to_user(item['Wallet'], convert=False)
-                supply = ut.get_supply(price)
-                if price != "N/A" and supply != "N/A":
-                    value = ut.get_value(supply - int((item['Balance'])) - 1, int((item['Balance'])))
-                    if value != "N/A":
-                        if item['Balance'] == 1:
-                            x = .1
-                        if item['Wallet'].lower() == address:
-                            dump_data.append({
-                                'Holding': item['Holding'],
-                                'Balance': item['Balance'],
-                                'ShownValue': round(price * item['Balance'], 3),
-                                'DumpValue': round(-value * (.95 + x), 3)
-                            })
-                            dump_value += round(-value * (.95 + x), 3)
-                        else:
-                            dump_data.append({
-                                'Holding': item['Holding'],
-                                'Balance': item['Balance'],
-                                'ShownValue': round(price * item['Balance'], 3),
-                                'DumpValue': round(-value * (.9 + x), 3)
-                            })
-                            dump_value += round(-value * (.9 + x), 3)
+                if price != "N/A":
+                    supply = ut.get_supply(price)
+                    if supply != "N/A":
+                        value = ut.get_value(supply - int((item['Balance'])) - 1, int((item['Balance'])))
+                        if value != "N/A":
+                            if item['Balance'] == 1:
+                                x = .1
+                            if item['Wallet'].lower() == address:
+                                dump_data.append({
+                                    'Holding': item['Holding'],
+                                    'Balance': item['Balance'],
+                                    'ShownValue': round(price * item['Balance'], 3),
+                                    'DumpValue': round(-value * (.95 + x), 3)
+                                })
+                                dump_value += round(-value * (.95 + x), 3)
+                            else:
+                                dump_data.append({
+                                    'Holding': item['Holding'],
+                                    'Balance': item['Balance'],
+                                    'ShownValue': round(price * item['Balance'], 3),
+                                    'DumpValue': round(-value * (.9 + x), 3)
+                                })
+                                dump_value += round(-value * (.9 + x), 3)
 
     return dump_data, round(dump_value, 3)

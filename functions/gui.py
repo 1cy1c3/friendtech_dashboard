@@ -26,7 +26,7 @@ def load_ft_graph(data):
     metric_data = []
     if data and len(data) > 1:
         # Sort the transactions by date
-        data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
+        data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%Y/%m/%d"))
         count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
         # Create a dictionary to store average values per date
         date_to_values = {}
@@ -38,10 +38,10 @@ def load_ft_graph(data):
         for trans in data:
 
             if raw:
-                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+                date = datetime.datetime.strptime(trans["time"], "%Y/%m/%d%H:%M")
 
             else:
-                date = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+                date = datetime.datetime.strptime(trans["time"], "%Y/%m/%d")
 
             if date in date_to_values:
                 date_to_values[date].append(float(trans["price"]))
@@ -110,7 +110,7 @@ def load_ft_scatter(data):
     raw = False
     if data and len(data) > 1:
         # Sort the transactions by date
-        data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%d/%m/%Y"))
+        data.sort(key=lambda x: datetime.datetime.strptime(x["time"], "%Y/%m/%d"))
         count = sum(1 for item in data if item['time'] == data[0]['time'])  # Count distinct dates
 
         if len(data) == count:
@@ -120,9 +120,9 @@ def load_ft_scatter(data):
 
         for trans in data:
             if raw:
-                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y %H:%M")
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%Y/%m/%d %H:%M")
             else:
-                trans['time'] = datetime.datetime.strptime(trans["time"], "%d/%m/%Y")
+                trans['time'] = datetime.datetime.strptime(trans["time"], "%Y/%m/%d")
 
         df = pd.DataFrame(data, columns=["time", "buy_price", "sell_price"])
         st.scatter_chart(df, x="time", y=["buy_price", "sell_price"], color=["#008000", "#FF0000"],

@@ -28,12 +28,12 @@ def home():
 
 def timestamp_to_date(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
-    return dt.strftime('%d/%m/%Y')
+    return dt.strftime('%Y/%m/%d')
 
 
 def timestamp_to_datetime(unix_timestamp):
     dt = datetime.utcfromtimestamp(int(unix_timestamp))
-    return dt.strftime('%d/%m/%Y %H:%M')
+    return dt.strftime('%Y/%m/%d %H:%M')
 
 
 def time_ago(timestamp_ms):
