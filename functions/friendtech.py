@@ -80,7 +80,7 @@ def get_portfolio_value(address):
     try:
         data = response.json()
         if "portfolioValue" in data and "feesCollected" in data:
-            if data["portfolioValue"] is not None:
+            if data["portfolioValue"] is not None and data["feesCollected"] is not None:
                 if "." in data["portfolioValue"]:
                     temp_p = data["portfolioValue"].split(".")
                     data["portfolioValue"] = temp_p[0]
