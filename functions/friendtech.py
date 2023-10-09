@@ -610,11 +610,19 @@ def get_holdings(target, dump_value=False):
                 data = response.json()
                 if 'users' in data:
                     for item in data['users']:
-                        portfolio.append({
-                            'PFP': item["twitterPfpUrl"],
-                            'Holding': item['twitterUsername'],
-                            'Balance': int(item['balance'])
-                        })
+                        if dump_value is True:
+                            portfolio.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': int(item['balance']),
+                                'Wallet': item['address']
+                            })
+                        else:
+                            portfolio.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': int(item['balance'])
+                            })
 
                 else:
                     return portfolio
