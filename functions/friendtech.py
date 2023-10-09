@@ -560,15 +560,13 @@ def get_holders(target):
                             'Balance': int(item['balance'])
                         })
 
-                    if data['nextPageStart'] is None:
-                        next_page = "0"
-                    else:
-                        next_page = str(data['nextPageStart'])
-
                 else:
                     return self_count, holder_total
 
-                return self_count, holder_total
+                if data['nextPageStart'] is None:
+                    next_page = "0"
+                else:
+                    next_page = str(data['nextPageStart'])
             except requests.exceptions.JSONDecodeError:
                 return self_count, holder_total
         return self_count, holder_total
@@ -581,7 +579,6 @@ def get_holdings(target, dump_value=False):
     portfolio = []
     try:
         data = response.json()
-
         if 'users' in data:
             for item in data['users']:
                 if dump_value is True:
@@ -619,15 +616,14 @@ def get_holdings(target, dump_value=False):
                             'Balance': int(item['balance'])
                         })
 
-                    if data['nextPageStart'] is None:
-                        next_page = "0"
-                    else:
-                        next_page = str(data['nextPageStart'])
-
                 else:
                     return portfolio
 
-                return portfolio
+                if data['nextPageStart'] is None:
+                    next_page = "0"
+                else:
+                    next_page = str(data['nextPageStart'])
+
             except requests.exceptions.JSONDecodeError:
                 return portfolio
         return portfolio
