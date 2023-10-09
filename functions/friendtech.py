@@ -197,9 +197,9 @@ def get_token_activity(target):
         return None, None, None, None, None
 
     # Search for next page start and make more requests untill the full history is loaded
-    if data['nextPageStart'] != "0":
+    if data['nextPageStart'] != "null":
         next_page = data['nextPageStart']
-        while next_page != "0":
+        while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity?pageStart={next_page}'
             headers = {
                 'Authorization': sc["auth_token"],
@@ -252,12 +252,10 @@ def get_token_activity(target):
                             'price': round((int(item['ethAmount']) * 10 ** -18), 3)
                         })
 
-                    if data['nextPageStart'] is None:
-                        next_page = "0"
-                    else:
-                        next_page = data['nextPageStart']
                 else:
                     return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
+                next_page = str(data['nextPageStart'])
+
             except requests.exceptions.JSONDecodeError:
                 return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
         return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
@@ -386,9 +384,9 @@ def get_personal_activity(target):
         return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
     # Search for next page start and make more requests until the full history is loaded
-    if data['nextPageStart'] != "0":
+    if data['nextPageStart'] != "null":
         next_page = data['nextPageStart']
-        while next_page != "0":
+        while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/trade-activity?pageStart={next_page}'
             response = requests.get(url)
 
@@ -421,10 +419,7 @@ def get_personal_activity(target):
                             'Timedelta': time_delta
                         })
 
-                    if data['nextPageStart'] is None:
-                        next_page = "0"
-                    else:
-                        next_page = str(data['nextPageStart'])
+                    next_page = str(data['nextPageStart'])
                     volume = round(volume, 3)
                     profit_in_ether = round(profit, 3)
                     investment = round(investment, 3)
@@ -473,11 +468,11 @@ def get_watchlist_activity(target_list):
             continue
 
         # Search for next page start and make more requests until the full history is loaded
-        if data['nextPageStart'] != "0":
+        if data['nextPageStart'] != "null":
             next_page = data['nextPageStart']
-            if "days ago" not in watchlist:
-                next_page = "0"
-            while next_page != "0":
+            if "days ago" in watchlist:
+                next_page = "null"
+            while next_page != "null":
                 url = f'https://prod-api.kosetto.com/users/{target[0]}/trade-activity?pageStart={next_page}'
                 response = requests.get(url)
                 try:
@@ -502,11 +497,7 @@ def get_watchlist_activity(target_list):
                                 })
                             else:
                                 continue
-
-                        if data['nextPageStart'] is None:
-                            next_page = "0"
-                        else:
-                            next_page = str(data['nextPageStart'])
+                        next_page = str(data['nextPageStart'])
                     else:
                         continue
                 except requests.exceptions.JSONDecodeError:
@@ -519,7 +510,6 @@ def get_watchlist_activity(target_list):
 def get_holders(target):
     url = f'https://prod-api.kosetto.com/users/{target}/token/holders'
     response = requests.get(url)
-
     self_count = 0
     holder_total = []
 
@@ -542,9 +532,9 @@ def get_holders(target):
         return None, holder_total
 
     # Search for next page start and make more requests until the full history is loaded
-    if data['nextPageStart'] != "0":
+    if data['nextPageStart'] != "null":
         next_page = data['nextPageStart']
-        while next_page != "0":
+        while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/token/holders?pageStart={next_page}'
             response = requests.get(url)
             try:
@@ -562,11 +552,8 @@ def get_holders(target):
 
                 else:
                     return self_count, holder_total
+                next_page = str(data['nextPageStart'])
 
-                if data['nextPageStart'] is None:
-                    next_page = "0"
-                else:
-                    next_page = str(data['nextPageStart'])
             except requests.exceptions.JSONDecodeError:
                 return self_count, holder_total
         return self_count, holder_total
@@ -601,9 +588,9 @@ def get_holdings(target, dump_value=False):
         return None
 
     # Search for next page start and make more requests until the full history is loaded
-    if data['nextPageStart'] != "0":
+    if data['nextPageStart'] != "null":
         next_page = data['nextPageStart']
-        while next_page != "0":
+        while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/token-holdings?pageStart={next_page}'
             response = requests.get(url)
             try:
@@ -627,10 +614,7 @@ def get_holdings(target, dump_value=False):
                 else:
                     return portfolio
 
-                if data['nextPageStart'] is None:
-                    next_page = "0"
-                else:
-                    next_page = str(data['nextPageStart'])
+                next_page = str(data['nextPageStart'])
 
             except requests.exceptions.JSONDecodeError:
                 return portfolio

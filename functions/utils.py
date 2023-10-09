@@ -91,10 +91,10 @@ def list_unity(list1, list2):
         if len(list1) > 0 and len(list2) > 0:
             if 'Holder' in list1[0] and 'Holding' in list2[0]:
                 # Get a list of 'twitterUsername' values from portfolio
-                portfolio_usernames = [item['Holding'] for item in list2]
+                portfolio_usernames = [item['Holding'].lower() for item in list2]
 
                 # Get a list of 'twitterUsername' values from holder_total
-                holder_total_usernames = [item['Holder'] for item in list1]
+                holder_total_usernames = [item['Holder'].lower() for item in list1]
 
                 # Find the matching usernames
                 matching_usernames = set(portfolio_usernames) & set(holder_total_usernames)
