@@ -2,6 +2,7 @@ import requests
 
 import streamlit as st
 import functions.utils as ut
+from collections import Counter
 
 ss = st.session_state
 sc = st.secrets
@@ -341,6 +342,8 @@ def get_personal_activity(target):
     sells = 0
     investment = 0
     date = None
+    sell_list = []
+    buy_list = []
 
     url = f'https://prod-api.kosetto.com/users/{target}/trade-activity'
     response = requests.get(url)
@@ -356,6 +359,11 @@ def get_personal_activity(target):
                     volume += int(item['ethAmount']) / (10 ** 18) * 1.1
                     investment += int(item['ethAmount']) / (10 ** 18) * 1.1
                     buys += 1
+                    buy_list.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': int(item['shareAmount'])
+                            })
 
                     if item['ethAmount'] == "0":
                         date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
@@ -364,6 +372,11 @@ def get_personal_activity(target):
                     profit += int(item['ethAmount']) / (10 ** 18) * 0.9
                     volume += int(item['ethAmount']) / (10 ** 18) * 0.9
                     sells += 1
+                    sell_list.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': - int(item['shareAmount'])
+                            })
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 account_activity.append({
@@ -379,9 +392,9 @@ def get_personal_activity(target):
             profit_in_ether = round(profit, 3)
             investment = round(investment, 3)
         else:
-            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
-        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
     # Search for next page start and make more requests until the full history is loaded
     if data['nextPageStart'] != "null":
@@ -400,6 +413,11 @@ def get_personal_activity(target):
                             volume += int(item['ethAmount']) / (10 ** 18) * 1.1
                             investment += int(item['ethAmount']) / (10 ** 18) * 1.1
                             buys += 1
+                            buy_list.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': int(item['shareAmount'])
+                            })
 
                             if item['ethAmount'] == "0":
                                 date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
@@ -408,6 +426,11 @@ def get_personal_activity(target):
                             profit += int(item['ethAmount']) / (10 ** 18) * 0.9
                             volume += int(item['ethAmount']) / (10 ** 18) * 0.9
                             sells += 1
+                            sell_list.append({
+                                'PFP': item["twitterPfpUrl"],
+                                'Holding': item['twitterUsername'],
+                                'Balance': - int(item['shareAmount'])
+                            })
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
                         account_activity.append({
@@ -424,12 +447,20 @@ def get_personal_activity(target):
                     profit_in_ether = round(profit, 3)
                     investment = round(investment, 3)
                 else:
-                    return account_activity, date, profit_in_ether, volume, buys, sells, investment
+                    result = [entry for entry in buy_list if entry not in sell_list]
+                    holdings = ut.combine_duplicates(result)
+                    return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
             except requests.exceptions.JSONDecodeError:
-                return account_activity, date, profit_in_ether, volume, buys, sells, investment
-        return account_activity, date, profit_in_ether, volume, buys, sells, investment
+                result = [entry for entry in buy_list if entry not in sell_list]
+                holdings = ut.combine_duplicates(result)
+                return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
+        result = [entry for entry in buy_list if entry not in sell_list]
+        holdings = ut.combine_duplicates(result)
+        return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
     else:
-        return account_activity, date, profit_in_ether, volume, buys, sells, investment
+        result = [entry for entry in buy_list if entry not in sell_list]
+        holdings = ut.combine_duplicates(result)
+        return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
 
 
 @st.cache_data(show_spinner=False, ttl="5m")

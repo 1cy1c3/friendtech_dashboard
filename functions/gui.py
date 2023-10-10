@@ -315,7 +315,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             with expander.expander("Advanced Stats"):
                 l, r = st.columns([1, 1])
                 with l:
-                    activity, created_at, profit, volume, buys, sells, investment = ft.get_personal_activity(address)
+                    activity, created_at, profit, volume, buys, sells, investment, _portfolio = ft.get_personal_activity(address)
                     created_text.write(f"**Created: {created_at}**")
                     if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                         total = round((profit + portfolio_value + fees), 3)
@@ -411,7 +411,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         portfolio = ft.get_holdings(address)
         with rc_2:
             if not watchlist:
-                _3_count, c_hodl = ut.list_unity(key_holders, portfolio)
+                _3_count, c_hodl = ut.list_unity(key_holders, _portfolio)
                 if c_hodl == 0:
                     _3_text.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
                 if c_hodl > 0:

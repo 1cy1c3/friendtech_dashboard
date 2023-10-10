@@ -1,7 +1,23 @@
 import streamlit as st
 from datetime import datetime
+from collections import defaultdict
+
 
 ss = st.session_state
+
+
+def combine_duplicates(items):
+    combined_dict = defaultdict(int)
+    for entry in items:
+        username = entry['Holding']
+        balance = entry['Balance']
+        combined_dict[username] += balance
+    combined_list = []
+    for username, balance in combined_dict.items():
+        for _ in range(combined_dict[username]):
+            entry = {'Holding': username, 'Balance': balance}
+            combined_list.append(entry)
+    return combined_list
 
 
 def init_state():
