@@ -417,9 +417,9 @@ def load_ft_stats(address, target, progress, watchlist=False):
                     _3_count -= 1
 
                 if c_hodl == 0:
-                    _3_text.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
+                    _3_text.write(f"**3,3-Rate:** 0%")
                 if c_hodl > 0:
-                    _3_text.write(f"**3,3-Rate:** {_3_count} / {c_hodl} **or** {int(100 * _3_count / c_hodl)}%")
+                    _3_text.write(f"**3,3-Rate:** {int(100 * _3_count / c_hodl)}% - Excluding Self-Key")
 
         progress.progress(value=95, text="Loading Stats")
         with right_col:
