@@ -412,6 +412,10 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with rc_2:
             if not watchlist:
                 _3_count, c_hodl = ut.list_unity(key_holders, _portfolio)
+                if self_count > 0:
+                    c_hodl -= 1
+                    _3_count -= 1
+
                 if c_hodl == 0:
                     _3_text.write(f"**3,3-Rate:** {_3_count} / {c_hodl}")
                 if c_hodl > 0:
