@@ -412,7 +412,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with rc_2:
             if not watchlist:
                 _3_count, c_hodl = ut.list_unity(key_holders, _portfolio)
-                if self_count > 0:
+                if self_count != "N/A" and self_count > 0:
                     c_hodl -= 1
                     _3_count -= 1
 
