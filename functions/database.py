@@ -1,6 +1,6 @@
 import mysql.connector
 import streamlit as st
-
+import datetime
 
 ss = st.session_state
 sc = st.secrets
@@ -59,4 +59,65 @@ def add_remove_wl(wallet, name):
 
     cursor.close()
     conn.close()
-    st.cache_data.clear()
+    get_watchlist.cache_data.clear()
+
+
+def get_data(wallet, database):
+    conn = mysql.connector.connect(
+        host=sc["db_host"],
+        user=sc["db_user"],
+        password=sc["db_pw"],
+        database=sc["db_name"],
+        autocommit=True
+    )
+    cursor = conn.cursor()
+
+    create_table_query = f"""
+        SELECT * FROM {database} WHERE wallet = %s
+        """
+
+    cursor.execute(create_table_query, (wallet,))
+    results = cursor.fetchall()
+    return results
+
+
+def post_data_holders(data, wallet):
+    current_date = datetime.datetime.now().date()
+    timestamp = int(
+        (datetime.datetime.timestamp(datetime.datetime.combine(current_date, datetime.datetime.min.time()))))
+    conn = mysql.connector.connect(
+        host=sc["db_host"],
+        user=sc["db_user"],
+        password=sc["db_pw"],
+        database=sc["db_name"],
+        autocommit=True
+    )
+    cursor = conn.cursor()
+    for item in data:
+        create_table_query = f"""
+            INSERT INTO holders (timestamp, wallet, pfp, name, amount) VALUES (%s, %s, %s, %s, %s)
+            """
+        cursor.execute(create_table_query, (timestamp, wallet, item['PFP'], item['Holder'], item['Balance']))
+    conn.commit()
+    conn.close()
+
+
+def post_data_holdings(data, wallet):
+    current_date = datetime.datetime.now().date()
+    timestamp = int(
+        (datetime.datetime.timestamp(datetime.datetime.combine(current_date, datetime.datetime.min.time()))))
+    conn = mysql.connector.connect(
+        host=sc["db_host"],
+        user=sc["db_user"],
+        password=sc["db_pw"],
+        database=sc["db_name"],
+        autocommit=True
+    )
+    cursor = conn.cursor()
+    for item in data:
+        create_table_query = f"""
+            INSERT INTO holdings (timestamp, wallet, pfp, name, amount) VALUES (%s, %s, %s, %s, %s)
+            """
+        cursor.execute(create_table_query, (timestamp, wallet, item['PFP'], item['Holder'], item['Balance']))
+    conn.commit()
+    conn.close()
