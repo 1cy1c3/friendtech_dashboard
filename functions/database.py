@@ -1,6 +1,6 @@
 import mysql.connector
 import streamlit as st
-import datetime
+import pandas as pd
 
 ss = st.session_state
 sc = st.secrets
@@ -63,28 +63,39 @@ def add_remove_wl(wallet, name):
 
 
 def get_data(wallet, database):
-    conn = mysql.connector.connect(
-        host=sc["db_host"],
-        user=sc["db_user"],
-        password=sc["db_pw"],
-        database=sc["db_name"],
-        autocommit=True
-    )
-    cursor = conn.cursor()
+    try:
+        conn = mysql.connector.connect(
+            host=sc["db_host"],
+            user=sc["db_user"],
+            password=sc["db_pw"],
+            database=sc["db_name"],
+            autocommit=True
+        )
+        cursor = conn.cursor()
 
-    create_table_query = f"""
-        SELECT * FROM {database} WHERE wallet = %s
-        """
+        create_table_query = f"""
+            SELECT * FROM {database} WHERE wallet = %s
+            ORDER BY timestamp DESC
+            """
 
-    cursor.execute(create_table_query, (wallet,))
-    results = cursor.fetchall()
-    return results
+        cursor.execute(create_table_query, (wallet,))
+        # Fetch all the rows from the cursor
+        rows = cursor.fetchall()
+
+        # Get the column names from the cursor description
+        column_names = [desc[0] for desc in cursor.description]
+        # Create a pandas DataFrame from the fetched rows and column names
+        df = pd.DataFrame(rows, columns=column_names)
+        df = df.drop(columns=['id'])
+
+        # Convert the filtered DataFrame to a JSON string
+        json_data = df.to_dict(orient='records')
+        return json_data
+    except:
+        return None
 
 
-def post_data_holders(data, wallet):
-    current_date = datetime.datetime.now().date()
-    timestamp = int(
-        (datetime.datetime.timestamp(datetime.datetime.combine(current_date, datetime.datetime.min.time()))))
+def post_data_user_activity(data, wallet):
     conn = mysql.connector.connect(
         host=sc["db_host"],
         user=sc["db_user"],
@@ -94,18 +105,19 @@ def post_data_holders(data, wallet):
     )
     cursor = conn.cursor()
     for item in data:
-        create_table_query = f"""
-            INSERT INTO holders (timestamp, wallet, pfp, name, amount) VALUES (%s, %s, %s, %s, %s)
-            """
-        cursor.execute(create_table_query, (timestamp, wallet, item['PFP'], item['Holder'], item['Balance']))
+        if 'PFP' in item:
+            create_table_query = f"""
+                INSERT INTO user_activity (Timestamp, Wallet, PFP, Subject, Activity, Keys, Eth, Timedelta) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+            cursor.execute(
+                create_table_query,
+                (item['Timestamp'], wallet, item['PFP'], item['Subject'], item['Activity'], item['Keys'], item['Eth'], item['Timedelta']))
     conn.commit()
     conn.close()
 
 
-def post_data_holdings(data, wallet):
-    current_date = datetime.datetime.now().date()
-    timestamp = int(
-        (datetime.datetime.timestamp(datetime.datetime.combine(current_date, datetime.datetime.min.time()))))
+def post_data_key_activity(data, wallet):
     conn = mysql.connector.connect(
         host=sc["db_host"],
         user=sc["db_user"],
@@ -116,8 +128,11 @@ def post_data_holdings(data, wallet):
     cursor = conn.cursor()
     for item in data:
         create_table_query = f"""
-            INSERT INTO holdings (timestamp, wallet, pfp, name, amount) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO key_activity (Timestamp, Wallet, PFP, Trader, Activity, Keys, Eth, Timedelta) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-        cursor.execute(create_table_query, (timestamp, wallet, item['PFP'], item['Holder'], item['Balance']))
+        cursor.execute(
+            create_table_query,
+            (item['Timestamp'], wallet, item['PFP'], item['Trader'], item['Activity'], item['Keys'], item['Eth'], item['Timedelta']))
     conn.commit()
     conn.close()

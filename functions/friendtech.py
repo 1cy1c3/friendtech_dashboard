@@ -2,7 +2,7 @@ import requests
 
 import streamlit as st
 import functions.utils as ut
-from collections import Counter
+import functions.database as db
 
 ss = st.session_state
 sc = st.secrets
@@ -37,7 +37,7 @@ def get_global_activity():
                     'Eth': round((int(item['ethAmount']) * 10 ** -18), 3)
                 })
         return filtered_data
-    except requests.exceptions.JSONDecodeError as e:
+    except requests.exceptions.JSONDecodeError:
         return None
 
 
@@ -92,8 +92,9 @@ def get_portfolio_value(address):
                     exp = int(temp_f[1]) - len(data["feesCollected"]) + 1
                     data["feesCollected"] = int(data["feesCollected"]) * 10 ** exp  # This calculation lol
 
-                return round((int(data["portfolioValue"]) * 10 ** -18), 3), round((int(data["feesCollected"]) * 10 ** -19),
-                                                                                  3)
+                return round((int(data["portfolioValue"]) * 10 ** -18), 3), round(
+                    (int(data["feesCollected"]) * 10 ** -19),
+                    3)
             else:
                 return "N/A", "N/A"
         else:
@@ -134,6 +135,14 @@ def get_top_50():
 
 
 def get_token_activity(target):
+    token_activity = []
+    # Fetch User Data and set last timestamp
+    fetch_db = db.get_data(target, "key_activity")
+    if fetch_db:
+        last_entry_ts = fetch_db[0]['Timestamp']
+    else:
+        last_entry_ts = 0
+
     url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity'
     headers = {
         'Authorization': sc["auth_token"],
@@ -143,43 +152,28 @@ def get_token_activity(target):
     }
 
     response = requests.get(url, headers=headers)
-    token_activity = []
-    chart_data = []
-    scatter_data = []
-
-    keys = 0
-    total_eth = 0  # initialize a counter to store the sum of ethAmounts
 
     try:
         data = response.json()
         if "users" in data:
+            last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
             for item in data["users"]:
+                if last_ft_ts <= last_entry_ts:
+                    break
                 eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
-                total_eth += eth_value  # increment the counter with each loop iteration
-                _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
-                raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 if int(item['shareAmount']) > 1:
                     item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
 
                 if item["isBuy"]:
                     activity = "buy"
-                    keys += int(item['shareAmount'])
-                    scatter_data.append({
-                        'time': _time,
-                        'raw_time': raw_time,
-                        'buy_price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                    })
+
                 else:
                     activity = "sell"
-                    keys -= int(item['shareAmount'])
-                    scatter_data.append({
-                        'time': _time,
-                        'raw_time': raw_time,
-                        'sell_price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                    })
 
                 token_activity.append({
+                    'Timestamp': int(item["createdAt"] / 1000),
+                    'Wallet': target,
                     'PFP': item["twitterPfpUrl"],
                     'Trader': item['twitterUsername'],
                     'Activity': activity,
@@ -187,18 +181,15 @@ def get_token_activity(target):
                     'Eth': eth_value,
                     'Timedelta': time_delta
                 })
-                chart_data.append({
-                    'time': _time,
-                    'raw_time': raw_time,
-                    'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                })
-        else:
-            return None, None, None, None, None
-    except requests.exceptions.JSONDecodeError:
-        return None, None, None, None, None
 
-    # Search for next page start and make more requests untill the full history is loaded
-    if data['nextPageStart'] != "null":
+                last_ft_ts = int(item["createdAt"] / 1000)
+        else:
+            return None
+    except requests.exceptions.JSONDecodeError:
+        return None
+
+    # Search for next page start and make more requests until the full history is loaded
+    if data['nextPageStart'] != "null" and last_ft_ts > last_entry_ts:
         next_page = data['nextPageStart']
         while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/token/trade-activity?pageStart={next_page}'
@@ -214,32 +205,22 @@ def get_token_activity(target):
                 data = response.json()
                 if "users" in data:
                     for item in data["users"]:
+                        if last_ft_ts <= last_entry_ts:
+                            break
                         eth_value = round((int(item['ethAmount']) * 10 ** -18), 3)
-                        total_eth += eth_value  # increment the counter with each loop iteration
-                        _time = ut.timestamp_to_date(int(item['createdAt'] / 1000))
-                        raw_time = ut.timestamp_to_datetime(int(item['createdAt'] / 1000))
                         time_delta = ut.time_ago(int(item["createdAt"]))
                         if int(item['shareAmount']) > 1:
                             item['ethAmount'] = int(int(item['ethAmount']) / int(item['shareAmount']))
 
                         if item["isBuy"]:
                             activity = "buy"
-                            keys += int(item['shareAmount'])
-                            scatter_data.append({
-                                'time': _time,
-                                'raw_time': raw_time,
-                                'buy_price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                            })
+
                         else:
                             activity = "sell"
-                            keys -= int(item['shareAmount'])
-                            scatter_data.append({
-                                'time': _time,
-                                'raw_time': raw_time,
-                                'sell_price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                            })
 
                         token_activity.append({
+                            'Timestamp': int(item["createdAt"] / 1000),
+                            'Wallet': target,
                             'PFP': item["twitterPfpUrl"],
                             'Trader': item['twitterUsername'],
                             'Activity': activity,
@@ -247,21 +228,42 @@ def get_token_activity(target):
                             'Eth': eth_value,
                             'Timedelta': time_delta
                         })
-                        chart_data.append({
-                            'time': _time,
-                            'raw_time': raw_time,
-                            'price': round((int(item['ethAmount']) * 10 ** -18), 3)
-                        })
 
+                        last_ft_ts = int(item["createdAt"] / 1000)
+                    next_page = str(data['nextPageStart'])
                 else:
-                    return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
-                next_page = str(data['nextPageStart'])
+                    if token_activity:
+                        try:
+                            db.post_data_key_activity(token_activity, target)
+                        except ConnectionError:
+                            pass
+                    token_activity += fetch_db
+                    return token_activity
 
             except requests.exceptions.JSONDecodeError:
-                return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
-        return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
+                if token_activity:
+                    try:
+                        db.post_data_key_activity(token_activity, target)
+                    except ConnectionError:
+                        pass
+                token_activity += fetch_db
+                return token_activity
+        if token_activity:
+            try:
+                db.post_data_key_activity(token_activity, target)
+            except ConnectionError:
+                pass
+        token_activity += fetch_db
+        return token_activity
+
     else:
-        return token_activity, round(total_eth, 3), chart_data, keys, scatter_data
+        if token_activity:
+            try:
+                db.post_data_key_activity(token_activity, target)
+            except ConnectionError:
+                pass
+        token_activity += fetch_db
+        return token_activity
 
 
 def get_user_points(address):
@@ -336,50 +338,33 @@ def addr_to_user(address, convert):
 
 
 def get_personal_activity(target):
-    profit = 0
-    volume = 0
-    buys = 0
-    sells = 0
-    investment = 0
-    date = None
-    sell_list = []
-    buy_list = []
+    # Fetch User Data and set last timestamp
+    fetch_db = db.get_data(target, "user_activity")
+    if fetch_db:
+        last_entry_ts = fetch_db[0]['Timestamp']
+    else:
+        last_entry_ts = 0
 
     url = f'https://prod-api.kosetto.com/users/{target}/trade-activity'
     response = requests.get(url)
     account_activity = []
-
     try:
         data = response.json()
         if "users" in data:
+            last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
             for item in data["users"]:
+                if last_ft_ts <= last_entry_ts:
+                    break
                 if item["isBuy"]:
                     activity = "buy"
-                    profit -= int(item['ethAmount']) / (10 ** 18) * 1.1
-                    volume += int(item['ethAmount']) / (10 ** 18) * 1.1
-                    investment += int(item['ethAmount']) / (10 ** 18) * 1.1
-                    buys += 1
-                    buy_list.append({
-                                'PFP': item["twitterPfpUrl"],
-                                'Holding': item['twitterUsername'],
-                                'Balance': int(item['shareAmount'])
-                            })
 
-                    if item['ethAmount'] == "0":
-                        date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                 else:
                     activity = "sell"
-                    profit += int(item['ethAmount']) / (10 ** 18) * 0.9
-                    volume += int(item['ethAmount']) / (10 ** 18) * 0.9
-                    sells += 1
-                    sell_list.append({
-                                'PFP': item["twitterPfpUrl"],
-                                'Holding': item['twitterUsername'],
-                                'Balance': - int(item['shareAmount'])
-                            })
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 account_activity.append({
+                    'Timestamp': int(item["createdAt"] / 1000),
+                    'Wallet': target,
                     'PFP': item["twitterPfpUrl"],
                     'Subject': item['twitterUsername'],
                     'Activity': activity,
@@ -388,16 +373,14 @@ def get_personal_activity(target):
                     'Timedelta': time_delta
                 })
 
-            volume = round(volume, 3)
-            profit_in_ether = round(profit, 3)
-            investment = round(investment, 3)
+                last_ft_ts = int(item["createdAt"] / 1000)
         else:
-            return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+            return "N/A"
     except requests.exceptions.JSONDecodeError:
-        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
+        return "N/A"
 
     # Search for next page start and make more requests until the full history is loaded
-    if data['nextPageStart'] != "null":
+    if data['nextPageStart'] != "null" and last_ft_ts > last_entry_ts:
         next_page = data['nextPageStart']
         while next_page != "null":
             url = f'https://prod-api.kosetto.com/users/{target}/trade-activity?pageStart={next_page}'
@@ -407,33 +390,18 @@ def get_personal_activity(target):
                 data = response.json()
                 if "users" in data:
                     for item in data["users"]:
+                        if last_ft_ts <= last_entry_ts:
+                            break
                         if item["isBuy"]:
                             activity = "buy"
-                            profit -= int(item['ethAmount']) / (10 ** 18) * 1.1
-                            volume += int(item['ethAmount']) / (10 ** 18) * 1.1
-                            investment += int(item['ethAmount']) / (10 ** 18) * 1.1
-                            buys += 1
-                            buy_list.append({
-                                'PFP': item["twitterPfpUrl"],
-                                'Holding': item['twitterUsername'],
-                                'Balance': int(item['shareAmount'])
-                            })
 
-                            if item['ethAmount'] == "0":
-                                date = str(ut.timestamp_to_datetime(int(item["createdAt"]) / 1000) + " (UTC)")
                         else:
                             activity = "sell"
-                            profit += int(item['ethAmount']) / (10 ** 18) * 0.9
-                            volume += int(item['ethAmount']) / (10 ** 18) * 0.9
-                            sells += 1
-                            sell_list.append({
-                                'PFP': item["twitterPfpUrl"],
-                                'Holding': item['twitterUsername'],
-                                'Balance': - int(item['shareAmount'])
-                            })
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
                         account_activity.append({
+                            'Timestamp': int(item["createdAt"] / 1000),
+                            'Wallet': target,
                             'PFP': item["twitterPfpUrl"],
                             'Subject': item['twitterUsername'],
                             'Activity': activity,
@@ -442,25 +410,47 @@ def get_personal_activity(target):
                             'Timedelta': time_delta
                         })
 
+                        last_ft_ts = int(item["createdAt"] / 1000)
                     next_page = str(data['nextPageStart'])
-                    volume = round(volume, 3)
-                    profit_in_ether = round(profit, 3)
-                    investment = round(investment, 3)
+
                 else:
-                    result = [entry for entry in buy_list if entry not in sell_list]
-                    holdings = ut.combine_duplicates(result)
-                    return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
+                    if account_activity:
+                        try:
+                            db.post_data_user_activity(account_activity, target)
+                        except ConnectionError:
+                            pass
+                    account_activity += fetch_db
+                    account_activity = [item for item in account_activity if len(item) == 8]
+                    return account_activity
+
             except requests.exceptions.JSONDecodeError:
-                result = [entry for entry in buy_list if entry not in sell_list]
-                holdings = ut.combine_duplicates(result)
-                return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
-        result = [entry for entry in buy_list if entry not in sell_list]
-        holdings = ut.combine_duplicates(result)
-        return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
+                if account_activity:
+                    try:
+                        db.post_data_user_activity(account_activity, target)
+                    except ConnectionError:
+                        pass
+                account_activity += fetch_db
+                account_activity = [item for item in account_activity if len(item) == 8]
+                return account_activity
+
+        if account_activity:
+            try:
+                db.post_data_user_activity(account_activity, target)
+            except ConnectionError:
+                pass
+        account_activity += fetch_db
+        account_activity = [item for item in account_activity if len(item) == 8]
+        return account_activity
+
     else:
-        result = [entry for entry in buy_list if entry not in sell_list]
-        holdings = ut.combine_duplicates(result)
-        return account_activity, date, profit_in_ether, volume, buys, sells, investment, holdings
+        if account_activity:
+            try:
+                db.post_data_user_activity(account_activity, target)
+            except ConnectionError:
+                pass
+        account_activity += fetch_db
+        account_activity = [item for item in account_activity if len(item) == 8]
+        return account_activity
 
 
 @st.cache_data(show_spinner=False, ttl="5m")

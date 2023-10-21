@@ -243,17 +243,17 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 balance = "N/A"
             progress.progress(value=15, text="Loading Stats")
 
-            points, tier, rank = ft.get_user_points(address)
-            if tier.lower() == "bronze":
-                st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
-            elif tier.lower() == "silver":
-                st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
-            elif tier.lower() == "gold":
-                st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
-            elif tier.lower() == "diamond":
-                st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
-            else:
-                st.write(f"**Rank:** {rank} **Points:** {points}")
+            #points, tier, rank = ft.get_user_points(address)
+            #if tier.lower() == "bronze":
+             #   st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
+            #elif tier.lower() == "silver":
+               # st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
+            #elif tier.lower() == "gold":
+            #    st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
+            #elif tier.lower() == "diamond":
+            #    st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
+            #else:
+            #    st.write(f"**Rank:** {rank} **Points:** {points}")
 
             st.write(f"**Account Balance:** {balance} ETH")
 
@@ -277,10 +277,12 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 st.write(f"**Holder:** {holder}")
                 st.write(f"**Keys:** {total_keys}")
                 st.write(f"**Key Price:** {price} ETH")
-            self_count, key_holders = ft.get_holders(address)
+
+            #_key_holders = ft.get_holders(address)
             progress.progress(value=45, text="Loading Stats")
 
-        key_activity, key_volume, share_price, keys, scatter_data = ft.get_token_activity(address)
+        key_activity = ft.get_token_activity(address)
+        key_volume, share_price, keys, scatter_data, key_holders, self_count = ut.get_holders(key_activity, target)
         if keys is None:
             keys = "N/A"
         progress.progress(value=55, text="Loading Stats")
@@ -315,7 +317,8 @@ def load_ft_stats(address, target, progress, watchlist=False):
             with expander.expander("Advanced Stats"):
                 l, r = st.columns([1, 1])
                 with l:
-                    activity, created_at, profit, volume, buys, sells, investment, _portfolio = ft.get_personal_activity(address)
+                    activity = ft.get_personal_activity(address)
+                    created_at, profit, volume, buys, sells, investment, portfolio = ut.get_holdings(activity)
                     created_text.write(f"**Created: {created_at}**")
                     if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
                         total = round((profit + portfolio_value + fees), 3)
@@ -336,7 +339,12 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
                     with r:
                         progress.progress(value=65, text="Loading Stats")
-                        st.write(f"**Buys:Sells:** {buys} : {sells}")
+                        if price != "N/A" and price > 0 and portfolio_value != "N/A":
+                            st.write(f"**Portfolio/Key-Ratio**: {round(portfolio_value / price, 3)}")
+                        else:
+                            st.write(f"**Portfolio/Key-Ratio**: N/A")
+
+                        st.write(f"**Buys/Sells:** {buys} / {sells}")
                         if bot_percent == "N/A":
                             st.markdown(f"**Bots:** {bots} **or** {bot_percent}%")
                         elif bot_percent <= 10:
@@ -408,10 +416,10 @@ def load_ft_stats(address, target, progress, watchlist=False):
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
-        portfolio = ft.get_holdings(address)
+        #portfolio = ft.get_holdings(address)
         with rc_2:
             if not watchlist:
-                _3_count, c_hodl = ut.list_unity(key_holders, _portfolio)
+                _3_count, c_hodl = ut.list_unity(key_holders, portfolio)
                 if self_count != "N/A" and self_count > 0:
                     c_hodl -= 1
                     _3_count -= 1
@@ -448,13 +456,17 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
 
 def load_ft_df(data, hide, image=False):
+    df = pd.DataFrame(data)
+    try:
+        df = df.drop(columns=['Timestamp'])
+        df = df.drop(columns=['Wallet'])
+    except:
+        pass
     if data:
         if image is False:
-            df = pd.DataFrame(data)
             df.index += 1
             st.dataframe(df, use_container_width=True, hide_index=hide)
         else:
-            df = pd.DataFrame(data)
             st.data_editor(
                 df,
                 column_config={
