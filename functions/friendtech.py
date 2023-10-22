@@ -156,7 +156,10 @@ def get_token_activity(target):
     try:
         data = response.json()
         if "users" in data:
-            last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
+            try:
+                last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
+            except:
+                last_ft_ts = 0
             for item in data["users"]:
                 if last_ft_ts <= last_entry_ts:
                     break
@@ -351,7 +354,10 @@ def get_personal_activity(target):
     try:
         data = response.json()
         if "users" in data:
-            last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
+            try:
+                last_ft_ts = int(data['users'][0]['createdAt'] / 1000)
+            except:
+                last_ft_ts = 0
             for item in data["users"]:
                 if last_ft_ts <= last_entry_ts:
                     break
