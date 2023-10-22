@@ -241,32 +241,29 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 balance = bs.balance(address)
             except Exception:
                 balance = "N/A"
+
             progress.progress(value=15, text="Loading Stats")
-
-            #points, tier, rank = ft.get_user_points(address)
-            #if tier.lower() == "bronze":
-             #   st.write(f"**Weekly Rank:** {rank} **Points:** {points}")
-            #elif tier.lower() == "silver":
-               # st.write(f":gray[**Weekly Rank:** {rank}] **Points:** {points}")
-            #elif tier.lower() == "gold":
-            #    st.write(f":orange[**Weekly Rank:** {rank}] **Points:** {points}")
-            #elif tier.lower() == "diamond":
-            #    st.write(f":violet[**Weekly Rank:** {rank}] **Points:** {points}")
-            #else:
-            #    st.write(f"**Rank:** {rank} **Points:** {points}")
-
             st.write(f"**Account Balance:** {balance} ETH")
-
             portfolio_value, fees_collected = ft.get_portfolio_value(address)
+
             if fees_collected == "N/A":
                 fees = "N/A"
             else:
                 fees = fees_collected / 2
             progress.progress(value=25, text="Loading Stats")
             st.write(f"**Portfolio Value:** {portfolio_value} ETH")
-            created_text = st.empty()
+            holder, holdings, total_keys, price, rank, watchlistcount = ft.addr_to_user(address, convert=False)
 
-            holder, holdings, total_keys, price = ft.addr_to_user(address, convert=False)
+            if rank == "N/A" or rank > 10000:
+                st.write(f"**Rank:** {rank}")
+            elif 5000 < rank <= 10000:
+                st.write(f":gray[**Rank:** {rank}]")
+            elif 500 < rank <= 5000:
+                st.write(f":orange[**Rank:** {rank}]")
+            elif rank <= 500:
+                st.write(f":violet[**Rank:** {rank}]")
+
+            created_text = st.empty()
             if not watchlist:
                 progress.progress(value=35, text="Loading Stats")
             else:
@@ -330,6 +327,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                     else:
                         capital_efficiency = "N/A"
 
+                    st.write(f"**Watchlist:** {watchlistcount}")
                     st.write(f"**Buy Volume:** {investment} ETH")
                     st.write(f"**Trading Profit:** {profit} ETH")
                     st.write(f"**Trading Volume:** {volume} ETH")

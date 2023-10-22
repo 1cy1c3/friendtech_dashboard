@@ -330,14 +330,15 @@ def addr_to_user(address, convert):
                 temp_p = data["displayPrice"].split(".")
                 data["displayPrice"] = temp_p[0]
             if "holderCount" in data and "holdingCount" in data and "shareSupply" in data and "displayPrice" in data:
-                return (data["holderCount"], data["holdingCount"],
-                        data["shareSupply"], round((int(data["displayPrice"]) * 10 ** -18), 3))
+
+                return (data["holderCount"], data["holdingCount"], data["shareSupply"],
+                        round((int(data["displayPrice"]) * 10 ** -18), 3), int(data["rank"]), int(data["watchlistCount"]))
             else:
-                return "N/A", "N/A", "N/A", "N/A"
+                return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:
         if convert:
             return "N/A", None
-        return "N/A", "N/A", "N/A", "N/A"
+        return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
 
 
 def get_personal_activity(target):
@@ -656,7 +657,7 @@ def get_dump_values(data, address):
     if data:
         for item in data:
             if 'Wallet' in item:
-                _, _, _, price = addr_to_user(item['Wallet'], convert=False)
+                _, _, _, price, _, _ = addr_to_user(item['Wallet'], convert=False)
                 if price != "N/A":
                     supply = ut.get_supply(price)
                     if supply != "N/A":
