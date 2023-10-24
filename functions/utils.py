@@ -116,7 +116,7 @@ def get_holdings(data):
 
     if data:
         for item in data:
-            if item["Activity"].lower() == "buy":
+            if "Activity" in item and item["Activity"].lower() == "buy":
                 profit -= item['Eth']
                 volume += item['Eth']
                 investment += item['Eth']
@@ -128,7 +128,7 @@ def get_holdings(data):
                         'Balance': 1
                     })
 
-            else:
+            elif "Activity" in item and item["Activity"].lower() == "sell":
                 profit += item['Eth']
                 volume += item['Eth']
                 sells += int(item['Keys'])
@@ -163,7 +163,7 @@ def get_holders(data, target):
             if target.lower() == item['Trader'].lower():
                 self_count += int(item['Keys'])
 
-            if item["Activity"] == "buy":
+            if "Activity" in item and item["Activity"].lower() == "buy":
                 keys += int(item['Keys'])
                 scatter_data.append({
                     'time': _time,
@@ -177,7 +177,7 @@ def get_holders(data, target):
                         'Balance': 1
                     })
 
-            else:
+            elif "Activity" in item and item["Activity"].lower() == "sell":
                 keys -= int(item['Keys'])
                 scatter_data.append({
                     'time': _time,
