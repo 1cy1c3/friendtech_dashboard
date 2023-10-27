@@ -116,28 +116,29 @@ def get_holdings(data):
 
     if data:
         for item in data:
-            if item["Activity"].lower() == "buy":
-                profit -= item['Eth']
-                volume += item['Eth']
-                investment += item['Eth']
-                buys += int(item['Keys'])
-                for _ in range(int(item['Keys'])):
-                    holdings_raw.append({
-                        'PFP': item["PFP"],
-                        'Holding': item['Subject'],
-                        'Balance': 1
-                    })
+            if "Activity" in item:
+                if item["Activity"].lower() == "buy":
+                    profit -= item['Eth']
+                    volume += item['Eth']
+                    investment += item['Eth']
+                    buys += int(item['Keys'])
+                    for _ in range(int(item['Keys'])):
+                        holdings_raw.append({
+                            'PFP': item["PFP"],
+                            'Holding': item['Subject'],
+                            'Balance': 1
+                        })
 
-            else:
-                profit += item['Eth']
-                volume += item['Eth']
-                sells += int(item['Keys'])
-                for _ in range(int(item['Keys'])):
-                    holdings_raw.append({
-                        'PFP': item["PFP"],
-                        'Holding': item['Subject'],
-                        'Balance': -1
-                    })
+                else:
+                    profit += item['Eth']
+                    volume += item['Eth']
+                    sells += int(item['Keys'])
+                    for _ in range(int(item['Keys'])):
+                        holdings_raw.append({
+                            'PFP': item["PFP"],
+                            'Holding': item['Subject'],
+                            'Balance': -1
+                        })
         date = str(timestamp_to_datetime(data[-1]["Timestamp"]) + " (UTC)")
         holdings = combine_duplicates_holding(holdings_raw)
         holdings = sorted(holdings, key=lambda x: x['Balance'], reverse=True)
@@ -159,45 +160,45 @@ def get_holders(data, target):
             _time = timestamp_to_date(item['Timestamp'])
             raw_time = timestamp_to_datetime(item['Timestamp'])
             price = round((float(item['Eth']) / int(item['Keys'])), 3)
+            if "Activity" in item:
+                if item["Activity"] == "buy":
+                    if target.lower() == item['Trader'].lower():
+                        self_count += int(item['Keys'])
 
-            if item["Activity"] == "buy":
-                if target.lower() == item['Trader'].lower():
-                    self_count += int(item['Keys'])
+                    keys += int(item['Keys'])
+                    scatter_data.append({
+                        'time': _time,
+                        'raw_time': raw_time,
+                        'buy_price': price
+                    })
+                    for _ in range(int(item['Keys'])):
+                        holders_raw.append({
+                            'PFP': item["PFP"],
+                            'Holder': item['Trader'],
+                            'Balance': 1
+                        })
 
-                keys += int(item['Keys'])
-                scatter_data.append({
+                else:
+                    if target.lower() == item['Trader'].lower():
+                        self_count -= int(item['Keys'])
+                    keys -= int(item['Keys'])
+                    scatter_data.append({
+                        'time': _time,
+                        'raw_time': raw_time,
+                        'sell_price': price
+                    })
+                    for _ in range(int(item['Keys'])):
+                        holders_raw.append({
+                            'PFP': item["PFP"],
+                            'Holder': item['Trader'],
+                            'Balance': -1
+                        })
+
+                chart_data.append({
                     'time': _time,
                     'raw_time': raw_time,
-                    'buy_price': price
+                    'price': price
                 })
-                for _ in range(int(item['Keys'])):
-                    holders_raw.append({
-                        'PFP': item["PFP"],
-                        'Holder': item['Trader'],
-                        'Balance': 1
-                    })
-
-            else:
-                if target.lower() == item['Trader'].lower():
-                    self_count -= int(item['Keys'])
-                keys -= int(item['Keys'])
-                scatter_data.append({
-                    'time': _time,
-                    'raw_time': raw_time,
-                    'sell_price': price
-                })
-                for _ in range(int(item['Keys'])):
-                    holders_raw.append({
-                        'PFP': item["PFP"],
-                        'Holder': item['Trader'],
-                        'Balance': -1
-                    })
-
-            chart_data.append({
-                'time': _time,
-                'raw_time': raw_time,
-                'price': price
-            })
 
         holders = combine_duplicates_holder(holders_raw)
         holders = sorted(holders, key=lambda x: x['Balance'], reverse=True)
