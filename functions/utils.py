@@ -160,10 +160,10 @@ def get_holders(data, target):
             raw_time = timestamp_to_datetime(item['Timestamp'])
             price = round((float(item['Eth']) / int(item['Keys'])), 3)
 
-            if target.lower() == item['Trader'].lower():
-                self_count += int(item['Keys'])
-
             if item["Activity"] == "buy":
+                if target.lower() == item['Trader'].lower():
+                    self_count += int(item['Keys'])
+
                 keys += int(item['Keys'])
                 scatter_data.append({
                     'time': _time,
@@ -178,6 +178,8 @@ def get_holders(data, target):
                     })
 
             else:
+                if target.lower() == item['Trader'].lower():
+                    self_count -= int(item['Keys'])
                 keys -= int(item['Keys'])
                 scatter_data.append({
                     'time': _time,
