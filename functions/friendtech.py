@@ -330,9 +330,11 @@ def addr_to_user(address, convert):
                 temp_p = data["displayPrice"].split(".")
                 data["displayPrice"] = temp_p[0]
             if "holderCount" in data and "holdingCount" in data and "shareSupply" in data and "displayPrice" in data:
-
+                rank = data["rank"]
+                if rank != "N/A":
+                    rank = int(data["rank"])
                 return (data["holderCount"], data["holdingCount"], data["shareSupply"],
-                        round((int(data["displayPrice"]) * 10 ** -18), 3), int(data["rank"]), int(data["watchlistCount"]))
+                        round((int(data["displayPrice"]) * 10 ** -18), 3), rank, int(data["watchlistCount"]))
             else:
                 return "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"
     except requests.exceptions.JSONDecodeError:

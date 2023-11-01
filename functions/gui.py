@@ -243,7 +243,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 balance = "N/A"
 
             progress.progress(value=15, text="Loading Stats")
-            st.write(f"**Account Balance:** {balance} ETH")
+            st.write(f"**Account Balance:** {balance}Ξ")
             portfolio_value, fees_collected = ft.get_portfolio_value(address)
 
             if fees_collected == "N/A":
@@ -251,7 +251,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
             else:
                 fees = fees_collected / 2
             progress.progress(value=25, text="Loading Stats")
-            st.write(f"**Portfolio Value:** {portfolio_value} ETH")
+            st.write(f"**Portfolio Value:** {portfolio_value}Ξ")
             holder, holdings, total_keys, price, rank, watchlistcount = ft.addr_to_user(address, convert=False)
 
             if rank == "N/A" or rank > 10000:
@@ -273,7 +273,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 st.write(f"**Holdings:** {holdings}")
                 st.write(f"**Holder:** {holder}")
                 st.write(f"**Keys:** {total_keys}")
-                st.write(f"**Key Price:** {price} ETH")
+                st.write(f"**Key Price:** {price}Ξ")
 
             #_key_holders = ft.get_holders(address)
             progress.progress(value=45, text="Loading Stats")
@@ -328,12 +328,12 @@ def load_ft_stats(address, target, progress, watchlist=False):
                         capital_efficiency = "N/A"
 
                     st.write(f"**Watchlist:** {watchlistcount}")
-                    st.write(f"**Buy Volume:** {investment} ETH")
-                    st.write(f"**Trading Profit:** {profit} ETH")
-                    st.write(f"**Trading Volume:** {volume} ETH")
-                    st.write(f"**Total Profit: {total}**")
+                    st.write(f"**Buy Volume:** {investment}Ξ")
+                    st.write(f"**Trading Profit:** {profit}Ξ")
+                    st.write(f"**Trading Volume:** {volume}Ξ")
+                    st.write(f"**Total Profit: {total}Ξ**")
                     st.write(f"**Capital Efficiency:** {capital_efficiency}%")
-                    st.write(f"**Collected Fees:** {fees} ETH")
+                    st.write(f"**Collected Fees:** {fees}Ξ")
 
                     with r:
                         progress.progress(value=65, text="Loading Stats")
@@ -370,7 +370,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                         elif self_count > 10:
                             st.markdown(f":red[**Own Keys:** {self_count}]")
 
-                        st.write(f"**Market Cap:** {market_cap} ETH")
+                        st.write(f"**Market Cap:** {market_cap}Ξ")
                         _3_text = st.empty()
     if not watchlist:
         with left_stats:
@@ -392,25 +392,25 @@ def load_ft_stats(address, target, progress, watchlist=False):
                 with metric_l:
                     if 'yesterday' in metrics[0] and metrics[0]['yesterday'] > 0.0:
                         st.metric(label="day to day",
-                                  value=f"{round(metrics[0]['yesterday'], 3)}ETH",
+                                  value=f"{round(metrics[0]['yesterday'], 3)}Ξ",
                                   delta=f"{round(100 * (price - metrics[0]['yesterday']) / metrics[0]['yesterday'], 2)}%")
 
                 with metric_lm:
                     if 'week' in metrics[0] and metrics[0]['week'] > 0.0:
                         st.metric(label="day to week",
-                                  value=f"{round(metrics[0]['week'], 3)}ETH",
+                                  value=f"{round(metrics[0]['week'], 3)}Ξ",
                                   delta=f"{round(100 * (price - metrics[0]['week']) / metrics[0]['week'], 2)}%")
                 with metric_rm:
                     if 'month' in metrics[0] and metrics[0]['month'] > 0.0:
                         st.metric(label="day to month",
-                                  value=f"{round(metrics[0]['month'], 3)}ETH",
+                                  value=f"{round(metrics[0]['month'], 3)}Ξ",
                                   delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['month'], 2)}%")
                 with metric_r:
                     if metrics[0]['creation'] == 0:
                         metrics[0]['creation'] = 0.0000625
 
                     st.metric(label="day to creation",
-                              value=f"{round(metrics[0]['creation'], 3)}ETH",
+                              value=f"{round(metrics[0]['creation'], 3)}Ξ",
                               delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
