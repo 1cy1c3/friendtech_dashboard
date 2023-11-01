@@ -1,5 +1,5 @@
 requests==2.31.0
-streamlit==1.27.0
+streamlit==1.28.0
 pandas==2.0.3
 argon2-cffi
 git+https://github.com/GauriSP10/streamlit_login_auth_ui.git
