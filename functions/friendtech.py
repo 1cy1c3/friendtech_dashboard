@@ -173,19 +173,20 @@ def get_token_activity(target):
 
                 else:
                     activity = "sell"
-
-                token_activity.append({
-                    'Timestamp': int(item["createdAt"] / 1000),
-                    'Wallet': target,
-                    'PFP': item["twitterPfpUrl"],
-                    'Trader': item['twitterUsername'],
-                    'Activity': activity,
-                    'Keys': item['shareAmount'],
-                    'Eth': eth_value,
-                    'Timedelta': time_delta
-                })
-
-                last_ft_ts = int(item["createdAt"] / 1000)
+                try:
+                    token_activity.append({
+                        'Timestamp': int(item["createdAt"] / 1000),
+                        'Wallet': target,
+                        'PFP': item["twitterPfpUrl"],
+                        'Trader': item['twitterUsername'],
+                        'Activity': activity,
+                        'Keys': item['shareAmount'],
+                        'Eth': eth_value,
+                        'Timedelta': time_delta
+                    })
+                    last_ft_ts = int(item["createdAt"] / 1000)
+                except:
+                    pass
         else:
             return None
     except requests.exceptions.JSONDecodeError:
