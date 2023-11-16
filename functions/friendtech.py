@@ -221,17 +221,19 @@ def get_token_activity(target):
 
                         else:
                             activity = "sell"
-
-                        token_activity.append({
-                            'Timestamp': int(item["createdAt"] / 1000),
-                            'Wallet': target,
-                            'PFP': item["twitterPfpUrl"],
-                            'Trader': item['twitterUsername'],
-                            'Activity': activity,
-                            'Keys': item['shareAmount'],
-                            'Eth': eth_value,
-                            'Timedelta': time_delta
-                        })
+                        try:
+                            token_activity.append({
+                                'Timestamp': int(item["createdAt"] / 1000),
+                                'Wallet': target,
+                                'PFP': item["twitterPfpUrl"],
+                                'Trader': item['twitterUsername'],
+                                'Activity': activity,
+                                'Keys': item['shareAmount'],
+                                'Eth': eth_value,
+                                'Timedelta': time_delta
+                            })
+                        except:
+                            pass
 
                         last_ft_ts = int(item["createdAt"] / 1000)
                     next_page = str(data['nextPageStart'])
@@ -372,16 +374,19 @@ def get_personal_activity(target):
                     activity = "sell"
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
-                account_activity.append({
-                    'Timestamp': int(item["createdAt"] / 1000),
-                    'Wallet': target,
-                    'PFP': item["twitterPfpUrl"],
-                    'Subject': item['twitterUsername'],
-                    'Activity': activity,
-                    'Keys': item['shareAmount'],
-                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                    'Timedelta': time_delta
-                })
+                try:
+                    account_activity.append({
+                        'Timestamp': int(item["createdAt"] / 1000),
+                        'Wallet': target,
+                        'PFP': item["twitterPfpUrl"],
+                        'Subject': item['twitterUsername'],
+                        'Activity': activity,
+                        'Keys': item['shareAmount'],
+                        'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                        'Timedelta': time_delta
+                    })
+                except:
+                    pass
 
                 last_ft_ts = int(item["createdAt"] / 1000)
         else:
