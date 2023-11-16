@@ -231,7 +231,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
         with right_col:
             st.markdown("# Activity")
 
-    with left_col:
+    with (left_col):
         lc_2, rc_2 = st.columns([1, 1])
         expander = st.empty()
         metric_l, metric_lm, metric_rm, metric_r = st.columns([1, 1, 1, 1])
@@ -317,7 +317,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
                     activity = ft.get_personal_activity(address)
                     created_at, profit, volume, buys, sells, investment, portfolio = ut.get_holdings(activity)
                     created_text.write(f"**Created: {created_at}**")
-                    if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A":
+                    if profit != "N/A" and portfolio_value != "N/A" and fees_collected != "N/A" and profit is not None and portfolio_value is not None and fees_collected is not None:
                         total = round((profit + portfolio_value + fees), 3)
                     else:
                         total = "N/A"
