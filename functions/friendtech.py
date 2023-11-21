@@ -56,7 +56,7 @@ def get_trending():
         if "users" in data:
             for item in data["users"]:
                 try:
-                    pfp = item["twitterPfpUrl"]
+                    pfp = item["pfpUrl"]
                 except:
                     pfp = None
                 if "displayPrice" in item and "." in item["displayPrice"]:
@@ -67,7 +67,7 @@ def get_trending():
                     item["volume"] = temp_p[0]
                 filtered_data.append({
                     'PFP': pfp,
-                    'Subject': item['twitterUsername'],
+                    'Subject': item['username'],
                     'Volume': round((int(item['volume']) * 10 ** -18), 3),
                     'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
                 })
@@ -115,7 +115,7 @@ def get_top_50():
         data = response.json()
         if "users" in data:
             for rank in data["users"]:
-                name = rank["twitterUsername"]
+                name = rank["username"]
                 if "." in rank["displayPrice"]:
                     temp_p = rank["displayPrice"].split(".")
                     rank["displayPrice"] = temp_p[0]
@@ -124,7 +124,7 @@ def get_top_50():
                 supply = rank["shareSupply"]
 
                 try:
-                    pfp = rank["twitterPfpUrl"]
+                    pfp = rank["pfpUrl"]
                 except:
                     pfp = None
 
@@ -183,7 +183,7 @@ def get_token_activity(target):
                 else:
                     activity = "sell"
                 try:
-                    pfp = item["twitterPfpUrl"]
+                    pfp = item['trader']["pfpUrl"]
                 except:
                     pfp = None
 
@@ -191,7 +191,7 @@ def get_token_activity(target):
                     'Timestamp': int(item["createdAt"] / 1000),
                     'Wallet': target,
                     'PFP': pfp,
-                    'Trader': item['twitterUsername'],
+                    'Trader': item['trader']['username'],
                     'Activity': activity,
                     'Keys': item['shareAmount'],
                     'Eth': eth_value,
@@ -235,7 +235,7 @@ def get_token_activity(target):
                             activity = "sell"
 
                         try:
-                            pfp = item["twitterPfpUrl"]
+                            pfp = item['trader']["pfpUrl"]
                         except:
                             pfp = None
 
@@ -243,7 +243,7 @@ def get_token_activity(target):
                             'Timestamp': int(item["createdAt"] / 1000),
                             'Wallet': target,
                             'PFP': pfp,
-                            'Trader': item['twitterUsername'],
+                            'Trader': item['trader']['username'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
                             'Eth': eth_value,
@@ -341,14 +341,14 @@ def addr_to_user(address, convert):
 
     try:
         data = response.json()
-        if convert and "twitterUsername" in data:
+        if convert and "username" in data:
             try:
-                pfp = data["twitterPfpUrl"]
+                pfp = data["pfpUrl"]
             except:
                 pfp = None
-            return data["twitterUsername"], pfp
+            return data["username"], pfp
 
-        elif convert and "twitterUsername" not in data:
+        elif convert and "username" not in data:
             return "N/A", None
 
         else:
@@ -380,6 +380,7 @@ def get_personal_activity(target):
     url = f'https://prod-api.kosetto.com/users/{target}/trade-activity'
     response = requests.get(url)
     account_activity = []
+
     try:
         data = response.json()
         if "users" in data:
@@ -398,7 +399,7 @@ def get_personal_activity(target):
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 try:
-                    pfp = item["twitterPfpUrl"]
+                    pfp = item['subject']["pfpUrl"]
                 except:
                     pfp = None
 
@@ -406,7 +407,7 @@ def get_personal_activity(target):
                     'Timestamp': int(item["createdAt"] / 1000),
                     'Wallet': target,
                     'PFP': pfp,
-                    'Subject': item['twitterUsername'],
+                    'Subject': item['subject']['username'],
                     'Activity': activity,
                     'Keys': item['shareAmount'],
                     'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
@@ -440,14 +441,14 @@ def get_personal_activity(target):
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
                         try:
-                            pfp = item["twitterPfpUrl"]
+                            pfp = item['subject']["pfpUrl"]
                         except:
                             pfp = None
                         account_activity.append({
                             'Timestamp': int(item["createdAt"] / 1000),
                             'Wallet': target,
                             'PFP': pfp,
-                            'Subject': item['twitterUsername'],
+                            'Subject': item['subject']['username'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
                             'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
@@ -518,7 +519,7 @@ def get_watchlist_activity(target_list):
                         watchlist.append({
                             'Timedelta': time_delta,
                             'Trader': target[1],
-                            'Subject': item['twitterUsername'],
+                            'Subject': item['username'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
                             'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
@@ -554,7 +555,7 @@ def get_watchlist_activity(target_list):
                                 watchlist.append({
                                     'Timedelta': time_delta,
                                     'Trader': target[1],
-                                    'Subject': item['twitterUsername'],
+                                    'Subject': item['username'],
                                     'Activity': activity,
                                     'Keys': item['shareAmount'],
                                     'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
@@ -586,13 +587,13 @@ def get_holders(target):
                     self_count = int(item['balance'])
 
                 try:
-                    pfp = item["twitterPfpUrl"]
+                    pfp = item["pfpUrl"]
                 except:
                     pfp = None
 
                 holder_total.append({
                     'PFP': pfp,
-                    'Holder': item['twitterUsername'],
+                    'Holder': item['username'],
                     'Balance': int(item['balance'])
                 })
 
@@ -615,12 +616,12 @@ def get_holders(target):
                             self_count = int(item['balance'])
 
                         try:
-                            pfp = item["twitterPfpUrl"]
+                            pfp = item["pfpUrl"]
                         except:
                             pfp = None
                         holder_total.append({
                             'PFP': pfp,
-                            'Holder': item['twitterUsername'],
+                            'Holder': item['username'],
                             'Balance': int(item['balance'])
                         })
 
@@ -643,20 +644,20 @@ def get_holdings(target, dump_value=False):
         if 'users' in data:
             for item in data['users']:
                 try:
-                    pfp = item["twitterPfpUrl"]
+                    pfp = item["pfpUrl"]
                 except:
                     pfp = None
                 if dump_value is True:
                     portfolio.append({
                         'PFP': pfp,
-                        'Holding': item['twitterUsername'],
+                        'Holding': item['username'],
                         'Balance': int(item['balance']),
                         'Wallet': item['address']
                     })
                 else:
                     portfolio.append({
                         'PFP': pfp,
-                        'Holding': item['twitterUsername'],
+                        'Holding': item['username'],
                         'Balance': int(item['balance'])
                     })
 
@@ -676,20 +677,20 @@ def get_holdings(target, dump_value=False):
                 if 'users' in data:
                     for item in data['users']:
                         try:
-                            pfp = item["twitterPfpUrl"]
+                            pfp = item["pfpUrl"]
                         except:
                             pfp = None
                         if dump_value is True:
                             portfolio.append({
                                 'PFP': pfp,
-                                'Holding': item['twitterUsername'],
+                                'Holding': item['username'],
                                 'Balance': int(item['balance']),
                                 'Wallet': item['address']
                             })
                         else:
                             portfolio.append({
                                 'PFP': pfp,
-                                'Holding': item['twitterUsername'],
+                                'Holding': item['username'],
                                 'Balance': int(item['balance'])
                             })
 
