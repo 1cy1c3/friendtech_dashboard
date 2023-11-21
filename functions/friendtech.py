@@ -55,6 +55,10 @@ def get_trending():
         filtered_data = []
         if "users" in data:
             for item in data["users"]:
+                try:
+                    pfp = item["twitterPfpUrl"]
+                except:
+                    pfp = None
                 if "displayPrice" in item and "." in item["displayPrice"]:
                     temp_p = item["displayPrice"].split(".")
                     item["displayPrice"] = temp_p[0]
@@ -62,7 +66,7 @@ def get_trending():
                     temp_p = item["volume"].split(".")
                     item["volume"] = temp_p[0]
                 filtered_data.append({
-                    'PFP': item["twitterPfpUrl"],
+                    'PFP': pfp,
                     'Subject': item['twitterUsername'],
                     'Volume': round((int(item['volume']) * 10 ** -18), 3),
                     'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
@@ -119,8 +123,13 @@ def get_top_50():
                 holder = rank["holderCount"]
                 supply = rank["shareSupply"]
 
+                try:
+                    pfp = rank["twitterPfpUrl"]
+                except:
+                    pfp = None
+
                 user = {
-                    "PFP": rank["twitterPfpUrl"],
+                    "PFP": pfp,
                     "Name": name,
                     "Price": price,
                     "Holder": holder,
@@ -174,19 +183,22 @@ def get_token_activity(target):
                 else:
                     activity = "sell"
                 try:
-                    token_activity.append({
-                        'Timestamp': int(item["createdAt"] / 1000),
-                        'Wallet': target,
-                        'PFP': item["twitterPfpUrl"],
-                        'Trader': item['twitterUsername'],
-                        'Activity': activity,
-                        'Keys': item['shareAmount'],
-                        'Eth': eth_value,
-                        'Timedelta': time_delta
-                    })
-                    last_ft_ts = int(item["createdAt"] / 1000)
+                    pfp = item["twitterPfpUrl"]
                 except:
-                    pass
+                    pfp = None
+
+                token_activity.append({
+                    'Timestamp': int(item["createdAt"] / 1000),
+                    'Wallet': target,
+                    'PFP': pfp,
+                    'Trader': item['twitterUsername'],
+                    'Activity': activity,
+                    'Keys': item['shareAmount'],
+                    'Eth': eth_value,
+                    'Timedelta': time_delta
+                })
+                last_ft_ts = int(item["createdAt"] / 1000)
+
         else:
             return None
     except requests.exceptions.JSONDecodeError:
@@ -221,19 +233,22 @@ def get_token_activity(target):
 
                         else:
                             activity = "sell"
+
                         try:
-                            token_activity.append({
-                                'Timestamp': int(item["createdAt"] / 1000),
-                                'Wallet': target,
-                                'PFP': item["twitterPfpUrl"],
-                                'Trader': item['twitterUsername'],
-                                'Activity': activity,
-                                'Keys': item['shareAmount'],
-                                'Eth': eth_value,
-                                'Timedelta': time_delta
-                            })
+                            pfp = item["twitterPfpUrl"]
                         except:
-                            pass
+                            pfp = None
+
+                        token_activity.append({
+                            'Timestamp': int(item["createdAt"] / 1000),
+                            'Wallet': target,
+                            'PFP': pfp,
+                            'Trader': item['twitterUsername'],
+                            'Activity': activity,
+                            'Keys': item['shareAmount'],
+                            'Eth': eth_value,
+                            'Timedelta': time_delta
+                        })
 
                         last_ft_ts = int(item["createdAt"] / 1000)
                     next_page = str(data['nextPageStart'])
@@ -306,9 +321,13 @@ def user_to_addr(user):
         data = response.json()
         if 'users' in data and len(data['users']) > 0:
             for item in data['users']:
+                try:
+                    pfp = item["twitterPfpUrl"]
+                except:
+                    pfp = None
                 if item['twitterUsername'].lower() == user.lower():
                     address = item['address']
-                    return address, item['twitterPfpUrl']  # Convert to checksum address
+                    return address, pfp  # Convert to checksum address
         else:
             return None, None
         return None, None
@@ -323,7 +342,11 @@ def addr_to_user(address, convert):
     try:
         data = response.json()
         if convert and "twitterUsername" in data:
-            return data["twitterUsername"], data["twitterPfpUrl"]
+            try:
+                pfp = data["twitterPfpUrl"]
+            except:
+                pfp = None
+            return data["twitterUsername"], pfp
 
         elif convert and "twitterUsername" not in data:
             return "N/A", None
@@ -375,18 +398,20 @@ def get_personal_activity(target):
 
                 time_delta = ut.time_ago(int(item["createdAt"]))
                 try:
-                    account_activity.append({
-                        'Timestamp': int(item["createdAt"] / 1000),
-                        'Wallet': target,
-                        'PFP': item["twitterPfpUrl"],
-                        'Subject': item['twitterUsername'],
-                        'Activity': activity,
-                        'Keys': item['shareAmount'],
-                        'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
-                        'Timedelta': time_delta
-                    })
+                    pfp = item["twitterPfpUrl"]
                 except:
-                    pass
+                    pfp = None
+
+                account_activity.append({
+                    'Timestamp': int(item["createdAt"] / 1000),
+                    'Wallet': target,
+                    'PFP': pfp,
+                    'Subject': item['twitterUsername'],
+                    'Activity': activity,
+                    'Keys': item['shareAmount'],
+                    'Eth': round((int(item['ethAmount']) * 10 ** -18), 3),
+                    'Timedelta': time_delta
+                })
 
                 last_ft_ts = int(item["createdAt"] / 1000)
         else:
@@ -414,10 +439,14 @@ def get_personal_activity(target):
                             activity = "sell"
 
                         time_delta = ut.time_ago(int(item["createdAt"]))
+                        try:
+                            pfp = item["twitterPfpUrl"]
+                        except:
+                            pfp = None
                         account_activity.append({
                             'Timestamp': int(item["createdAt"] / 1000),
                             'Wallet': target,
-                            'PFP': item["twitterPfpUrl"],
+                            'PFP': pfp,
                             'Subject': item['twitterUsername'],
                             'Activity': activity,
                             'Keys': item['shareAmount'],
@@ -556,8 +585,13 @@ def get_holders(target):
                 if item['address'].lower() == target:
                     self_count = int(item['balance'])
 
+                try:
+                    pfp = item["twitterPfpUrl"]
+                except:
+                    pfp = None
+
                 holder_total.append({
-                    'PFP': item["twitterPfpUrl"],
+                    'PFP': pfp,
                     'Holder': item['twitterUsername'],
                     'Balance': int(item['balance'])
                 })
@@ -580,8 +614,12 @@ def get_holders(target):
                         if item['address'] == target.lower():
                             self_count = int(item['balance'])
 
+                        try:
+                            pfp = item["twitterPfpUrl"]
+                        except:
+                            pfp = None
                         holder_total.append({
-                            'PFP': item["twitterPfpUrl"],
+                            'PFP': pfp,
                             'Holder': item['twitterUsername'],
                             'Balance': int(item['balance'])
                         })
@@ -604,16 +642,20 @@ def get_holdings(target, dump_value=False):
         data = response.json()
         if 'users' in data:
             for item in data['users']:
+                try:
+                    pfp = item["twitterPfpUrl"]
+                except:
+                    pfp = None
                 if dump_value is True:
                     portfolio.append({
-                        'PFP': item["twitterPfpUrl"],
+                        'PFP': pfp,
                         'Holding': item['twitterUsername'],
                         'Balance': int(item['balance']),
                         'Wallet': item['address']
                     })
                 else:
                     portfolio.append({
-                        'PFP': item["twitterPfpUrl"],
+                        'PFP': pfp,
                         'Holding': item['twitterUsername'],
                         'Balance': int(item['balance'])
                     })
@@ -633,16 +675,20 @@ def get_holdings(target, dump_value=False):
                 data = response.json()
                 if 'users' in data:
                     for item in data['users']:
+                        try:
+                            pfp = item["twitterPfpUrl"]
+                        except:
+                            pfp = None
                         if dump_value is True:
                             portfolio.append({
-                                'PFP': item["twitterPfpUrl"],
+                                'PFP': pfp,
                                 'Holding': item['twitterUsername'],
                                 'Balance': int(item['balance']),
                                 'Wallet': item['address']
                             })
                         else:
                             portfolio.append({
-                                'PFP': item["twitterPfpUrl"],
+                                'PFP': pfp,
                                 'Holding': item['twitterUsername'],
                                 'Balance': int(item['balance'])
                             })
