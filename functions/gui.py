@@ -411,7 +411,7 @@ def load_ft_stats(address, target, progress, watchlist=False):
 
                     st.metric(label="day to creation",
                               value=f"{round(metrics[0]['creation'], 3)}Ξ",
-                              delta=f"{round(100 * (price - metrics[0]['month']) / metrics[0]['creation'], 2)}%")
+                              delta=f"{round(100 * (price - metrics[0]['creation']) / metrics[0]['creation'], 2)}%")
 
         progress.progress(value=85, text="Loading Stats")
         #portfolio = ft.get_holdings(address)
