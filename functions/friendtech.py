@@ -56,7 +56,7 @@ def get_trending():
         if "users" in data:
             for item in data["users"]:
                 try:
-                    pfp = item["pfpUrl"]
+                    pfp = item["twitterPfpUrl"]
                 except:
                     pfp = None
                 if "displayPrice" in item and "." in item["displayPrice"]:
@@ -67,7 +67,7 @@ def get_trending():
                     item["volume"] = temp_p[0]
                 filtered_data.append({
                     'PFP': pfp,
-                    'Subject': item['username'],
+                    'Subject': item['twitterUsername'],
                     'Volume': round((int(item['volume']) * 10 ** -18), 3),
                     'Price': round((int(item['displayPrice']) * 10 ** -18), 3)
                 })
