@@ -115,7 +115,7 @@ def get_top_50():
         data = response.json()
         if "users" in data:
             for rank in data["users"]:
-                name = rank["username"]
+                name = rank["twitterUsername"]
                 if "." in rank["displayPrice"]:
                     temp_p = rank["displayPrice"].split(".")
                     rank["displayPrice"] = temp_p[0]
@@ -124,7 +124,7 @@ def get_top_50():
                 supply = rank["shareSupply"]
 
                 try:
-                    pfp = rank["pfpUrl"]
+                    pfp = rank["twitterPfpUrl"]
                 except:
                     pfp = None
 
