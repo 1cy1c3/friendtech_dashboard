@@ -748,7 +748,6 @@ def get_top_buyers():
         data = response.json()
         response.raise_for_status()
         for item in data['users']:
-            print(item)
             top_buyers.append({
                 'PFP': item['twitterPfpUrl'],
                 'Trader': item['twitterUsername'],
