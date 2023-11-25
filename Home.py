@@ -31,6 +31,7 @@ with st.sidebar:
 # Columns for responsive Page layout and page structure
 h_l_col, h_r_col = st.columns([8, 1])  # Columns header
 left_col, right_col = st.columns([1, 1])  # Columns Search
+m_l_c, m_r_c = st.columns([1, 1])
 b_l_c, b_r_c = st.columns([1, 1])
 
 h_l_col.header("Home Page")
@@ -43,6 +44,14 @@ with left_col:
 with right_col:
     st.markdown("# Trending")
     gui.load_ft_df(ft.get_trending(), hide=True, image=True)
+
+with m_l_c:
+    st.markdown("# Top Buyers")
+    gui.load_ft_df(ft.get_top_buyers(), hide=True, image=True)
+with m_r_c:
+    st.markdown("# Top Sellers")
+    gui.load_ft_df(ft.get_top_seller(), hide=True, image=True)
+
 
 st.markdown("")  # Spacer for columns
 st.markdown("# Global Activity")

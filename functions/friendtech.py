@@ -738,3 +738,42 @@ def get_dump_values(data, address):
                                 dump_value += round(-value * (.9 + x), 3)
 
     return dump_data, round(dump_value, 3)
+
+
+def get_top_buyers():
+    url = f'https://prod-api.kosetto.com/lists/top-buyers'
+    top_buyers = []
+    response = requests.get(url)
+    try:
+        data = response.json()
+        response.raise_for_status()
+        for item in data['users']:
+            print(item)
+            top_buyers.append({
+                'PFP': item['twitterPfpUrl'],
+                'Trader': item['twitterUsername'],
+                'Volume': round((int(item['netBuy']) * 10 ** -18), 3)
+            })
+    except:
+        pass
+    finally:
+        return top_buyers
+
+
+def get_top_seller():
+    url = f'https://prod-api.kosetto.com/lists/top-sellers'
+    top_seller = []
+    response = requests.get(url)
+    try:
+        data = response.json()
+        response.raise_for_status()
+        for item in data['users']:
+            top_seller.append({
+                'PFP': item['twitterPfpUrl'],
+                'Trader': item['twitterUsername'],
+                'Volume': round((int(item['netBuy']) * 10 ** -18), 3)
+            })
+    except:
+        pass
+    finally:
+        return top_seller
