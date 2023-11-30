@@ -677,20 +677,20 @@ def get_holdings(target, dump_value=False):
                 if 'users' in data:
                     for item in data['users']:
                         try:
-                            pfp = item["pfpUrl"]
+                            pfp = item["twitterPfpUrl"]
                         except:
                             pfp = None
                         if dump_value is True:
                             portfolio.append({
                                 'PFP': pfp,
-                                'Holding': item['username'],
+                                'Holding': item['twitterUsername'],
                                 'Balance': int(item['balance']),
                                 'Wallet': item['address']
                             })
                         else:
                             portfolio.append({
                                 'PFP': pfp,
-                                'Holding': item['username'],
+                                'Holding': item['twitterUsername'],
                                 'Balance': int(item['balance'])
                             })
 
