@@ -1,4 +1,4 @@
-requests==2.31.0
+requests
 streamlit
 pandas==2.0.3
 argon2-cffi
